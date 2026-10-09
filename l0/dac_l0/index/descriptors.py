@@ -4,6 +4,7 @@ Families (payload bytes per vector = descriptor + 16 B locator):
 - HASH64   : 64-bit difference hash          →  8 + 16 = 24 B
 - THUMB32  : 8x4 grey thumbnail (uint8)      → 32 + 16 = 48 B  (table row "48")
 - THUMB144 : 16x9 grey thumbnail (uint8)     → 144 + 16 = 160 B (closest to the 144 B row)
+- THUMB512 : 32x16 grey thumbnail (uint8)    → 512 + 16 = 528 B (the 528 B row)
 """
 from __future__ import annotations
 
@@ -23,10 +24,11 @@ class DescriptorFamily(str, enum.Enum):
     HASH64 = "HASH64"
     THUMB32 = "THUMB32"
     THUMB144 = "THUMB144"
+    THUMB512 = "THUMB512"
 
     @property
     def descriptor_bytes(self) -> int:
-        return {"HASH64": 8, "THUMB32": 32, "THUMB144": 144}[self.value]
+        return {"HASH64": 8, "THUMB32": 32, "THUMB144": 144, "THUMB512": 512}[self.value]
 
     @property
     def vector_bytes(self) -> int:
@@ -87,6 +89,8 @@ def describe(frame_bgr: np.ndarray, family: DescriptorFamily) -> bytes:
         return thumb_bytes(frame_bgr, 8, 4)
     if family == DescriptorFamily.THUMB144:
         return thumb_bytes(frame_bgr, 16, 9)
+    if family == DescriptorFamily.THUMB512:
+        return thumb_bytes(frame_bgr, 32, 16)
     raise ValueError(family)
 
 

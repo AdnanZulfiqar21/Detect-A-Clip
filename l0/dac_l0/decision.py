@@ -50,6 +50,7 @@ class DecisionThresholds:
     hash_max_distance: float = 9.0     # DEV other-work p5 = 10 under gen-3 channel (ED-10)
     thumb32_max_distance: float = 120.0
     thumb144_max_distance: float = 300.0
+    thumb512_max_distance: float = 620.0   # DEV other-work p5 = 692 (ED-10)
     top_k: int = 12
     mirror_invariant: bool = True
 
@@ -58,6 +59,7 @@ class DecisionThresholds:
             DescriptorFamily.HASH64: self.hash_max_distance,
             DescriptorFamily.THUMB32: self.thumb32_max_distance,
             DescriptorFamily.THUMB144: self.thumb144_max_distance,
+            DescriptorFamily.THUMB512: self.thumb512_max_distance,
         }[family]
 
     def digest(self) -> str:

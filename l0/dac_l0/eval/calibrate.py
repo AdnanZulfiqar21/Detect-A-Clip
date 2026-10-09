@@ -30,21 +30,24 @@ from ..index.descriptors import DescriptorFamily
 from ..synth.fixtures import fixture_manifest, make_queries
 from .run_lab import build_gallery, extract_family, score_family
 
+# Grid revised once after the DEV v3.1 run (montage half-coverage VERIFIED) and before any
+# CALIBRATION outcome: verified_min_support_fraction added; two distance axes thinned.
 GRID = {
     "verified_min_support": [5, 6, 7, 8],
+    "verified_min_support_fraction": [0.5, 0.6, 0.7],
     "verified_min_span_ms": [2000, 3000, 4000],
-    "verified_max_mean_dist_frac": [0.6, 0.7, 0.8],
+    "verified_max_mean_dist_frac": [0.6, 0.8],
     "verified_min_margin": [2, 3, 4],
     "possible_min_support": [3, 4, 5],
     "possible_min_span_ms": [1000, 1500, 2500],
-    "possible_max_mean_dist_frac": [0.6, 0.75, 0.9],
+    "possible_max_mean_dist_frac": [0.6, 0.9],
     "possible_on_competition": [False, True],
 }
 OBJECTIVE_KINDS = ("CLEAN", "EDITED", "SERIES_UNIQUE", "TRAILER", "OVERLAY")
 
 
 def _conservatism(th: DecisionThresholds) -> Tuple:
-    return (th.verified_min_support, th.verified_min_span_ms, th.verified_min_margin, -th.verified_max_mean_dist_frac,
+    return (th.verified_min_support, th.verified_min_support_fraction, th.verified_min_span_ms, th.verified_min_margin, -th.verified_max_mean_dist_frac,
             th.possible_min_support, th.possible_min_span_ms, -th.possible_max_mean_dist_frac, not th.possible_on_competition)
 
 
