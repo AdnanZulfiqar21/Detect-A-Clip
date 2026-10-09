@@ -27,18 +27,25 @@ Tracks: **DESKTOP-L0** (Python harness on this Windows host) · **ANDROID** · *
 | P00-T03 | ALL | BLOCKED | B-03 |
 | P00-T04 | ALL | BLOCKED | B-04. Limited development authorization recorded in DECISIONS.md. |
 | P00-T05 | ALL | BLOCKED | B-05 (counsel). Query vs corpus act separation is encoded in schema `RightsGrant.permitted_acts`. |
-| P00-T06 | DESKTOP-L0 | IN_PROGRESS | THREAT_MODEL / CTRL-G00 checklist / DPIA screening drafts in `docs/`. |
-| P00-T07 | DESKTOP-L0 | IN_PROGRESS | Synthetic asset generator `l0/synth/`. |
-| P00-T08 | DESKTOP-L0 | IN_PROGRESS | `l0/eval/protocol.py` + `docs/EVAL_PROTOCOL.md`. |
-| P00-T09 | ALL | IN_PROGRESS | `l0/tests/test_trace.py` parses roadmap IDs (TRACE-01). |
-| P01-T01…T08 | ANDROID | NOT_STARTED (T01 source prep IN_PROGRESS) | B-01 |
-| P02-T01…T06 | IOS | BLOCKED | B-02 |
-| P03-T01 | DESKTOP-L0 | IN_PROGRESS | `l0/schemas/` |
+| P00-T06 | DESKTOP-L0 | IN_PROGRESS | Desktop CTRL-G00 controls exist in code (no network, no frame files, memory-only). THREAT_MODEL / DPIA_SCREENING documents NOT_STARTED. |
+| P00-T07 | DESKTOP-L0 | IMPLEMENTED_NOT_VERIFIED | `l0/dac_l0/synth/`: 20 works × 3 editions, 10 absent works, 6 natural scenes, 7 synthetic private/overlay screens; hashes in `l0/assets/ASSET_MANIFEST.json`. Needs named rights reviewer sign-off (grant status PENDING_REVIEW). |
+| P00-T08 | DESKTOP-L0 | IMPLEMENTED_NOT_VERIFIED | `l0/dac_l0/eval/protocol.py`: frozen splits, separate denominators, Wilson + cluster bootstrap, rare-event rule. Independent AI-06 setup review not available. |
+| P00-T09 | ALL | PASS (document level) | TRACE-01 test; see TEST_EVIDENCE. |
+| P01-T01 | ANDROID | IMPLEMENTED_NOT_VERIFIED | `android/`: no INTERNET, capture disabled by default, mediaProjection FGS, coordinator/selector + JVM tests. Not compiled (B-09); Part A not run (B-01). |
+| P01-T02…T08 | ANDROID | BLOCKED | B-01 (device), B-09 (SDK). CAP-A03 plan in `android/CAP-A03_PLAN.md`. |
+| P02-T01…T06 | IOS | BLOCKED | B-02. Swift coordinator port + XCTests + checklist in `ios/` (IMPLEMENTED_NOT_VERIFIED). |
+| P03-T01 | DESKTOP-L0 | IMPLEMENTED_NOT_VERIFIED | `l0/dac_l0/schemas.py` work/edition IDs and locators. Series/episode/alias tables and migrations not yet built. |
 | P03-T02 | L1 | BLOCKED | B-05; L0 contributor grant manifest in `l0/assets/RIGHTS_MANIFEST.json`. |
-| P03-T03 | DESKTOP-L0 | IN_PROGRESS | `l0/index/builder.py` |
-| P03-T04 | DESKTOP-L0 | IN_PROGRESS | `l0/pack/` integrity manifest UNCALIBRATED + tamper tests (SEC-01 basic). |
+| P03-T03 | DESKTOP-L0 | PASS (desktop) | Reproducible build (bit-exact rebuild test); bytes per reference hour measured (IDX-01 desktop). |
+| P03-T04 | DESKTOP-L0 | PASS (L0 dev scope) | Signed UNCALIBRATED manifest, fail-closed loader, SEC-01 basic tests. |
 | P03-T05, T06, T07 | L1 | BLOCKED | B-05 |
-| P04-T01…T07 | DESKTOP-L0 | NOT_STARTED → see per-commit updates | LAB purpose only. |
+| P04-T01 | DESKTOP-L0 | IMPLEMENTED_NOT_VERIFIED | Quality flags + normalisation + black-bar crop on fixtures. Device frames BLOCKED. |
+| P04-T02 | DESKTOP-L0 | PASS (LAB) | HASH64 / THUMB32 / THUMB144 baselines at 2 s; see LAB report. 1 s/5 s/shot sampling and the 528 B row not yet compared. |
+| P04-T03 | DESKTOP-L0 | IN_PROGRESS | Temporal verification + montage segmentation implemented; montage/recap/shared-footage queries not yet in the evaluation set. |
+| P04-T04 | DESKTOP-L0 | NOT_STARTED | |
+| P04-T05 | DESKTOP-L0 | IN_PROGRESS | One result enum; OUTSIDE_CATALOGUE unreachable; thresholds UNCALIBRATED (OF-01 open). |
+| P04-T06 | DESKTOP-L0 | IN_PROGRESS | Clean/edited/absent/unusable LAB run done; leakage audit not done. |
+| P04-T07 | DESKTOP-L0 | BLOCKED | Independent evaluator absent (B-06). |
 | P04-T08 | ANDROID/IOS | BLOCKED | B-01/B-02/B-07 |
 | P05-T01…T07 | ALL | NOT_STARTED | Need G00/G-NATIVE. |
 | P06-T01…T08 | ALL | NOT_STARTED | |
@@ -57,8 +64,8 @@ Tracks: **DESKTOP-L0** (Python harness on this Windows host) · **ANDROID** · *
 | G00 (iOS) | BLOCKED | B-02 + DATA-L00 Part A |
 | G01 | BLOCKED | B-01 |
 | G02 | BLOCKED | B-02 |
-| G03-L0 | IN_PROGRESS | schemas, builder, UNCALIBRATED manifest, tamper rejection |
+| G03-L0 | IN_PROGRESS | Engineering items done (schemas, builder, UNCALIBRATED manifest, tamper rejection). Rights reviewer sign-off of the synthetic grant still needed. |
 | G03-L1 | BLOCKED | B-05 |
-| G04 | NOT_STARTED | LAB purpose only on desktop |
+| G04 | IN_PROGRESS (LAB) | First LAB report recorded; RELEASE purpose BLOCKED (B-06). |
 | G05–G10 | NOT_STARTED / BLOCKED | |
 | G11 | DEFERRED | |
