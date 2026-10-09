@@ -9,8 +9,8 @@ Windows 11 Pro x64, Python 3.13.15, Temurin JDK 17.0.20.1, kotlinc 2.4.21.
 
 | Suite | Command | Last result | Code |
 |---|---|---|---|
-| L0 Python (115 tests) | `cd l0 && python -m pytest` | see RESUME_STATE for the latest run | branch `impl/l0-desktop` |
-| Pure-Kotlin JVM (26 tests: coordinator, lifecycle, consent, eligibility) | `bash android/run-jvm-tests.sh` | **OK (26 tests)** 2026-10-09 | commit `0a1f231` and later |
+| L0 Python (123 tests) | `cd l0 && python -m pytest -o addopts=""` | **123 passed** 2026-10-09 | branch `impl/l0-desktop` |
+| Pure-Kotlin JVM (29 tests: coordinator, lifecycle, consent, eligibility, recognition golden ×400 cases, DAC-DHASH-v1 golden ×42 frames) | `bash android/run-jvm-tests.sh` | **OK (29 tests)** 2026-10-09 | branch `impl/l0-desktop` |
 | Android app (Gradle, instrumented) | — | **NOT RUN** (SDK licence pending, B-09; no device, B-01) | — |
 | iOS (`swift test`, XCTest) | — | **NOT RUN** (no Mac, B-02) | — |
 
@@ -36,6 +36,8 @@ Windows 11 Pro x64, Python 3.13.15, Temurin JDK 17.0.20.1, kotlinc 2.4.21.
 | AI-03 | Edited / montage | INCONCLUSIVE (LAB) | FINAL reports | EDITED correct named 45/60 (HASH64) to 35/60 (THUMB512); no wrong title; MONTAGE never VERIFIED |
 | AI-05 | Shared intros, recaps, stock footage | PASS (LAB, exploratory) | FINAL reports | SERIES_INTRO series level 4/4; RECAP 4/4 correct; STOCK_SHARED abstained 4/4; no episode named without unique evidence |
 | AI-06 | Independent evaluation | BLOCKED | — | no independent evaluator (B-06) |
+| (port) | Kotlin verification/decision = Python reference | PASS (JVM) | `RecognitionGoldenTest`, mutation check caught an injected off-by-one | Swift port uncompiled |
+| (port) | DAC-DHASH-v1 bit-exact Python = Kotlin | PASS (JVM) | `DacDhashGoldenTest` | candidate descriptor only |
 | AI-07 | Distinct non-match states | PASS (LAB) | UNUSABLE 9/9 expected in every family; OUTSIDE_CATALOGUE unconstructible | — |
 | DATA-L00…L03, CAP-A*, CAP-I*, UX-*, OPS-*, REL-* | Device, network, store | BLOCKED | — | B-01, B-02, B-07, B-08, B-09 |
 

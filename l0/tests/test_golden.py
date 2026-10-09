@@ -15,3 +15,12 @@ def test_golden_file_is_current(tmp_path):
 
     assert norm(out.read_bytes().decode("utf-8")) == norm(COMMITTED.read_bytes().decode("utf-8")), \
         "Python reference changed: regenerate with `python -m dac_l0.eval.golden --out ../android/app/src/test/resources/golden_recognition.txt` and rerun android/run-jvm-tests.sh"
+
+
+def test_dac_dhash_golden_file_is_current(tmp_path):
+    from dac_l0.index.exact import write_golden
+
+    out = tmp_path / "x.txt"
+    write_golden(out)
+    committed = COMMITTED.parent / "golden_dac_dhash_v1.txt"
+    assert out.read_bytes().replace(b"\r\n", b"\n") == committed.read_bytes().replace(b"\r\n", b"\n")

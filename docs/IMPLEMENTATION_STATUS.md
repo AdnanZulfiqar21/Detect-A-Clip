@@ -11,7 +11,7 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | Platform | Works now | Not verified / missing |
 |---|---|---|
 | Desktop L0 | Synthetic fixtures v3.1 with challenge cases; descriptors (24/48/160/528 B); index builder and bounded parser; temporal verification; series/episode-aware decision; calibration; signed UNCALIBRATED/L0-calibrated packs; atomic pack store; lab leases; LAB runner. 115 tests | Real footage, real devices, release statistics |
-| Android | Source for LAB app: no INTERNET, capture off by default, mediaProjection FGS adapter, pure-Kotlin coordinator, lifecycle, consent records, eligibility gate. 26 JVM tests pass | Android compile (B-09), any device run (B-01), CAP-A03 source restriction |
+| Android | Source for LAB app: no INTERNET, capture off by default, mediaProjection FGS adapter, pure-Kotlin coordinator, lifecycle, consent records, eligibility gate. 29 JVM tests pass (incl. bit-exact recognition and descriptor golden tests) | Android compile (B-09), any device run (B-01), CAP-A03 source restriction |
 | iOS | Swift sources for coordinator, frame selector, lifecycle with background-task guard, consent/eligibility, ScreenCaptureKit adapter skeleton, XCTests | Any compile or test (B-02) |
 
 ## Task register (86 tasks)
@@ -45,7 +45,7 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | P04-T05 | PASS (L0 synthetic calibration) | frozen per descriptor; LAB-only status |
 | P04-T06 | PASS (LAB) | all kinds incl. leakage audit; failures kept in reports |
 | P04-T07 | BLOCKED | independent evaluator (B-06) |
-| P04-T08 | BLOCKED | B-01/B-02/B-07 |
+| P04-T08 | BLOCKED (device) · prep IMPLEMENTED | Kotlin recognition port bit-exact vs Python (400 golden cases); DAC-DHASH-v1 exact descriptor (Python = Kotlin); device budgets need B-01/B-02/B-07 |
 | P05-T01 | IMPLEMENTED_NOT_VERIFIED | `docs/legal/*` DRAFT_FOR_COUNSEL; legal review required |
 | P05-T02 | IMPLEMENTED_NOT_VERIFIED | `ConsentRecords` (JVM-tested); Android UI uncompiled |
 | P05-T03 | IMPLEMENTED_NOT_VERIFIED | native picker from user action; `EligibilityGate` (JVM-tested) |

@@ -16,6 +16,8 @@ No iOS build is claimed to pass.
 | `DetectAClipLab/Sources/ConsentAndEligibility.swift` | Terms receipt (translation-only change re-prompts) and pre-scan eligibility gate | IMPLEMENTED_NOT_VERIFIED |
 | `DetectAClipLab/Sources/ScreenCaptureAdapter.swift` | ScreenCaptureKit adapter skeleton behind `canImport(ScreenCaptureKit) && os(iOS)`; symbol signatures UNVERIFIED | NOT COMPILED |
 | `DetectAClipLab/Tests/CaptureLifecycleTests.swift`, `ConsentAndEligibilityTests.swift` | Lifecycle races, background expiry, consent, eligibility | NOT_RUN |
+| `DetectAClipLab/Sources/Recognition.swift`, `DacDhash.swift` | Ports of verification/decision and the DAC-DHASH-v1 descriptor | IMPLEMENTED_NOT_VERIFIED |
+| `DetectAClipLab/Tests/RecognitionGoldenTests.swift`, `DacDhashGoldenTests.swift` | Must match the same golden files as the JVM tests | NOT_RUN |
 
 ## Capture paths to investigate separately (D11: no blanket minimum)
 

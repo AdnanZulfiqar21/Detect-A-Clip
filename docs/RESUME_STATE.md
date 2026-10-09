@@ -11,8 +11,9 @@ first, then resume here.
   Hamcrest 1.3 (SHA-1 verified), Gradle 8.14.3, Android cmdline-tools 22.0 with **no SDK packages**.
   The Android SDK licence is **not accepted** (B-09); do not run `sdkmanager --licenses`.
 - **Verified this session:**
-  - `cd l0 && python -m pytest`: 121 passed.
-  - `bash android/run-jvm-tests.sh`: OK (26 tests), pure-Kotlin files only.
+  - `cd l0 && python -m pytest -o addopts=""`: 123 passed.
+  - `bash android/run-jvm-tests.sh`: OK (29 tests), pure-Kotlin files only, incl. bit-exact
+    recognition (400 golden cases) and DAC-DHASH-v1 (42 golden frames) against Python.
   - Sealed FINAL LAB run (fixtures-v3.1, frozen calibration): wrong-title VERIFIED 0 for all four
     descriptors; THUMB32 1 FALSE_POSSIBLE. FINAL is now **seen**.
 - **Index format:** idx-flat-3 (display names) was introduced *after* the FINAL run, which used
@@ -23,6 +24,8 @@ first, then resume here.
 - **Next eligible steps (no external input needed):**
   1. fixtures-v4 with minimum start separation, unique labels and larger CALIBRATION/FINAL families,
      only if a method change needs a new sealed evaluation.
-  2. Kotlin port of the recognition core (selector → descriptor → retrieval → verification →
-     decision) as pure Kotlin with JVM tests against Python-generated golden vectors (P04-T08 prep).
+  2. Done this session: Kotlin/Swift ports of verification + decision and the DAC-DHASH-v1
+     descriptor with golden vectors. Remaining device-independent step: a Kotlin flat retriever
+     over a DAC-DHASH-v1 pack plus an end-to-end JVM test, then (with a method change) a new
+     calibration and sealed family for DAC-DHASH-v1.
 - **Needs owner input:** see docs/BLOCKERS.md (B-01…B-09).
