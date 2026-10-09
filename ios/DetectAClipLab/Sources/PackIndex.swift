@@ -30,7 +30,7 @@ public struct PackIndex {
         guard metaLen <= 64 * 1024 * 1024, o + metaLen <= d.count else { throw fail("bad metadata length") }
         let metaData = Data(d[o..<(o + metaLen)]); o += metaLen
         guard let meta = try JSONSerialization.jsonObject(with: metaData) as? [String: Any],
-              meta["index_format_version"] as? String == "idx-flat-3", meta["family"] as? String == "HASH64",
+              meta["index_format_version"] as? String == "idx-flat-3", meta["family"] as? String == "DACDHASH",
               let wr = meta["works"] as? [[String: Any]], wr.count == nWorks else { throw fail("bad metadata") }
         var works: [Recognition.WorkEntry] = []
         for w in wr {

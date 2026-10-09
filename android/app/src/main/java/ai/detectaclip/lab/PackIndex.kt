@@ -64,7 +64,7 @@ class PackIndex private constructor(
             val metaBytes = ByteArray(metaLen).also { bb.get(it) }
             val meta = MiniJson.parse(String(metaBytes, Charsets.UTF_8)) as? Map<*, *> ?: error("metadata not an object")
             require(meta["index_format_version"] == FORMAT) { "incompatible index format version" }
-            require(meta["family"] == "HASH64") { "family mismatch" }
+            require(meta["family"] == "DACDHASH") { "this engine only accepts DACDHASH packs (DAC-CROP-v1 + DAC-DHASH-v1)" }
             val worksRaw = meta["works"] as? List<*> ?: error("no works")
             require(worksRaw.size == nWorks) { "work table mismatch" }
             val works = ArrayList<Recognition.WorkEntry>()

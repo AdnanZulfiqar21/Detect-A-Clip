@@ -75,6 +75,12 @@ class EndToEndGoldenTest {
         assertThrows(IllegalArgumentException::class.java) { PackIndex.parse(bytes, maxPayloadBytes = 100) }
     }
 
+    @Test fun packForAnotherDescriptorFamilyIsRejected() {
+        val bytes = hex(golden().readLines().first { it.startsWith("PACKHEX ") }.removePrefix("PACKHEX "))
+        val text = String(bytes, Charsets.ISO_8859_1).replace("\"DACDHASH\"", "\"HASH6400\"") // same length
+        assertThrows(IllegalArgumentException::class.java) { PackIndex.parse(text.toByteArray(Charsets.ISO_8859_1)) }
+    }
+
     @Test fun miniJsonRejectsMalformedInput() {
         for (bad in listOf("{\"a\":1,\"a\":2}", "[1,2", "{\"a\" 1}", "\"\u0001\"", "{}x", "[".repeat(40) + "]".repeat(40))) {
             assertThrows(Exception::class.java) { MiniJson.parse(bad) }
