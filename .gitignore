@@ -1,0 +1,64 @@
+# --- Build outputs ---
+build/
+out/
+dist/
+*.apk
+*.aab
+*.ipa
+*.dSYM/
+.gradle/
+local.properties
+*.iml
+.idea/
+.vscode/
+DerivedData/
+xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+
+# --- Node ---
+node_modules/
+
+# --- Generated synthetic media, indexes, packs (reproducible from source; never commit binaries) ---
+l0/assets/generated/
+l0/packs/*.bin
+l0/packs/*.idx
+l0/packs/*.npy
+l0/packs/*.pack
+*.mp4
+*.avi
+*.mkv
+*.mov
+*.webm
+*.npy
+*.npz
+*.onnx
+*.tflite
+*.mlmodel*
+*.faiss
+
+# --- Private evidence / secrets / personal data (NEVER commit) ---
+evidence/private/
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+*.pem
+*.key
+.env
+.env.*
+secrets/
+captures/
+# local toolchain downloads (JDK, Android SDK, Gradle)
+tools/
+
+# --- OS ---
+Thumbs.db
+.DS_Store
