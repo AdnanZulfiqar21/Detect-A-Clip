@@ -3,29 +3,23 @@
 On continuation: verify live git state (`git status`, `git log -1`, `git ls-remote origin`)
 first, then resume here.
 
-- **Updated:** 2026-10-09 (session 2 checkpoint)
-- **Branches:** `main` = `bbdbe06` (baseline, pushed). Work on `impl/l0-desktop` (pushed; see
-  `git log -1` for the tip). Draft PR: https://github.com/AdnanZulfiqar21/Detect-A-Clip/pull/1.
+- **Updated:** 2026-10-10 (session 3 checkpoint)
+- **Branches:** `main` = `bbdbe06` (baseline). Work on `impl/l0-desktop` (pushed; `git log -1`).
+  Draft PR: https://github.com/AdnanZulfiqar21/Detect-A-Clip/pull/1.
 - **Uncommitted work:** none expected after the checkpoint commit.
 - **Local toolchain (git-ignored `tools/`):** Temurin JDK 17.0.20.1, kotlinc 2.4.21, JUnit 4.13.2 +
-  Hamcrest 1.3 (SHA-1 verified), Gradle 8.14.3, Android cmdline-tools 22.0 with **no SDK packages**.
-  The Android SDK licence is **not accepted** (B-09); do not run `sdkmanager --licenses`.
-- **Verified this session:**
-  - `cd l0 && python -m pytest -o addopts=""`: 124 passed.
-  - `bash android/run-jvm-tests.sh`: OK (32 tests), pure-Kotlin files only, incl. bit-exact
-    recognition (400 golden cases), DAC-DHASH-v1 (42 frames) and end-to-end pack→decision (6 queries).
-  - Sealed FINAL LAB run (fixtures-v3.1, frozen calibration): wrong-title VERIFIED 0 for all four
-    descriptors; THUMB32 1 FALSE_POSSIBLE. FINAL is now **seen**.
-- **Index format:** idx-flat-3 (display names) was introduced *after* the FINAL run, which used
-  idx-flat-2. Recognition logic is unchanged; reruns rebuild caches.
-- **Open findings:** THUMB32 FALSE_POSSIBLE limitation; fixtures-v3.1 near-duplicate queries and
-  small families (EVAL_PROTOCOL §7); UI_LIKE heuristic false positives on synthetic scenes
-  (conservative: causes abstention only).
-- **Next eligible steps (no external input needed):**
-  1. fixtures-v4 with minimum start separation, unique labels and larger CALIBRATION/FINAL families,
-     only if a method change needs a new sealed evaluation.
-  2. Done: Kotlin engine path (pack parser, DAC-DHASH-v1, retrieval, verification, decision)
-     reproduces Python end to end on synthetic frames. Remaining engine work needs a method
-     change (adopt DAC-DHASH-v1 + exact preprocessing in packs → new calibration and a new
-     sealed family) or a device (P04-T08 budgets).
+  Hamcrest 1.3, Gradle 8.14.3, Android cmdline-tools 22.0 with **no SDK packages**. Android SDK
+  licence **not accepted** (B-09); never run `sdkmanager --licenses`.
+- **Verified:** `cd l0 && python -m pytest -o addopts=""` → 127 passed; `bash android/run-jvm-tests.sh`
+  → OK (34 tests, pure-Kotlin only).
+- **Evaluation state:** fixtures-v4 is current. DEV, CAL4 and FINAL4 are all SEEN (FINAL4 run once
+  on 2026-10-10). A further held-out evaluation needs fresh seeds (v5). v3.1 results are historical.
+- **Device engine:** DACDHASH (DAC-CROP-v1 + DAC-QUAL-v1 + DAC-DHASH-v1) is the recommended device
+  path (ED-18). Python, Kotlin (JVM-verified) and Swift (uncompiled) implement it; packs for devices
+  should be built with `--family DACDHASH`.
+- **Open findings:** DACDHASH partial montage segmentation (5/12 on FINAL4); POSSIBLE allowed under
+  competition for DACDHASH; UI_LIKE has no exact-path counterpart; synthetic content is an upper
+  bound on real-footage accuracy.
+- **Next eligible steps:** none that avoid owner input or a deliberate new method cycle. Device
+  experiments (P01/P02, P04-T08) need B-01/B-02/B-09.
 - **Needs owner input:** see docs/BLOCKERS.md (B-01…B-09).

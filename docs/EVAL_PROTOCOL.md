@@ -90,3 +90,10 @@ unique labels, 12 montages and 8 trailers per family. v3.1 CALIBRATION/FINAL are
 the gallery. Descriptors evaluated: HASH64 (LAB reference) and DACDHASH (integer-exact device
 path, ED-17). Scoring rules and the calibration selection rule are unchanged from v3.1.
 Calibration files: `l0/evidence/calibration/v4/`.
+
+### FINAL4 outcome (2026-10-10, single run)
+
+Both descriptors: 0 wrong-title VERIFIED, 0 wrong-title POSSIBLE on 418 FINAL4 queries.
+DACDHASH: EDITED 85/120 named correctly, 5/12 montages partially segmented, 2 shared-stock
+queries shown as POSSIBLE (allowed by the CAL4-selected `possible_on_competition`). HASH64:
+EDITED 78/120, montages 12/12 fully segmented, stock 4/4 abstained. FINAL4 is now SEEN.

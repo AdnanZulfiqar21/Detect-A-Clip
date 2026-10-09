@@ -19,6 +19,7 @@ No iOS build is claimed to pass.
 | `DetectAClipLab/Sources/Recognition.swift`, `DacDhash.swift` | Ports of verification/decision and the DAC-DHASH-v1 descriptor | IMPLEMENTED_NOT_VERIFIED |
 | `DetectAClipLab/Tests/RecognitionGoldenTests.swift`, `DacDhashGoldenTests.swift` | Must match the same golden files as the JVM tests | NOT_RUN |
 | `DetectAClipLab/Sources/PackIndex.swift`, `Tests/EndToEndGoldenTests.swift` | Bounded pack parser + retrieval; Python pack → Swift engine end-to-end golden | IMPLEMENTED_NOT_VERIFIED / NOT_RUN |
+| `DetectAClipLab/Sources/DacExact.swift`, `Tests/ExactPathGoldenTests.swift` | DAC-CROP-v1, DAC-QUAL-v1, mirrored hash (device path, ED-17) | IMPLEMENTED_NOT_VERIFIED / NOT_RUN |
 
 ## Capture paths to investigate separately (D11: no blanket minimum)
 

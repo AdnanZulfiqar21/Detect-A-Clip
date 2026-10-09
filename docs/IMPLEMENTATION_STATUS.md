@@ -11,7 +11,7 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | Platform | Works now | Not verified / missing |
 |---|---|---|
 | Desktop L0 | Synthetic fixtures v3.1 with challenge cases; descriptors (24/48/160/528 B); index builder and bounded parser; temporal verification; series/episode-aware decision; calibration; signed UNCALIBRATED/L0-calibrated packs; atomic pack store; lab leases; LAB runner. 115 tests | Real footage, real devices, release statistics |
-| Android | Source for LAB app: no INTERNET, capture off by default, mediaProjection FGS adapter, pure-Kotlin coordinator, lifecycle, consent records, eligibility gate. 29 JVM tests pass (incl. bit-exact recognition and descriptor golden tests) | Android compile (B-09), any device run (B-01), CAP-A03 source restriction |
+| Android | Source for LAB app: no INTERNET, capture off by default, mediaProjection FGS adapter, pure-Kotlin coordinator, lifecycle, consent records, eligibility gate. 34 JVM tests pass (incl. bit-exact recognition, descriptor, exact-path and end-to-end golden tests) | Android compile (B-09), any device run (B-01), CAP-A03 source restriction |
 | iOS | Swift sources for coordinator, frame selector, lifecycle with background-task guard, consent/eligibility, ScreenCaptureKit adapter skeleton, XCTests | Any compile or test (B-02) |
 
 ## Task register (86 tasks)
@@ -42,8 +42,8 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | P04-T02 | PASS (LAB) | 4 descriptors; sampling study (DEV) in `evidence/studies/` |
 | P04-T03 | PASS (LAB, exploratory) | temporal verification, montage segments, recaps, stock footage |
 | P04-T04 | IN_PROGRESS | series→episode→edition→time hierarchy done; multilingual names not built |
-| P04-T05 | PASS (L0 synthetic calibration) | frozen per descriptor; LAB-only status |
-| P04-T06 | PASS (LAB) | all kinds incl. leakage audit; failures kept in reports |
+| P04-T05 | PASS (L0 synthetic calibration) | v3.1 (CALIBRATION) and v4 (CAL4) frozen per descriptor; LAB-only status |
+| P04-T06 | PASS (LAB) | all kinds incl. leakage audit; sealed FINAL (v3.1) and FINAL4 (v4) each run once; failures kept in reports |
 | P04-T07 | BLOCKED | independent evaluator (B-06) |
 | P04-T08 | BLOCKED (device) · prep IMPLEMENTED | Kotlin recognition port bit-exact vs Python (400 golden cases); DAC-DHASH-v1 exact descriptor (Python = Kotlin); device budgets need B-01/B-02/B-07 |
 | P05-T01 | IMPLEMENTED_NOT_VERIFIED | `docs/legal/*` DRAFT_FOR_COUNSEL; legal review required |

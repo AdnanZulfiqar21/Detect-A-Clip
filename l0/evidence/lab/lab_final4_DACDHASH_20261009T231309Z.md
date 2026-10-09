@@ -1,0 +1,98 @@
+# L0 LAB report `final4_DACDHASH` — 2026-10-09T23:13:09.068908+00:00
+
+**Purpose:** LAB. Synthetic L0 exploratory evidence only. Not device, rights, coverage or release evidence.
+
+Host Windows 11 AMD64 python 3.13.15 · commit `965ec1d+dirty` · synth-gen-3 / prep-640x360-gray-uniformcrop-3 / idx-flat-3
+Fixture manifest `5f783bb994880571` · thresholds `4b419abcd991055f` (CALIBRATED_L0_SYNTHETIC) · calibration file: C:\Projects\Detect A Clip\l0\evidence\calibration\v4\calibration_DACDHASH.json
+
+## Safety totals and outcome counts
+
+| Descriptor | Family | wrong title VERIFIED | wrong title POSSIBLE | recognition p50 ms (desktop) | p90 ms |
+|---|---|---:|---:|---:|---:|
+| DACDHASH | FINAL4 | 0 | 0 | 600 | 1219 |
+
+### DACDHASH · FINAL4
+
+Index: 5880 vectors, 159,357 B, 48,783 B per reference hour, 78 titles.
+
+| Kind | Outcomes |
+|---|---|
+| ABSENT | ABSTAIN=130 |
+| CLEAN | CORRECT_POSSIBLE=1, CORRECT_VERIFIED=119 |
+| EDITED | ABSTAIN=35, CORRECT_POSSIBLE=1, CORRECT_VERIFIED=84 |
+| MONTAGE | CORRECT_SEGMENTS=7, PARTIAL=5 |
+| OVERLAY | CORRECT_VERIFIED=3 |
+| SERIES_INTRO | CORRECT_SERIES_LEVEL=4 |
+| SERIES_RECAP | CORRECT_VERIFIED=4 |
+| SERIES_UNIQUE | CORRECT_VERIFIED=4 |
+| STOCK_SHARED | ABSTAIN=2, CORRECT_POSSIBLE=2 |
+| TRAILER | CORRECT_POSSIBLE=7, CORRECT_VERIFIED=1 |
+| UNUSABLE | EXPECTED_STATE=9 |
+
+| Metric | k/n | Wilson 95 % | cluster boot 95 % (clusters) |
+|---|---:|---|---|
+| ABSENT:correct_named | 0/130 | [0.000, 0.029] | [0.000, 0.000] (30) |
+| ABSENT:wrong_title_possible | 0/130 | [0.000, 0.029] | [0.000, 0.000] (30) |
+| ABSENT:wrong_title_verified | 0/130 | [0.000, 0.029] | [0.000, 0.000] (30) |
+| CLEAN:correct_named | 120/120 | [0.969, 1.000] | [1.000, 1.000] (20) |
+| CLEAN:wrong_title_possible | 0/120 | [0.000, 0.031] | [0.000, 0.000] (20) |
+| CLEAN:wrong_title_verified | 0/120 | [0.000, 0.031] | [0.000, 0.000] (20) |
+| EDITED:correct_named | 85/120 | [0.622, 0.782] | [0.658, 0.758] (20) |
+| EDITED:wrong_title_possible | 0/120 | [0.000, 0.031] | [0.000, 0.000] (20) |
+| EDITED:wrong_title_verified | 0/120 | [0.000, 0.031] | [0.000, 0.000] (20) |
+| MONTAGE:correct_named | 7/12 | [0.320, 0.807] | [0.300, 0.833] (10) |
+| MONTAGE:wrong_title_possible | 0/12 | [0.000, 0.242] | [0.000, 0.000] (10) |
+| MONTAGE:wrong_title_verified | 0/12 | [0.000, 0.242] | [0.000, 0.000] (10) |
+| OVERLAY:correct_named | 3/3 | [0.439, 1.000] | [1.000, 1.000] (1) |
+| OVERLAY:wrong_title_possible | 0/3 | [0.000, 0.561] | [0.000, 0.000] (1) |
+| OVERLAY:wrong_title_verified | 0/3 | [0.000, 0.561] | [0.000, 0.000] (1) |
+| SERIES_INTRO:correct_named | 4/4 | [0.510, 1.000] | [1.000, 1.000] (4) |
+| SERIES_INTRO:wrong_title_possible | 0/4 | [0.000, 0.490] | [0.000, 0.000] (4) |
+| SERIES_INTRO:wrong_title_verified | 0/4 | [0.000, 0.490] | [0.000, 0.000] (4) |
+| SERIES_RECAP:correct_named | 4/4 | [0.510, 1.000] | [1.000, 1.000] (4) |
+| SERIES_RECAP:wrong_title_possible | 0/4 | [0.000, 0.490] | [0.000, 0.000] (4) |
+| SERIES_RECAP:wrong_title_verified | 0/4 | [0.000, 0.490] | [0.000, 0.000] (4) |
+| SERIES_UNIQUE:correct_named | 4/4 | [0.510, 1.000] | [1.000, 1.000] (4) |
+| SERIES_UNIQUE:wrong_title_possible | 0/4 | [0.000, 0.490] | [0.000, 0.000] (4) |
+| SERIES_UNIQUE:wrong_title_verified | 0/4 | [0.000, 0.490] | [0.000, 0.000] (4) |
+| STOCK_SHARED:correct_named | 2/4 | [0.150, 0.850] | [0.500, 0.500] (2) |
+| STOCK_SHARED:wrong_title_possible | 0/4 | [0.000, 0.490] | [0.000, 0.000] (2) |
+| STOCK_SHARED:wrong_title_verified | 0/4 | [0.000, 0.490] | [0.000, 0.000] (2) |
+| TRAILER:correct_named | 8/8 | [0.676, 1.000] | [1.000, 1.000] (7) |
+| TRAILER:wrong_title_possible | 0/8 | [0.000, 0.324] | [0.000, 0.000] (7) |
+| TRAILER:wrong_title_verified | 0/8 | [0.000, 0.324] | [0.000, 0.000] (7) |
+| UNUSABLE:correct_named | 0/9 | [0.000, 0.299] | [0.000, 0.000] (3) |
+| UNUSABLE:wrong_title_possible | 0/9 | [0.000, 0.299] | [0.000, 0.000] (3) |
+| UNUSABLE:wrong_title_verified | 0/9 | [0.000, 0.299] | [0.000, 0.000] (3) |
+
+## Scoring rules
+
+```
+fixtures-v3 scoring rules (preregistered 2026-10-09 before any CALIBRATION/FINAL outcome)
+Every query yields exactly one outcome category. "named" = candidate_work_id of a
+VERIFIED or POSSIBLE result; for episodes candidate_work_id is the series ID and
+candidate_episode_id the episode (None = series level).
+- CLEAN / EDITED: CORRECT_VERIFIED, CORRECT_POSSIBLE, ABSTAIN, WRONG_VERIFIED, WRONG_POSSIBLE.
+- SERIES_UNIQUE: CORRECT_VERIFIED / CORRECT_POSSIBLE (right series and right episode);
+  SERIES_LEVEL (right series, no episode: granularity loss, not wrong); ABSTAIN;
+  WRONG_EPISODE_VERIFIED / WRONG_EPISODE_POSSIBLE; WRONG_VERIFIED / WRONG_POSSIBLE (outside series).
+- SERIES_INTRO (shared intro): CORRECT = series level or ABSTAIN; any named episode is
+  UNSUPPORTED_SPECIFICITY_VERIFIED / _POSSIBLE; outside series is WRONG_*.
+- SERIES_RECAP (previous episode's footage + 2 s own): CORRECT = series level, own episode,
+  or ABSTAIN; another episode VERIFIED = WRONG_EPISODE_VERIFIED; POSSIBLE = WRONG_EPISODE_POSSIBLE.
+- STOCK_SHARED (same stock scene in two works): CORRECT = ABSTAIN, or POSSIBLE naming either
+  work; VERIFIED naming either work = OVERCONFIDENT_SHARED; outside the pair = WRONG_*.
+- MONTAGE (two works): CORRECT_SEGMENTS = POSSIBLE whose segments name both works and nothing
+  else; PARTIAL = names a subset; ABSTAIN; OVERCONFIDENT_VERIFIED = VERIFIED; WRONG_* = any
+  named work or segment outside the pair.
+- TRAILER (rapid cuts of one work): CORRECT_* names it; ABSTAIN; WRONG_* other work.
+- ABSENT: ABSTAIN; FALSE_VERIFIED; FALSE_POSSIBLE (a wrong title shown as uncertain). Both
+  are errors and are reported separately; FALSE_POSSIBLE is never merged into ABSTAIN.
+- UNUSABLE: EXPECTED_STATE if the state is in the case's acceptable list, else UNEXPECTED_STATE
+  (WRONG_* if a title is named).
+- OVERLAY (overlay over the underlying video): CORRECT_* names the video's work; ABSTAIN;
+  WRONG_* names another work.
+Safety totals: WRONG_TITLE_VERIFIED = every *_VERIFIED error category; WRONG_TITLE_POSSIBLE =
+every *_POSSIBLE error category (incl. FALSE_POSSIBLE).
+
+```

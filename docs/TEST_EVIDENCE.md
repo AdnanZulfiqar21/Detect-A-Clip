@@ -9,8 +9,8 @@ Windows 11 Pro x64, Python 3.13.15, Temurin JDK 17.0.20.1, kotlinc 2.4.21.
 
 | Suite | Command | Last result | Code |
 |---|---|---|---|
-| L0 Python (124 tests) | `cd l0 && python -m pytest -o addopts=""` | **124 passed** 2026-10-09 | branch `impl/l0-desktop` |
-| Pure-Kotlin JVM (32 tests: coordinator, lifecycle, consent, eligibility, recognition golden ×400 cases, DAC-DHASH-v1 golden ×42 frames, end-to-end pack→decision golden ×6 queries, parser/JSON bounds) | `bash android/run-jvm-tests.sh` | **OK (32 tests)** 2026-10-09 | branch `impl/l0-desktop` |
+| L0 Python (127 tests) | `cd l0 && python -m pytest -o addopts=""` | **127 passed** 2026-10-10 | branch `impl/l0-desktop` |
+| Pure-Kotlin JVM (34 tests: coordinator, lifecycle, consent, eligibility, recognition golden ×400 cases, DAC-DHASH-v1 golden ×42 frames, exact crop/quality/mirror golden ×9 cases, end-to-end pack→decision golden ×6 queries, parser/JSON bounds) | `bash android/run-jvm-tests.sh` | **OK (34 tests)** 2026-10-10 | branch `impl/l0-desktop` |
 | Android app (Gradle, instrumented) | — | **NOT RUN** (SDK licence pending, B-09; no device, B-01) | — |
 | iOS (`swift test`, XCTest) | — | **NOT RUN** (no Mac, B-02) | — |
 
@@ -35,6 +35,8 @@ Windows 11 Pro x64, Python 3.13.15, Temurin JDK 17.0.20.1, kotlinc 2.4.21.
 | AI-02 | Absent works | INCONCLUSIVE (LAB) | FINAL reports | false VERIFIED 0/66 all descriptors; THUMB32 1/66 FALSE_POSSIBLE; n cannot bound a 2 % rate |
 | AI-03 | Edited / montage | INCONCLUSIVE (LAB) | FINAL reports | EDITED correct named 45/60 (HASH64) to 35/60 (THUMB512); no wrong title; MONTAGE never VERIFIED |
 | AI-05 | Shared intros, recaps, stock footage | PASS (LAB, exploratory) | FINAL reports | SERIES_INTRO series level 4/4; RECAP 4/4 correct; STOCK_SHARED abstained 4/4; no episode named without unique evidence |
+| AI-01/02/03/05 (v4) | Sealed FINAL4, fixtures-v4, CAL4 calibration | PASS / INCONCLUSIVE (LAB) | `lab_final4_HASH64_20261009T230913Z`, `lab_final4_DACDHASH_20261009T231309Z` | wrong-title VERIFIED 0 and POSSIBLE 0 for both; CLEAN 119–120/120; EDITED 78 (HASH64) / 85 (DACDHASH) /120; ABSENT abstained 130/130; 20 works per family, still far below F05 counts |
+| (port) | DAC-CROP-v1 / DAC-QUAL-v1 / mirrored hash Python = Kotlin | PASS (JVM) | `ExactPathGoldenTest` | Swift port uncompiled |
 | AI-06 | Independent evaluation | BLOCKED | — | no independent evaluator (B-06) |
 | (port) | Kotlin verification/decision = Python reference | PASS (JVM) | `RecognitionGoldenTest`, mutation check caught an injected off-by-one | Swift port uncompiled |
 | (port) | DAC-DHASH-v1 bit-exact Python = Kotlin | PASS (JVM) | `DacDhashGoldenTest` | candidate descriptor only |
@@ -51,6 +53,9 @@ Windows 11 Pro x64, Python 3.13.15, Temurin JDK 17.0.20.1, kotlinc 2.4.21.
 | `evidence/calibration/calibration_*.json` | CALIBRATION | grid | frozen per descriptor |
 | `lab_final_*_20261009T194*/195*` | FINAL (sealed, run once) | frozen calibration | code = commit `45e0123` for recognition; "+dirty" marks unrelated store/test files written during the run |
 | `lab_calibrated_*_20261009T1953*` | DEV + CALIBRATION | frozen calibration | DEV OF-01 cases: no wrong title for HASH64; THUMB32 1 FALSE_POSSIBLE |
+| `lab_dev4_*` | DEV (v4 queries) | dev-uncalibrated-2 | DACDHASH 8 wrong-title POSSIBLE before calibration (kept) |
+| `evidence/calibration/v4/*` | CAL4 | grid | frozen HASH64, DACDHASH |
+| `lab_final4_*` | FINAL4 (sealed, run once) | frozen CAL4 calibration | recognition code = commit `965ec1d`; "+dirty" = iOS/test files written during the run |
 
 Recognition times in reports are desktop CPU times under 12 parallel workers, excluding
 synthetic rendering. They are not F05 device latencies.
