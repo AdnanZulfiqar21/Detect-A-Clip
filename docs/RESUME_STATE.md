@@ -1,13 +1,28 @@
 # RESUME_STATE — Detect A Clip
 
-Updated at checkpoints. On continuation: verify live git state first, then resume here.
+On continuation: verify live git state (`git status`, `git log -1`, `git ls-remote origin`)
+first, then resume here.
 
-- **Updated:** 2026-10-09 (session 1)
-- **Branch / commits:** `impl/l0-desktop` at the "Record LAB evidence" commit on top of `9ba8c6d`; `main` at `bbdbe06` (baseline). **Not pushed** (awaiting owner confirmation to publish to the public repo).
+- **Updated:** 2026-10-09 (session 2 checkpoint)
+- **Branches:** `main` = `bbdbe06` (baseline, pushed). Work on `impl/l0-desktop` (pushed; see
+  `git log -1` for the tip). Draft PR: https://github.com/AdnanZulfiqar21/Detect-A-Clip/pull/1.
 - **Uncommitted work:** none expected after the checkpoint commit.
-- **Local toolchain (git-ignored `tools/`):** Temurin JDK 17.0.20.1, Gradle 8.14.3, Android cmdline-tools 22.0. No SDK platform/build-tools (B-09). Run sdkmanager via `java -cp "android-sdk/cmdline-tools/latest/lib/*" com.android.sdklib.tool.sdkmanager.SdkManagerCli`; the `.bat` breaks on the space in the path.
-- **Done:** P00-T01, P00-T09 (TRACE-01), P03-T03, P03-T04, P04-T02 (LAB); harness LIFE-01/02/03, SEC-02, SEC-01 basic, AI-01/AI-07 LAB.
-- **Open findings:** OF-01 HASH64 POSSIBLE_MATCH on 4/66 absent clips (fix only via CALIBRATION family, P04-T05).
-- **Next eligible steps:** (1) P04-T05 calibration on CALIBRATION works only, then re-run LAB; (2) add montage/recap/shared-intro queries (P04-T03, AI-03/AI-05); (3) compare 1 s / 5 s sampling and a 528 B descriptor row (P04-T02c, IDX-01); (4) THREAT_MODEL + CTRL-G00 checklist + DPIA screening docs (P00-T06); (5) once B-09 is cleared: Android Gradle wrapper, compile, run JVM tests, merged-manifest INTERNET check.
-- **Needs owner input:** B-09 SDK licence acceptance; permission to push to the public GitHub repo; B-01/B-02 devices.
-- **Last commands/results:** `python -m pytest` (l0) → 81 passed; LAB run 9 m 36 s → `l0/evidence/lab/lab_report_20261009T135848Z.md`.
+- **Local toolchain (git-ignored `tools/`):** Temurin JDK 17.0.20.1, kotlinc 2.4.21, JUnit 4.13.2 +
+  Hamcrest 1.3 (SHA-1 verified), Gradle 8.14.3, Android cmdline-tools 22.0 with **no SDK packages**.
+  The Android SDK licence is **not accepted** (B-09); do not run `sdkmanager --licenses`.
+- **Verified this session:**
+  - `cd l0 && python -m pytest`: 121 passed.
+  - `bash android/run-jvm-tests.sh`: OK (26 tests), pure-Kotlin files only.
+  - Sealed FINAL LAB run (fixtures-v3.1, frozen calibration): wrong-title VERIFIED 0 for all four
+    descriptors; THUMB32 1 FALSE_POSSIBLE. FINAL is now **seen**.
+- **Index format:** idx-flat-3 (display names) was introduced *after* the FINAL run, which used
+  idx-flat-2. Recognition logic is unchanged; reruns rebuild caches.
+- **Open findings:** THUMB32 FALSE_POSSIBLE limitation; fixtures-v3.1 near-duplicate queries and
+  small families (EVAL_PROTOCOL §7); UI_LIKE heuristic false positives on synthetic scenes
+  (conservative: causes abstention only).
+- **Next eligible steps (no external input needed):**
+  1. fixtures-v4 with minimum start separation, unique labels and larger CALIBRATION/FINAL families,
+     only if a method change needs a new sealed evaluation.
+  2. Kotlin port of the recognition core (selector → descriptor → retrieval → verification →
+     decision) as pure Kotlin with JVM tests against Python-generated golden vectors (P04-T08 prep).
+- **Needs owner input:** see docs/BLOCKERS.md (B-01…B-09).

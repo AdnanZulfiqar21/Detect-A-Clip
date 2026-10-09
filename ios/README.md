@@ -11,6 +11,11 @@ No iOS build is claimed to pass.
 | `DetectAClipLab/Package.swift` | Swift package for the platform-independent coordinator and its tests (`swift test` on a Mac) | IMPLEMENTED_NOT_VERIFIED |
 | `DetectAClipLab/Sources/ScanCoordinator.swift` | Port of `l0/dac_l0/coordinator.py` (F03 event table) | IMPLEMENTED_NOT_VERIFIED |
 | `DetectAClipLab/Tests/ScanCoordinatorTests.swift` | LIFE-01/03 orderings, fail-closed stop attribution, background expiry | NOT_RUN |
+| `DetectAClipLab/Sources/FrameSelector.swift` | ≤2 fps, ≤3 owned frames, monotonic timestamps | IMPLEMENTED_NOT_VERIFIED |
+| `DetectAClipLab/Sources/CaptureLifecycle.swift` | Port of the JVM-tested Kotlin lifecycle + early background-task request and expiry cancel | IMPLEMENTED_NOT_VERIFIED |
+| `DetectAClipLab/Sources/ConsentAndEligibility.swift` | Terms receipt (translation-only change re-prompts) and pre-scan eligibility gate | IMPLEMENTED_NOT_VERIFIED |
+| `DetectAClipLab/Sources/ScreenCaptureAdapter.swift` | ScreenCaptureKit adapter skeleton behind `canImport(ScreenCaptureKit) && os(iOS)`; symbol signatures UNVERIFIED | NOT COMPILED |
+| `DetectAClipLab/Tests/CaptureLifecycleTests.swift`, `ConsentAndEligibilityTests.swift` | Lifecycle races, background expiry, consent, eligibility | NOT_RUN |
 
 ## Capture paths to investigate separately (D11: no blanket minimum)
 

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import struct
 import time
 from dataclasses import dataclass, field
@@ -36,6 +37,7 @@ class WorkEntry:
     durations_s: List[float]
     series_id: Optional[str] = None   # idx-flat-2: work→series/episode hierarchy (P04-T04)
     episode_id: Optional[str] = None
+    names: Dict[str, str] = field(default_factory=dict)  # idx-flat-3: locale tag → display name (P04-T04a)
 
 
 @dataclass
@@ -124,8 +126,9 @@ class IndexBundle:
             raise ValueError("work table mismatch")
         works = []
         for w in works_raw:
-            if not isinstance(w, dict) or set(w) != {"work_index", "work_id", "synthetic_title", "editions", "durations_s", "series_id", "episode_id"}:
+            if not isinstance(w, dict) or set(w) != {"work_index", "work_id", "synthetic_title", "editions", "durations_s", "series_id", "episode_id", "names"}:
                 raise ValueError("bad work entry")
+            _check_names(w["names"])
             works.append(WorkEntry(**w))
         vec = dbytes + LOCATOR_BYTES
         body = data[off:]
@@ -147,6 +150,38 @@ class IndexBundle:
         return hashlib.sha256(self.to_bytes()).hexdigest()
 
 
+_LOCALE = re.compile(r"^[a-z]{2,3}(-[A-Za-z0-9]{2,8}){0,3}$")
+MAX_NAMES = 16
+MAX_NAME_CHARS = 200
+
+
+def _check_names(names) -> None:
+    """Untrusted metadata bounds for display names."""
+    if not isinstance(names, dict) or len(names) > MAX_NAMES:
+        raise ValueError("bad names table")
+    for k, v in names.items():
+        if not isinstance(k, str) or not _LOCALE.match(k):
+            raise ValueError("bad locale tag")
+        if not isinstance(v, str) or not (0 < len(v) <= MAX_NAME_CHARS) or any(ord(c) < 32 for c in v):
+            raise ValueError("bad display name")
+
+
+def resolve_display_name(names: Dict[str, str], preferences: Sequence[str], fallback: str) -> str:
+    """Exact locale, then same language, then English, then the lexicographically first name,
+    then `fallback`. Never mixes names across works."""
+    for p in preferences:
+        if p in names:
+            return names[p]
+    for p in preferences:
+        lang = p.split("-")[0]
+        for k in sorted(names):
+            if k.split("-")[0] == lang:
+                return names[k]
+    if "en" in names:
+        return names["en"]
+    return names[sorted(names)[0]] if names else fallback
+
+
 def build_index(editions: Sequence[Edition], family: DescriptorFamily, sampling_interval_s: float = 2.0) -> IndexBundle:
     """Build a flat index from authorised gallery editions.
 
@@ -164,7 +199,8 @@ def build_index(editions: Sequence[Edition], family: DescriptorFamily, sampling_
         wid = ed.work.work_id
         if wid not in works:
             works[wid] = WorkEntry(len(works), wid, ed.work.synthetic_title, [], [],
-                                   getattr(ed.work, "series_id", None), getattr(ed.work, "episode_id", None))
+                                   getattr(ed.work, "series_id", None), getattr(ed.work, "episode_id", None),
+                                   dict(getattr(ed.work, "display_names", None) or {"en": ed.work.synthetic_title}))
         we = works[wid]
         if ed.edition_id in we.editions:
             raise ValueError(f"duplicate edition {ed.asset_id}")

@@ -180,3 +180,32 @@ def test_roundtrip_is_bit_exact_and_build_is_reproducible(bundle):
     assert IndexBundle.from_bytes(bundle.to_bytes()).to_bytes() == bundle.to_bytes()
     eds = [Edition(w, EditionKind.THEATRICAL) for w in gallery_works(3)]
     assert build_index(eds, DescriptorFamily.HASH64, 2.0).sha256() == bundle.sha256()
+
+
+# ------------------------------------------------------------ P04-T04a display names
+
+
+def test_display_names_round_trip_and_resolution():
+    from dac_l0.index.builder import resolve_display_name
+
+    eds = [Edition(w, EditionKind.THEATRICAL) for w in gallery_works(1)]
+    b = build_index(eds, DescriptorFamily.HASH64, 2.0)
+    b.works[0].names = {"en": "Synthetic Work 000", "ur-Latn": "Masnooi Kaam 000", "tr": "Sentetik Eser 000"}
+    b2 = IndexBundle.from_bytes(b.to_bytes())
+    n = b2.works[0].names
+    assert resolve_display_name(n, ["ur-Latn"], "x") == "Masnooi Kaam 000"
+    assert resolve_display_name(n, ["ur-PK"], "x") == "Masnooi Kaam 000"   # same language
+    assert resolve_display_name(n, ["ko"], "x") == "Synthetic Work 000"    # English fallback
+    assert resolve_display_name({}, ["ko"], "SW000") == "SW000"
+
+
+@pytest.mark.parametrize("names", [
+    {"not a tag": "x"}, {"en": ""}, {"en": "a" * 201}, {"en": "line\nbreak"},
+    {f"x{i:02d}": "n" for i in range(17)},
+])
+def test_display_name_bounds_rejected(names):
+    eds = [Edition(w, EditionKind.THEATRICAL) for w in gallery_works(1)]
+    b = build_index(eds, DescriptorFamily.HASH64, 2.0)
+    b.works[0].names = names
+    with pytest.raises(ValueError):
+        IndexBundle.from_bytes(b.to_bytes())

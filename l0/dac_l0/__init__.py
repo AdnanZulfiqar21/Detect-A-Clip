@@ -12,5 +12,5 @@ __version__ = "0.1.0"
 # previously built packs; the pack loader checks compatibility against them.
 GENERATOR_VERSION = "synth-gen-3"
 PREPROCESSING_VERSION = "prep-640x360-gray-uniformcrop-3"
-INDEX_FORMAT_VERSION = "idx-flat-2"
+INDEX_FORMAT_VERSION = "idx-flat-3"
 CALIBRATION_STATUS_DEFAULT = "UNCALIBRATED"  # until P04-T05 freezes thresholds

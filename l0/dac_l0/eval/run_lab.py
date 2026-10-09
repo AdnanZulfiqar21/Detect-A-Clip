@@ -169,14 +169,15 @@ def build_gallery(desc: DescriptorFamily, cache_dir: Path, sampling_interval_s: 
     return b, p
 
 
-def extract_family(family: str, desc: DescriptorFamily, th: DecisionThresholds, cache_dir: Path, workers: Optional[int] = None) -> Evidence:
-    key = _retrieval_key(th, desc)
+def extract_family(family: str, desc: DescriptorFamily, th: DecisionThresholds, cache_dir: Path, workers: Optional[int] = None,
+                   sampling_interval_s: float = 2.0) -> Evidence:
+    key = _retrieval_key(th, desc) + ("" if sampling_interval_s == 2.0 else f"|si={sampling_interval_s}")
     import hashlib
-    digest = hashlib.sha256(f"{FIXTURE_VERSION}|{GENERATOR_VERSION}|{PREPROCESSING_VERSION}|{key}".encode()).hexdigest()[:16]
+    digest = hashlib.sha256(f"{FIXTURE_VERSION}|{GENERATOR_VERSION}|{PREPROCESSING_VERSION}|{INDEX_FORMAT_VERSION}|{key}".encode()).hexdigest()[:16]
     cp = cache_dir / f"evidence_{family}_{digest}.pkl"
     if cp.exists():
         return pickle.loads(cp.read_bytes())
-    bundle, bpath = build_gallery(desc, cache_dir)
+    bundle, bpath = build_gallery(desc, cache_dir, sampling_interval_s)
     n = len(make_queries(family))
     hyps: List = [None] * n
     summ: List = [None] * n

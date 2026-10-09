@@ -1,71 +1,81 @@
 # IMPLEMENTATION_STATUS — Detect A Clip
 
 Statuses: NOT_STARTED · IN_PROGRESS · IMPLEMENTED_NOT_VERIFIED · PASS · FAIL · BLOCKED ·
-INCONCLUSIVE · DEFERRED · UNVERIFIED. A PASS cites a command/run, date, commit and
-configuration in `docs/TEST_EVIDENCE.md`. "Source exists" is never "complete".
+INCONCLUSIVE · DEFERRED · UNVERIFIED. PASS rows cite evidence in `docs/TEST_EVIDENCE.md`.
+"Compiled on the JVM" means pure-Kotlin files only, never the Android app.
 
-Tracks: **DESKTOP-L0** (Python harness on this Windows host) · **ANDROID** · **IOS**.
+Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 
-## Phase summary
+## What exists, by platform (2026-10-09)
 
-| Phase | Status | Notes |
+| Platform | Works now | Not verified / missing |
 |---|---|---|
-| P00 | IN_PROGRESS | T01 done; T02 UNVERIFIED (no SDK installed); T03/T04/T05 BLOCKED (B-03/B-04); T06/T07/T08/T09 in progress on desktop track. |
-| P01 | NOT_STARTED / BLOCKED | Source preparation possible; compile + capture BLOCKED (B-01). |
-| P02 | BLOCKED | B-02. Source/spec preparation only. |
-| P03 | IN_PROGRESS (L0 items only) | L1 items BLOCKED (B-05). |
-| P04 | IN_PROGRESS (desktop LAB only) | RELEASE purpose BLOCKED (B-06). |
-| P05–P10 | NOT_STARTED | Need native gates and external inputs. |
-| P11 | DEFERRED | Per roadmap. Nothing enabled. |
+| Desktop L0 | Synthetic fixtures v3.1 with challenge cases; descriptors (24/48/160/528 B); index builder and bounded parser; temporal verification; series/episode-aware decision; calibration; signed UNCALIBRATED/L0-calibrated packs; atomic pack store; lab leases; LAB runner. 115 tests | Real footage, real devices, release statistics |
+| Android | Source for LAB app: no INTERNET, capture off by default, mediaProjection FGS adapter, pure-Kotlin coordinator, lifecycle, consent records, eligibility gate. 26 JVM tests pass | Android compile (B-09), any device run (B-01), CAP-A03 source restriction |
+| iOS | Swift sources for coordinator, frame selector, lifecycle with background-task guard, consent/eligibility, ScreenCaptureKit adapter skeleton, XCTests | Any compile or test (B-02) |
 
 ## Task register (86 tasks)
 
-| Task | Track | Status | Evidence / note |
-|---|---|---|---|
-| P00-T01 | ALL | PASS (inventory) | `docs/ENVIRONMENT.md` 2026-10-09. Desktop: Win 11 Pro x64, 14 logical CPUs, 15.8 GB RAM, 34 GB free; Python 3.13.15, numpy 2.5.3, opencv 5.0.0, Pillow 12.3.0, Node 22.23.2, git 2.55, gh 2.101 (authenticated). Absent: JDK, Android SDK/adb/Gradle, Android device, macOS/Xcode/iPhone, provisioning. |
-| P00-T02 | ANDROID/IOS | UNVERIFIED | No installed headers on host. Documentary status only (S03/S04/Q03, S05–S11, V11). Local SDK install attempt tracked in RESUME_STATE. |
-| P00-T03 | ALL | BLOCKED | B-03 |
-| P00-T04 | ALL | BLOCKED | B-04. Limited development authorization recorded in DECISIONS.md. |
-| P00-T05 | ALL | BLOCKED | B-05 (counsel). Query vs corpus act separation is encoded in schema `RightsGrant.permitted_acts`. |
-| P00-T06 | DESKTOP-L0 | IN_PROGRESS | Desktop CTRL-G00 controls exist in code (no network, no frame files, memory-only). THREAT_MODEL / DPIA_SCREENING documents NOT_STARTED. |
-| P00-T07 | DESKTOP-L0 | IMPLEMENTED_NOT_VERIFIED | `l0/dac_l0/synth/`: 20 works × 3 editions, 10 absent works, 6 natural scenes, 7 synthetic private/overlay screens; hashes in `l0/assets/ASSET_MANIFEST.json`. Needs named rights reviewer sign-off (grant status PENDING_REVIEW). |
-| P00-T08 | DESKTOP-L0 | IMPLEMENTED_NOT_VERIFIED | `l0/dac_l0/eval/protocol.py`: frozen splits, separate denominators, Wilson + cluster bootstrap, rare-event rule. Independent AI-06 setup review not available. |
-| P00-T09 | ALL | PASS (document level) | TRACE-01 test; see TEST_EVIDENCE. |
-| P01-T01 | ANDROID | IMPLEMENTED_NOT_VERIFIED | `android/`: no INTERNET, capture disabled by default, mediaProjection FGS, coordinator/selector + JVM tests. Not compiled (B-09); Part A not run (B-01). |
-| P01-T02…T08 | ANDROID | BLOCKED | B-01 (device), B-09 (SDK). CAP-A03 plan in `android/CAP-A03_PLAN.md`. |
-| P02-T01…T06 | IOS | BLOCKED | B-02. Swift coordinator port + XCTests + checklist in `ios/` (IMPLEMENTED_NOT_VERIFIED). |
-| P03-T01 | DESKTOP-L0 | IMPLEMENTED_NOT_VERIFIED | `l0/dac_l0/schemas.py` work/edition IDs and locators. Series/episode/alias tables and migrations not yet built. |
-| P03-T02 | L1 | BLOCKED | B-05; L0 contributor grant manifest in `l0/assets/RIGHTS_MANIFEST.json`. |
-| P03-T03 | DESKTOP-L0 | PASS (desktop) | Reproducible build (bit-exact rebuild test); bytes per reference hour measured (IDX-01 desktop). |
-| P03-T04 | DESKTOP-L0 | PASS (L0 dev scope) | Signed UNCALIBRATED manifest, fail-closed loader, SEC-01 basic tests. |
-| P03-T05, T06, T07 | L1 | BLOCKED | B-05 |
-| P04-T01 | DESKTOP-L0 | IMPLEMENTED_NOT_VERIFIED | Quality flags + normalisation + black-bar crop on fixtures. Device frames BLOCKED. |
-| P04-T02 | DESKTOP-L0 | PASS (LAB) | HASH64 / THUMB32 / THUMB144 baselines at 2 s; see LAB report. 1 s/5 s/shot sampling and the 528 B row not yet compared. |
-| P04-T03 | DESKTOP-L0 | IN_PROGRESS | Temporal verification + montage segmentation implemented; montage/recap/shared-footage queries not yet in the evaluation set. |
-| P04-T04 | DESKTOP-L0 | NOT_STARTED | |
-| P04-T05 | DESKTOP-L0 | IN_PROGRESS | One result enum; OUTSIDE_CATALOGUE unreachable; thresholds UNCALIBRATED (OF-01 open). |
-| P04-T06 | DESKTOP-L0 | IN_PROGRESS | Clean/edited/absent/unusable LAB run done; leakage audit not done. |
-| P04-T07 | DESKTOP-L0 | BLOCKED | Independent evaluator absent (B-06). |
-| P04-T08 | ANDROID/IOS | BLOCKED | B-01/B-02/B-07 |
-| P05-T01…T07 | ALL | NOT_STARTED | Need G00/G-NATIVE. |
-| P06-T01…T08 | ALL | NOT_STARTED | |
-| P07-T01…T07 | ALL | BLOCKED | B-03 + native gates |
-| P08-T01…T07 | ALL | BLOCKED | B-05 |
-| P09-T01…T07 | ALL | BLOCKED | D04 / B-04 |
-| P10-T01…T06 | ALL | BLOCKED | B-08 |
-| P11-T01…T06 | ALL | DEFERRED | Roadmap. |
-
-## Gate register (13 rows)
-
-| Gate | Status | Note |
+| Task | Status | Evidence / note |
 |---|---|---|
-| G00 (desktop L0) | IN_PROGRESS | Needs lawful synthetic assets + protocol + CTRL-G00 desktop controls. No phone required. |
-| G00 (Android) | BLOCKED | B-01 + DATA-L00 Part A |
-| G00 (iOS) | BLOCKED | B-02 + DATA-L00 Part A |
-| G01 | BLOCKED | B-01 |
-| G02 | BLOCKED | B-02 |
-| G03-L0 | IN_PROGRESS | Engineering items done (schemas, builder, UNCALIBRATED manifest, tamper rejection). Rights reviewer sign-off of the synthetic grant still needed. |
-| G03-L1 | BLOCKED | B-05 |
-| G04 | IN_PROGRESS (LAB) | First LAB report recorded; RELEASE purpose BLOCKED (B-06). |
-| G05–G10 | NOT_STARTED / BLOCKED | |
-| G11 | DEFERRED | |
+| P00-T01 | PASS | `docs/ENVIRONMENT.md`, `docs/SDK_MATRIX.md` toolchain table |
+| P00-T02 | UNVERIFIED | `docs/SDK_MATRIX.md`: documented only; installed/measured need B-09/B-02 |
+| P00-T03 | BLOCKED | B-03 |
+| P00-T04 | BLOCKED | B-04 |
+| P00-T05 | BLOCKED | B-05 |
+| P00-T06 | IMPLEMENTED_NOT_VERIFIED | THREAT_MODEL, CTRL-G00 checklist, DPIA screening drafts; reviewer sign-off missing |
+| P00-T07 | IMPLEMENTED_NOT_VERIFIED | fixtures v3.1, asset/rights manifests; rights-reviewer sign-off missing |
+| P00-T08 | PASS (L0 exploratory protocol) | EVAL_PROTOCOL, preregistered scoring/calibration, sealed FINAL; independent AI-06 setup review missing |
+| P00-T09 | PASS (document level) | TRACE-01 |
+| P01-T01 | IMPLEMENTED_NOT_VERIFIED | Part A source items done; Android compile + merged-manifest check BLOCKED (B-09); signed Part A BLOCKED (B-01) |
+| P01-T02…T08 | BLOCKED | B-01, B-09. Lifecycle races covered on JVM only |
+| P02-T01 | UNVERIFIED | documentary symbol review in SDK_MATRIX; headers need Mac (B-02) |
+| P02-T02…T06 | BLOCKED | B-02; Swift sources prepared |
+| P03-T01 | IMPLEMENTED_NOT_VERIFIED | work/edition/series/episode IDs (idx-flat-2); alias tables not built |
+| P03-T02 | BLOCKED | B-05 (L0 self-grant manifest exists) |
+| P03-T03 | PASS (desktop) | reproducible builder, bytes/hour per descriptor |
+| P03-T04 | PASS (L0 dev scope) | signed manifest, fail-closed loader, SEC-01 |
+| P03-T05 | BLOCKED | B-05 |
+| P03-T06 | IMPLEMENTED_NOT_VERIFIED (dev fixtures) | atomic store, epoch marker, lab leases; licensed/final-tuple part BLOCKED (B-05) |
+| P03-T07 | BLOCKED | B-05 |
+| P04-T01 | IMPLEMENTED_NOT_VERIFIED | quality flags, uniform-border crop; device frames BLOCKED |
+| P04-T02 | PASS (LAB) | 4 descriptors; sampling study (DEV) in `evidence/studies/` |
+| P04-T03 | PASS (LAB, exploratory) | temporal verification, montage segments, recaps, stock footage |
+| P04-T04 | IN_PROGRESS | series→episode→edition→time hierarchy done; multilingual names not built |
+| P04-T05 | PASS (L0 synthetic calibration) | frozen per descriptor; LAB-only status |
+| P04-T06 | PASS (LAB) | all kinds incl. leakage audit; failures kept in reports |
+| P04-T07 | BLOCKED | independent evaluator (B-06) |
+| P04-T08 | BLOCKED | B-01/B-02/B-07 |
+| P05-T01 | IMPLEMENTED_NOT_VERIFIED | `docs/legal/*` DRAFT_FOR_COUNSEL; legal review required |
+| P05-T02 | IMPLEMENTED_NOT_VERIFIED | `ConsentRecords` (JVM-tested); Android UI uncompiled |
+| P05-T03 | IMPLEMENTED_NOT_VERIFIED | native picker from user action; `EligibilityGate` (JVM-tested) |
+| P05-T04 | IMPLEMENTED_NOT_VERIFIED | canonical states, uncertain-result wording, memory-only result |
+| P05-T05 | IMPLEMENTED_NOT_VERIFIED | in-app Stop/Cancel, notification Stop→Cancel switch; UX-02 device runs BLOCKED |
+| P05-T06 | IMPLEMENTED_NOT_VERIFIED | decline/changed-terms/late-callback logic tested on JVM |
+| P05-T07 | BLOCKED | accessibility review needs device; study needs D04 |
+| P06-T01 | IN_PROGRESS | threat model draft; actual API path evidence BLOCKED |
+| P06-T02 | PASS (harness) | lease/generation/race tests (Python + Kotlin) |
+| P06-T03 | IMPLEMENTED_NOT_VERIFIED | no logs/SDKs/backups in source; DATA-L02 device inspection BLOCKED |
+| P06-T04 | BLOCKED | device soak |
+| P06-T05 | IN_PROGRESS | SBOM; bounded parsers; release signing not designed |
+| P06-T06 | IMPLEMENTED_NOT_VERIFIED | cell/pack expiry and untrusted-time denial (JVM + Python) |
+| P06-T07 | IMPLEMENTED_NOT_VERIFIED | data inventory in THREAT_MODEL/privacy draft; counsel BLOCKED |
+| P06-T08 | BLOCKED | independent reviewer |
+| P07-T01…T07 | BLOCKED | B-03 + native gates; Snapchat OFF |
+| P08-T01…T07 | BLOCKED | B-05 |
+| P09-T01…T07 | BLOCKED | D04 / B-04 |
+| P10-T01…T06 | BLOCKED | B-08 |
+| P11-T01…T06 | DEFERRED | roadmap |
+
+## Gates
+
+| Gate | Status |
+|---|---|
+| G00 desktop | Engineering items ready; named reviewer sign-off missing (D5 in CTRL-G00) |
+| G00 Android / iOS | BLOCKED (B-01/B-09, B-02) |
+| G01 / G02 | BLOCKED |
+| G03-L0 | Engineering items ready; rights-reviewer sign-off of the synthetic self-grant missing |
+| G03-L1 | BLOCKED (B-05) |
+| G04 | LAB record exists (fixtures v3.1 FINAL); RELEASE BLOCKED (B-06) |
+| G05–G10 | BLOCKED / NOT_STARTED |
+| G11 | DEFERRED |

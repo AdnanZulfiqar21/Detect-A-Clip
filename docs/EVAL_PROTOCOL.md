@@ -64,3 +64,15 @@ POSSIBLE_MATCH is shown as "Possible match, not confirmed", never with a numeric
 and is counted in every report. A wrong title shown as POSSIBLE is an error
 (`WRONG_*_POSSIBLE` / `FALSE_POSSIBLE`); it is never merged into abstention and never
 relabelled as a false VERIFIED.
+
+## 7. Known limitations of fixtures-v3.1 (found after FINAL; not fixed in v3.1)
+
+- **Near-duplicate queries.** Random clip starts have no minimum separation, so some pairs of
+  queries come from the same edition and transform less than 2 s apart (DEV 5, CALIBRATION 6,
+  FINAL 5 pairs; `tests/test_leakage_audit.py`). They are clustered evidence, not independent
+  samples; the per-work cluster bootstrap already treats works as clusters. v4 will enforce
+  a minimum separation and unique labels.
+- **Small families.** 10 CALIBRATION works could not separate grid settings on safety: every
+  setting met the zero-wrong-VERIFIED constraint. Tie-breaks, not evidence, chose among them.
+- **Single FINAL run.** FINAL is now seen. Re-evaluation after any method change needs a new
+  sealed family with fresh seeds.
