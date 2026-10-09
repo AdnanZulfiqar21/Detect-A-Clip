@@ -192,7 +192,10 @@ def decide(
         lead = max(strong_segs, key=lambda h: (h.support, -h.mean_distance))
         return match(ResultState.POSSIBLE_MATCH, lead, [seg(s, True) for s in strong_segs], [], True)
 
-    frac = top.support / max(1, frames.qualified)
+    # Coverage over every *selected* frame, not only qualified ones: frames excluded by quality
+    # checks (blank, UI-like, static) still belong to the clip. Otherwise half a montage that
+    # was excluded as UI-like would let the other half VERIFY the whole clip (DEV finding).
+    frac = top.support / max(1, frames.selected)
     verified = (
         not competing
         and _strong(top, th.verified_min_support, th.verified_min_span_ms, th.verified_max_mean_dist_frac, radius)

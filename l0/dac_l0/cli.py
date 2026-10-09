@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent
 def cmd_manifest(a):
     from .synth.manifest import write_manifests
 
-    p = write_manifests(Path(a.out), n_works=a.works, n_absent=a.absent)
+    p = write_manifests(Path(a.out))
     m = json.loads(p.read_text(encoding="utf-8"))
     print(f"wrote {p} ({m['counts']['total_assets']} assets, sha256 {m['manifest_sha256'][:16]}…)")
 

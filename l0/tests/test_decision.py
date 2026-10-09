@@ -103,3 +103,13 @@ def test_thresholds_digest_changes_with_any_field():
     from dataclasses import replace
 
     assert TH.digest() != replace(TH, verified_min_span_ms=TH.verified_min_span_ms + 1).digest()
+
+
+def test_support_fraction_counts_frames_excluded_by_quality_checks():
+    """Montage half excluded as UI-like: 8 of 16 selected frames support one work."""
+    f = FrameSummary(offered=80, selected=16, qualified=8)
+    from dataclasses import replace
+
+    th = replace(TH, verified_min_support_fraction=0.6)
+    r = decide("s", 1, [H(0, 8, start=4000, end=7500)], f, bundle(), 0, th)
+    assert r.state != ResultState.VERIFIED_MATCH

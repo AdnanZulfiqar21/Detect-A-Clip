@@ -54,92 +54,75 @@ def l0_rights_grant() -> RightsGrant:
     )
 
 
-def build_asset_manifest(n_works: int = 20, n_absent: int = 10, n_natural: int = 6, with_hashes: bool = True) -> Dict:
+def build_asset_manifest(with_hashes: bool = True) -> Dict:
+    """Asset manifest for every fixtures-v3.x family (gallery editions, absent works, natural
+    scenes, synthetic private screens). Content hashes make provenance reproducible; the
+    manifest hash excludes the creation timestamp so it is stable across rebuilds."""
+    from .fixtures import FAMILIES, FIXTURE_VERSION, build_family
+
     now = datetime.now(timezone.utc).isoformat()
     assets: List[Dict] = []
 
     def add(asset: ReferenceAsset, family: str, extra: Dict) -> None:
         d = json.loads(to_json(asset))
+        d.pop("created_at", None)
         d["family"] = family
         d.update(extra)
         assets.append(d)
 
-    for w in gallery_works(n_works):
-        for kind in EditionKind:
-            ed = Edition(w, kind)
+    counts: Dict[str, int] = {}
+    for fam in FAMILIES:
+        F = build_family(fam)
+        for ed in F.gallery_editions():
+            w = ed.work
             h = content_hash(ed.render_frame, ed.duration_s) if with_hashes else "UNHASHED"
-            add(
-                ReferenceAsset(
-                    asset_id=ed.asset_id, work_id=w.work_id, series_id=None, episode_id=None,
-                    edition_id=ed.edition_id, segment_ids=[], source="synthetic-generator",
-                    content_hash=h, is_query_only=False, grant_id=L0_GRANT_ID, created_at=now,
-                    derivative_rights=True, local_distribution_rights=True, training_rights=False,
-                    display_rights=True,
-                ),
-                "GALLERY_WORK",
-                {"seed": w.seed, "duration_s": ed.duration_s, "synthetic_title": w.synthetic_title},
-            )
-    for w in absent_works(n_absent):
-        ed = Edition(w, EditionKind.THEATRICAL)
-        h = content_hash(ed.render_frame, ed.duration_s) if with_hashes else "UNHASHED"
-        add(
-            ReferenceAsset(
-                asset_id=ed.asset_id, work_id=w.work_id, series_id=None, episode_id=None,
-                edition_id=ed.edition_id, segment_ids=[], source="synthetic-generator",
-                content_hash=h, is_query_only=True, grant_id=L0_GRANT_ID, created_at=now,
-                derivative_rights=True, local_distribution_rights=False, training_rights=False,
-                display_rights=False,
-            ),
-            "ABSENT_WORK",
-            {"seed": w.seed, "duration_s": ed.duration_s},
-        )
-    for i in range(n_natural):
-        ns = NaturalScene(i, 7000 + i)
-        h = content_hash(ns.render_frame, ns.duration_s) if with_hashes else "UNHASHED"
-        add(
-            ReferenceAsset(
-                asset_id=ns.asset_id, work_id="NONE", series_id=None, episode_id=None, edition_id="NONE",
-                segment_ids=[], source="synthetic-generator", content_hash=h, is_query_only=True,
-                grant_id=L0_GRANT_ID, created_at=now, derivative_rights=True, local_distribution_rights=False,
-                training_rights=False, display_rights=False,
-            ),
-            "NATURAL_UNMARKED",
-            {"seed": ns.seed, "duration_s": ns.duration_s},
-        )
+            kind = "EPISODE" if getattr(w, "series_id", None) else ("STOCK_SHARING_WORK" if w in F.stock_pair else "GALLERY_WORK")
+            add(ReferenceAsset(asset_id=ed.asset_id, work_id=w.work_id, series_id=getattr(w, "series_id", None),
+                               episode_id=getattr(w, "episode_id", None), edition_id=ed.edition_id, segment_ids=[],
+                               source="synthetic-generator", content_hash=h, is_query_only=False, grant_id=L0_GRANT_ID,
+                               created_at=now, derivative_rights=True, local_distribution_rights=True,
+                               training_rights=False, display_rights=True),
+                f"{fam}:{kind}", {"seed": w.seed, "duration_s": ed.duration_s})
+        for w in F.absent:
+            ed = Edition(w, EditionKind.THEATRICAL)
+            h = content_hash(ed.render_frame, ed.duration_s) if with_hashes else "UNHASHED"
+            add(ReferenceAsset(asset_id=ed.asset_id, work_id=w.work_id, series_id=None, episode_id=None,
+                               edition_id=ed.edition_id, segment_ids=[], source="synthetic-generator", content_hash=h,
+                               is_query_only=True, grant_id=L0_GRANT_ID, created_at=now, derivative_rights=True,
+                               local_distribution_rights=False, training_rights=False, display_rights=False),
+                f"{fam}:ABSENT_WORK", {"seed": w.seed, "duration_s": ed.duration_s})
+        for ns in F.natural:
+            h = content_hash(ns.render_frame, ns.duration_s) if with_hashes else "UNHASHED"
+            add(ReferenceAsset(asset_id=f"{fam}-{ns.asset_id}", work_id="NONE", series_id=None, episode_id=None,
+                               edition_id="NONE", segment_ids=[], source="synthetic-generator", content_hash=h,
+                               is_query_only=True, grant_id=L0_GRANT_ID, created_at=now, derivative_rights=True,
+                               local_distribution_rights=False, training_rights=False, display_rights=False),
+                f"{fam}:NATURAL_UNMARKED", {"seed": ns.seed, "duration_s": ns.duration_s})
+        counts[fam] = sum(1 for a in assets if a["family"].startswith(fam + ":"))
     for kind in PrivateScreenKind:
-        ps = PrivateScreen(kind, 1)
-        f = ps.render_frame(0.0)
-        h = hashlib.sha256(f.tobytes()).hexdigest() if with_hashes else "UNHASHED"
-        add(
-            ReferenceAsset(
-                asset_id=ps.asset_id, work_id="NONE", series_id=None, episode_id=None, edition_id="NONE",
-                segment_ids=[], source="synthetic-generator", content_hash=h, is_query_only=True,
-                grant_id=L0_GRANT_ID, created_at=now, derivative_rights=False, local_distribution_rights=False,
-                training_rights=False, display_rights=False,
-            ),
-            "SYNTHETIC_PRIVATE_SCREEN",
-            {"seed": 1, "overlay_class": kind.value, "note": "fictional seeded text only; no real private pixels"},
-        )
+        for seed in (1, 2):
+            ps = PrivateScreen(kind, seed)
+            h = hashlib.sha256(ps.render_frame(0.0).tobytes()).hexdigest() if with_hashes else "UNHASHED"
+            add(ReferenceAsset(asset_id=ps.asset_id, work_id="NONE", series_id=None, episode_id=None, edition_id="NONE",
+                               segment_ids=[], source="synthetic-generator", content_hash=h, is_query_only=True,
+                               grant_id=L0_GRANT_ID, created_at=now, derivative_rights=False,
+                               local_distribution_rights=False, training_rights=False, display_rights=False),
+                "SYNTHETIC_PRIVATE_SCREEN", {"seed": seed, "overlay_class": kind.value,
+                                             "note": "fictional seeded text only; no real private pixels"})
 
     manifest = {
         "manifest_type": "L0_ASSET_MANIFEST",
         "generator_version": GENERATOR_VERSION,
-        "content_hash_basis": f"SHA-256 over BGR uint8 640x360 frames sampled at {HASH_BASIS_FPS} fps",
-        "created_at": now,
-        "counts": {
-            "gallery_works": n_works,
-            "editions_per_work": len(EditionKind),
-            "absent_works": n_absent,
-            "natural_unmarked": n_natural,
-            "synthetic_private_screens": len(PrivateScreenKind),
-            "total_assets": len(assets),
-        },
-        "quality_claim": "NONE — synthetic diagnostic material; not industry-quality footage; not six-industry coverage.",
+        "fixture_version": FIXTURE_VERSION,
+        "content_hash_basis": f"SHA-256 over BGR uint8 640x360 frames sampled at {HASH_BASIS_FPS} fps (queries add the capture channel at evaluation time and are not hashed here)",
+        "counts": {**{f"{k}_assets": v for k, v in counts.items()}, "total_assets": len(assets)},
+        "quality_claim": "NONE: synthetic diagnostic material; not industry-quality footage; not six-industry coverage.",
         "grant": json.loads(to_json(l0_rights_grant())),
         "assets": assets,
     }
     body = json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode()
     manifest["manifest_sha256"] = hashlib.sha256(body).hexdigest()
+    manifest["created_at"] = now
     return manifest
 
 
