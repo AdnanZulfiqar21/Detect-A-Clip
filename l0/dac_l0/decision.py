@@ -185,8 +185,10 @@ def decide(
         if not strong_segs:
             return plain(ResultState.NO_CONFIDENT_MATCH, flags)
         # Bounded segment-specific evidence; overall state is at most POSSIBLE_MATCH and
-        # no single episode/time is asserted for the montage as a whole.
-        return match(ResultState.POSSIBLE_MATCH, strong_segs[0], [seg(s, True) for s in strong_segs], [], True)
+        # no single episode/time is asserted for the montage as a whole. The headline name is
+        # the best-supported segment (not the earliest); segments stay in time order.
+        lead = max(strong_segs, key=lambda h: (h.support, -h.mean_distance))
+        return match(ResultState.POSSIBLE_MATCH, lead, [seg(s, True) for s in strong_segs], [], True)
 
     frac = top.support / max(1, frames.qualified)
     verified = (

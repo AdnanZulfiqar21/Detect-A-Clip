@@ -46,7 +46,7 @@ from .generator import (
     blank_frame,
 )
 
-FIXTURE_VERSION = "fixtures-v3"
+FIXTURE_VERSION = "fixtures-v3.1"  # v3.1: 10 s shared intro and stock (DEV finding, before any CAL/FINAL outcome)
 QUERY_LEN_S = 8.0
 FAMILIES = ("DEV", "CALIBRATION", "FINAL")
 
@@ -94,10 +94,10 @@ def build_family(name: str) -> FamilyFixtures:
     series_id = f"S-{name[:3]}"
     episodes = []
     for k in range(N_EPISODES):
-        recap = (bodies[k - 1], 20.0, 6.0) if k > 0 else (intro, 6.0, 6.0)
+        recap = (bodies[k - 1], 20.0, 6.0) if k > 0 else (intro, 10.0, 6.0)
         episodes.append(ComposedWork(
             work_index=sp["series_idx"] + k, seed=sp["series_seed"] + 50 + k,
-            segments=((intro, 0.0, 6.0), recap, (bodies[k], 0.0, 48.0)),
+            segments=((intro, 0.0, 10.0), recap, (bodies[k], 0.0, 44.0)),
             series_id=series_id, episode_id=f"E{k + 1:02d}",
         ))
 
@@ -105,9 +105,9 @@ def build_family(name: str) -> FamilyFixtures:
     stock = SynthWork(sp["stock_idx"] + 9, sp["stock_seed"])
     a = SynthWork(sp["stock_idx"] + 5, sp["stock_seed"] + 1)
     b = SynthWork(sp["stock_idx"] + 6, sp["stock_seed"] + 2)
-    wa = ComposedWork(sp["stock_idx"], sp["stock_seed"] + 11, ((a, 0.0, 20.0), (stock, 10.0, 6.0), (a, 20.0, 34.0)))
-    wb = ComposedWork(sp["stock_idx"] + 1, sp["stock_seed"] + 12, ((b, 0.0, 35.0), (stock, 10.0, 6.0), (b, 35.0, 19.0)))
-    return FamilyFixtures(name, plain, episodes, (wa, wb), (20.0, 26.0, 35.0, 41.0), absent, natural)
+    wa = ComposedWork(sp["stock_idx"], sp["stock_seed"] + 11, ((a, 0.0, 20.0), (stock, 10.0, 10.0), (a, 20.0, 30.0)))
+    wb = ComposedWork(sp["stock_idx"] + 1, sp["stock_seed"] + 12, ((b, 0.0, 32.0), (stock, 10.0, 10.0), (b, 32.0, 18.0)))
+    return FamilyFixtures(name, plain, episodes, (wa, wb), (20.0, 30.0, 32.0, 42.0), absent, natural)
 
 
 def all_gallery_editions() -> List[Edition]:
@@ -164,16 +164,18 @@ def make_queries(name: str) -> List[QueryCase]:
         c = _clip_case(name, "SERIES_UNIQUE", ed, start, QueryTransform.NONE, i, series, ep.episode_id); i += 1
         c.cluster = ep.work_id
         cases.append(c)
-        # Shared intro (identical in every episode) → series level is the correct granularity.
-        c = _clip_case(name, "SERIES_INTRO", ed, 0.0, QueryTransform.NONE, i, series, None); i += 1
+        # Shared intro (identical in every episode; the 8 s clip lies wholly inside the 10 s
+        # intro) → series level is the correct granularity.
+        c = _clip_case(name, "SERIES_INTRO", ed, 1.0, QueryTransform.NONE, i, series, None); i += 1
         c.cluster = ep.work_id
         cases.append(c)
-        # Recap of the previous episode plus 2 s of this episode.
-        c = _clip_case(name, "SERIES_RECAP", ed, 6.0, QueryTransform.NONE, i, series, ep.episode_id); i += 1
+        # Recap of the previous episode (6 s) plus 2 s of this episode.
+        c = _clip_case(name, "SERIES_RECAP", ed, 10.0, QueryTransform.NONE, i, series, ep.episode_id); i += 1
         c.cluster = ep.work_id
         cases.append(c)
     wa, wb = F.stock_pair
-    for j, (w, st) in enumerate([(wa, F.stock_window[0] - 1.0), (wb, F.stock_window[2] - 1.0)]):
+    # The 8 s clip lies wholly inside the 10 s stock scene shared by both works.
+    for j, (w, st) in enumerate([(wa, F.stock_window[0] + 1.0), (wb, F.stock_window[2] + 1.0)]):
         for tr in (QueryTransform.NONE, QueryTransform.CAPTIONED):
             c = _clip_case(name, "STOCK_SHARED", Edition(w, EditionKind.THEATRICAL), st, tr, i, w.work_id,
                            acceptable=(wa.work_id, wb.work_id)); i += 1

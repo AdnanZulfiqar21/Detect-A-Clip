@@ -136,9 +136,12 @@ def _deliveries(case: QueryCase):
 
 
 def _extract_one(i: int):
+    """Render first, then time recognition only (rendering is a test-harness cost). The time
+    is desktop CPU time under parallel workers, not an F05 device latency."""
     case = _W["cases"][i]
+    frames = list(_deliveries(case))
     t0 = time.perf_counter()
-    hyps, summ, _ = extract_evidence(_deliveries(case), _W["retr"], _W["th"])
+    hyps, summ, _ = extract_evidence(frames, _W["retr"], _W["th"])
     return i, hyps, summ, (time.perf_counter() - t0) * 1000
 
 
@@ -290,7 +293,7 @@ def render_markdown(rep: Dict) -> str:
          f"Fixture manifest `{rep['fixture_manifest_sha256'][:16]}` · thresholds `{rep['thresholds_digest'][:16]}` "
          f"({rep['thresholds']['calibration_status']}) · calibration file: {rep['calibration_file'] or 'none'}", ""]
     L += ["## Safety totals and outcome counts", "",
-          "| Descriptor | Family | wrong title VERIFIED | wrong title POSSIBLE | p50 ms | p90 ms |", "|---|---|---:|---:|---:|---:|"]
+          "| Descriptor | Family | wrong title VERIFIED | wrong title POSSIBLE | recognition p50 ms (desktop) | p90 ms |", "|---|---|---:|---:|---:|---:|"]
     for r in rep["results"]:
         L.append(f"| {r['descriptor']} | {r['family']} | {r['wrong_title_verified']} | {r['wrong_title_possible']} | {r['latency_ms_p50']:.0f} | {r['latency_ms_p90']:.0f} |")
     for r in rep["results"]:
