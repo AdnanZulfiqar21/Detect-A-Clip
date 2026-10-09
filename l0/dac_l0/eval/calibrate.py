@@ -110,7 +110,7 @@ def load_frozen(path: Path) -> DecisionThresholds:
     if d.get("status") != "FROZEN":
         raise ValueError("calibration file is not FROZEN")
     th = DecisionThresholds(**d["thresholds"])
-    if th.digest() != d["thresholds_digest"]:
+    if th.digest(fields=list(d["thresholds"])) != d["thresholds_digest"]:
         raise ValueError("calibration thresholds digest mismatch")
     if d["fixture_manifest_sha256"] != fixture_manifest()["sha256"]:
         raise ValueError("calibration was made on a different fixture manifest")

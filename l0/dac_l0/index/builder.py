@@ -74,7 +74,7 @@ class IndexBundle:
         return json.dumps(meta, sort_keys=True, separators=(",", ":")).encode()
 
     def hash_u64(self) -> np.ndarray:
-        if self.family != DescriptorFamily.HASH64:
+        if not self.family.is_hash:
             raise ValueError("not a hash index")
         return np.ascontiguousarray(self.descriptors).view("<u8").ravel()
 
@@ -98,8 +98,7 @@ class IndexBundle:
         magic, version, dbytes, n, nworks, interval = struct.unpack(HEADER_FMT, data[:HEADER_SIZE])
         if magic != MAGIC or version != 1:
             raise ValueError("bad magic/version")
-        family = next((f for f in DescriptorFamily if f.descriptor_bytes == dbytes), None)
-        if family is None:
+        if dbytes not in {f.descriptor_bytes for f in DescriptorFamily}:
             raise ValueError("unknown descriptor size")
         if not (0 <= n <= MAX_VECTORS) or not (0 <= nworks <= 1_000_000):
             raise ValueError("count out of bounds")
@@ -119,7 +118,11 @@ class IndexBundle:
             raise ValueError(f"metadata not valid JSON: {e}") from e
         if meta.get("index_format_version") != INDEX_FORMAT_VERSION:
             raise ValueError("incompatible index format version")
-        if meta.get("family") != family.value:
+        try:
+            family = DescriptorFamily(meta.get("family"))
+        except ValueError:
+            raise ValueError("unknown descriptor family")
+        if family.descriptor_bytes != dbytes:
             raise ValueError("metadata/header family mismatch")
         works_raw = meta.get("works")
         if not isinstance(works_raw, list) or len(works_raw) != nworks:

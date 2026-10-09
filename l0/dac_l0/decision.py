@@ -51,6 +51,7 @@ class DecisionThresholds:
     thumb32_max_distance: float = 120.0
     thumb144_max_distance: float = 300.0
     thumb512_max_distance: float = 620.0   # DEV other-work p5 = 692 (ED-10)
+    dacdhash_max_distance: float = 11.0    # DEV other-work p5 = 12 (exact device path, ED-17)
     top_k: int = 12
     mirror_invariant: bool = True
 
@@ -60,10 +61,16 @@ class DecisionThresholds:
             DescriptorFamily.THUMB32: self.thumb32_max_distance,
             DescriptorFamily.THUMB144: self.thumb144_max_distance,
             DescriptorFamily.THUMB512: self.thumb512_max_distance,
+            DescriptorFamily.DACDHASH: self.dacdhash_max_distance,
         }[family]
 
-    def digest(self) -> str:
-        return hashlib.sha256(json.dumps(asdict(self), sort_keys=True).encode()).hexdigest()
+    def digest(self, fields=None) -> str:
+        """SHA-256 over the threshold fields (all, or only `fields` so that files frozen before
+        a new field existed keep verifying)."""
+        d = asdict(self)
+        if fields is not None:
+            d = {k: d[k] for k in fields}
+        return hashlib.sha256(json.dumps(d, sort_keys=True).encode()).hexdigest()
 
 
 @dataclass

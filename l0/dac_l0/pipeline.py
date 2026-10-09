@@ -16,6 +16,7 @@ from . import GENERATOR_VERSION, INDEX_FORMAT_VERSION
 from .decision import RESULT_VALIDITY_MS, DecisionThresholds, FrameSummary, decide
 from .index.builder import IndexBundle
 from .index.descriptors import DescriptorFamily, describe
+from .index.exact import crop_rect, dhash_luma, luma_u8, quality_v1
 from .index.retrieval import Candidate, FlatRetriever
 from .quality import QualityFlag, assess, normalize, to_gray
 from .sampler import FrameSelector
@@ -43,7 +44,9 @@ def extract_evidence(
     summary = FrameSummary()
     per_frame: List[Tuple[int, List[Candidate]]] = []
     prev_gray = None
+    prev_means = None
     radius = thresholds.radius(bundle.family)
+    exact = bundle.family == DescriptorFamily.DACDHASH
 
     for d in deliveries:
         if is_cancelled():
@@ -52,22 +55,42 @@ def extract_evidence(
         if not sel.offer(d.timestamp_ms):
             continue  # OS buffer released immediately by the adapter
         try:
-            frame = normalize(d.frame_bgr)
-            rep = assess(frame, prev_gray)
-            summary.selected += 1
-            summary.flags.extend(rep.flags)
-            if rep.unusable_feed:
-                summary.unusable_feed += 1
-                continue
-            if not rep.qualified:
-                continue
-            summary.qualified += 1
-            prev_gray = to_gray(frame)
-            desc = describe(frame, bundle.family)
+            if exact:
+                # Device path (DAC-CROP-v1, DAC-QUAL-v1, DAC-DHASH-v1): integer-only, no OpenCV.
+                rgb = np.ascontiguousarray(d.frame_bgr[:, :, 2::-1])
+                y = luma_u8(rgb)
+                t0, b0, l0, r0 = crop_rect(y)
+                region = y[t0:b0, l0:r0]
+                flag, means = quality_v1(region, prev_means)
+                summary.selected += 1
+                summary.flags.append(flag)
+                if flag == "BLANK":
+                    summary.unusable_feed += 1
+                    continue
+                if flag != "OK":
+                    continue
+                summary.qualified += 1
+                prev_means = means
+                desc = dhash_luma(region).to_bytes(8, "little")
+                mirror_desc = dhash_luma(region[:, ::-1]).to_bytes(8, "little")
+            else:
+                frame = normalize(d.frame_bgr)
+                rep = assess(frame, prev_gray)
+                summary.selected += 1
+                summary.flags.extend(rep.flags)
+                if rep.unusable_feed:
+                    summary.unusable_feed += 1
+                    continue
+                if not rep.qualified:
+                    continue
+                summary.qualified += 1
+                prev_gray = to_gray(frame)
+                desc = describe(frame, bundle.family)
+                mirror_desc = describe(cv2.flip(frame, 1), bundle.family) if thresholds.mirror_invariant else None
             cands = retriever.search(desc, top_k=thresholds.top_k, max_distance=radius)
             if thresholds.mirror_invariant:
                 # Also search the horizontally flipped query; keep the closer hit per locator.
-                flipped = retriever.search(describe(cv2.flip(frame, 1), bundle.family), top_k=thresholds.top_k, max_distance=radius)
+                flipped = retriever.search(mirror_desc, top_k=thresholds.top_k, max_distance=radius)
                 best = {}
                 for c in list(cands) + list(flipped):
                     key = c.locator

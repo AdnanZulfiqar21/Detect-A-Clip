@@ -19,7 +19,7 @@ class Candidate:
 class FlatRetriever:
     def __init__(self, bundle: IndexBundle):
         self.bundle = bundle
-        if bundle.family == DescriptorFamily.HASH64:
+        if bundle.family.is_hash:
             self._hashes = bundle.hash_u64()
         else:
             self._vecs = bundle.descriptors.astype(np.int32)
@@ -28,7 +28,7 @@ class FlatRetriever:
         b = self.bundle
         if b.vector_count == 0:
             return []
-        if b.family == DescriptorFamily.HASH64:
+        if b.family.is_hash:
             q = np.frombuffer(descriptor, dtype="<u8")[0]
             dist = hamming64(self._hashes, q).astype(np.float32)
         else:

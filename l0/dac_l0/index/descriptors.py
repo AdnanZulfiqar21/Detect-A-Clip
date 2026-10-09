@@ -5,6 +5,7 @@ Families (payload bytes per vector = descriptor + 16 B locator):
 - THUMB32  : 8x4 grey thumbnail (uint8)      → 32 + 16 = 48 B  (table row "48")
 - THUMB144 : 16x9 grey thumbnail (uint8)     → 144 + 16 = 160 B (closest to the 144 B row)
 - THUMB512 : 32x16 grey thumbnail (uint8)    → 512 + 16 = 528 B (the 528 B row)
+- DACDHASH : DAC-CROP-v1 + DAC-DHASH-v1, integer-exact (device engine) → 8 + 16 = 24 B
 """
 from __future__ import annotations
 
@@ -25,10 +26,16 @@ class DescriptorFamily(str, enum.Enum):
     THUMB32 = "THUMB32"
     THUMB144 = "THUMB144"
     THUMB512 = "THUMB512"
+    DACDHASH = "DACDHASH"
 
     @property
     def descriptor_bytes(self) -> int:
-        return {"HASH64": 8, "THUMB32": 32, "THUMB144": 144, "THUMB512": 512}[self.value]
+        return {"HASH64": 8, "THUMB32": 32, "THUMB144": 144, "THUMB512": 512, "DACDHASH": 8}[self.value]
+
+    @property
+    def is_hash(self) -> bool:
+        """64-bit hashes compared by Hamming distance."""
+        return self.value in ("HASH64", "DACDHASH")
 
     @property
     def vector_bytes(self) -> int:
@@ -80,6 +87,10 @@ def thumb_bytes(frame_bgr: np.ndarray, w: int, h: int) -> bytes:
 
 
 def describe(frame_bgr: np.ndarray, family: DescriptorFamily) -> bytes:
+    if family == DescriptorFamily.DACDHASH:
+        from .exact import exact_describe  # integer-exact device path; no OpenCV preprocessing
+
+        return exact_describe(np.ascontiguousarray(frame_bgr[:, :, 2::-1])).to_bytes(8, "little")
     from ..quality import crop_black_bars  # local import avoids a cycle
 
     frame_bgr = crop_black_bars(frame_bgr)

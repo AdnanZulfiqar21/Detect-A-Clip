@@ -28,23 +28,99 @@ def luma_u8(rgb: np.ndarray) -> np.ndarray:
     return ((77 * r + 150 * g + 29 * b + 128) >> 8).astype(np.int32)
 
 
-def dac_dhash_v1(rgb: np.ndarray) -> int:
-    h, w = rgb.shape[:2]
-    if w < 9 or h < 8:
+def cell_means(y: np.ndarray, gx: int, gy: int) -> np.ndarray:
+    """Integer area means on a gx×gy grid: cell i spans [⌊i·W/gx⌋, ⌊(i+1)·W/gx⌋)."""
+    h, w = y.shape
+    if w < gx or h < gy:
         raise ValueError("frame too small")
-    y = luma_u8(rgb)
-    means = np.zeros((8, 9), dtype=np.int64)
-    for j in range(8):
-        y0, y1 = (j * h) // 8, ((j + 1) * h) // 8
-        for i in range(9):
-            x0, x1 = (i * w) // 9, ((i + 1) * w) // 9
+    means = np.zeros((gy, gx), dtype=np.int64)
+    for j in range(gy):
+        y0, y1 = (j * h) // gy, ((j + 1) * h) // gy
+        for i in range(gx):
+            x0, x1 = (i * w) // gx, ((i + 1) * w) // gx
             cell = y[y0:y1, x0:x1]
             means[j, i] = int(cell.sum()) // cell.size
+    return means
+
+
+def dhash_luma(y: np.ndarray) -> int:
+    """DAC-DHASH-v1 on an integer luma array."""
+    means = cell_means(y, 9, 8)
     v = 0
     for j in range(8):
         for i in range(8):
             v = (v << 1) | int(means[j, i + 1] > means[j, i])
     return v
+
+
+def dac_dhash_v1(rgb: np.ndarray) -> int:
+    return dhash_luma(luma_u8(rgb))
+
+
+# ------------------------------------------------------------------ DAC-CROP-v1
+CROP_SPEC = "DAC-CROP-v1"
+BORDER_DARK_MAX = 16      # a line whose max luma is below this is dark border
+BORDER_FLAT_RANGE = 8     # a line whose (max - min) luma is at most this is flat border
+
+
+def _trim(flags) -> tuple:
+    lo, hi = 0, len(flags)
+    while lo < hi and flags[lo]:
+        lo += 1
+    while hi > lo and flags[hi - 1]:
+        hi -= 1
+    return lo, hi
+
+
+def crop_rect(y: np.ndarray) -> tuple:
+    """Integer border crop. Rows then columns, outside-in, two passes. A line is border when
+    max < BORDER_DARK_MAX or (max - min) <= BORDER_FLAT_RANGE over the current region.
+    At least 40 % of each dimension is kept (10·kept ≥ 4·full), else the full frame.
+    Returns (top, bottom, left, right), half-open."""
+    h, w = y.shape
+    top, bot, left, right = 0, h, 0, w
+    for _ in range(2):
+        reg = y[top:bot, left:right]
+        if reg.size == 0:
+            break
+        mx, mn = reg.max(axis=1), reg.min(axis=1)
+        t, b = _trim((mx < BORDER_DARK_MAX) | (mx - mn <= BORDER_FLAT_RANGE))
+        top, bot = top + t, top + b
+        reg = y[top:bot, left:right]
+        if reg.size == 0:
+            break
+        mx, mn = reg.max(axis=0), reg.min(axis=0)
+        l, r = _trim((mx < BORDER_DARK_MAX) | (mx - mn <= BORDER_FLAT_RANGE))
+        left, right = left + l, left + r
+    if 10 * (bot - top) < 4 * h or 10 * (right - left) < 4 * w:
+        return 0, h, 0, w
+    return top, bot, left, right
+
+
+# ------------------------------------------------------------------ DAC-QUAL-v1
+QUAL_SPEC = "DAC-QUAL-v1"
+
+
+def quality_v1(region: np.ndarray, prev_means):
+    """Integer quality flags on 16×9 cell means of the cropped region.
+    BLANK: max mean < 12. FLAT: max - min < 6. STATIC: every mean within ±1 of the previous
+    qualified frame's means. Otherwise OK. Returns (flag, means)."""
+    m = cell_means(region, 16, 9)
+    if int(m.max()) < 12:
+        return "BLANK", m
+    if int(m.max() - m.min()) < 6:
+        return "FLAT", m
+    if prev_means is not None and int(np.abs(m - prev_means).max()) <= 1:
+        return "STATIC", m
+    return "OK", m
+
+
+def exact_describe(rgb: np.ndarray, mirrored: bool = False) -> int:
+    """Device descriptor: luma → DAC-CROP-v1 rectangle → DAC-DHASH-v1 (optionally mirrored)."""
+    y = luma_u8(rgb)
+    t, b, l, r = crop_rect(y)
+    reg = y[t:b, l:r]
+    return dhash_luma(reg[:, ::-1] if mirrored else reg)
 
 
 class XorShift32:
