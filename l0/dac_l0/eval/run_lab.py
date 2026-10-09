@@ -252,7 +252,7 @@ def _git_commit() -> str:
 
 def run(out_dir: Path, families: List[str], descriptors: List[DescriptorFamily], th: DecisionThresholds,
         cache_dir: Path, label: str, calibration_file: Optional[str] = None) -> Path:
-    if "FINAL" in families and th.calibration_status != "CALIBRATED_L0_SYNTHETIC":
+    if any(f.startswith("FINAL") for f in families) and th.calibration_status != "CALIBRATED_L0_SYNTHETIC":
         raise RuntimeError("FINAL is sealed: run it only with a frozen calibration file")
     now = datetime.now(timezone.utc)
     report = {

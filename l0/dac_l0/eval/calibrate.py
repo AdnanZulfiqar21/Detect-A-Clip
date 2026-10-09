@@ -51,10 +51,10 @@ def _conservatism(th: DecisionThresholds) -> Tuple:
             th.possible_min_support, th.possible_min_span_ms, -th.possible_max_mean_dist_frac, not th.possible_on_competition)
 
 
-def calibrate(desc: DescriptorFamily, base: DecisionThresholds, cache_dir: Path, out_dir: Path) -> Dict:
+def calibrate(desc: DescriptorFamily, base: DecisionThresholds, cache_dir: Path, out_dir: Path, family: str = "CAL4") -> Dict:
     assert base.radius(desc) > 0
-    ev = extract_family("CALIBRATION", desc, base, cache_dir)
-    cases = make_queries("CALIBRATION")
+    ev = extract_family(family, desc, base, cache_dir)
+    cases = make_queries(family)
     bundle, _ = build_gallery(desc, cache_dir)
     keys = list(GRID)
     best = None
@@ -78,7 +78,7 @@ def calibrate(desc: DescriptorFamily, base: DecisionThresholds, cache_dir: Path,
         "calibration_type": "L0_SYNTHETIC_CALIBRATION",
         "descriptor": desc.value,
         "created_at": now.isoformat(),
-        "family_used": "CALIBRATION",
+        "family_used": family,
         "fixture_manifest_sha256": fixture_manifest()["sha256"],
         "evidence_digest": ev.retrieval_digest,
         "grid": GRID,

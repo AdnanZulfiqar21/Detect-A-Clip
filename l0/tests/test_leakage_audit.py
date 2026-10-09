@@ -84,3 +84,15 @@ def test_near_duplicate_counts_are_recorded_not_hidden():
     counts = {f: near_duplicates(f) for f in FAMILIES}
     assert all(v >= 0 for v in counts.values())
     print("near-duplicate query pairs (<2 s, same edition+transform):", counts)
+
+
+def test_labels_are_unique_in_v4_families():
+    for f in FAMILIES:
+        c = Counter((q.kind, q.label) for q in make_queries(f))
+        dup = [k for k, v in c.items() if v > 1]
+        assert not dup, (f, dup[:3])
+
+
+def test_v4_has_no_near_duplicate_queries():
+    for f in FAMILIES:
+        assert near_duplicates(f) == 0, f

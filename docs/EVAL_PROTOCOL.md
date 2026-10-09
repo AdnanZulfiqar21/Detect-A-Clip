@@ -76,3 +76,17 @@ relabelled as a false VERIFIED.
   setting met the zero-wrong-VERIFIED constraint. Tie-breaks, not evidence, chose among them.
 - **Single FINAL run.** FINAL is now seen. Re-evaluation after any method change needs a new
   sealed family with fresh seeds.
+
+## 8. fixtures-v4 (preregistered 2026-10-09, before any CAL4/FINAL4 outcome)
+
+| Family | Seeds | Size | Status |
+|---|---|---|---|
+| DEV | v3.1 DEV (1000+, 3100+, 5000+, 7000+) | 20 works, 10 absent | SEEN, tuning allowed |
+| CAL4 | 31000+, 33100+, 33200+, 35000+, 37000+ | 20 works, 20 absent, 10 natural, 418 queries | calibration only |
+| FINAL4 | 41000+, 43100+, 43200+, 45000+, 47000+ | 20 works, 20 absent, 10 natural, 418 queries | SEALED; one run per descriptor with the frozen CAL4 calibration |
+
+Changes from v3.1: separated clip starts (≥ 3 s within an edition; 0 near-duplicate pairs),
+unique labels, 12 montages and 8 trailers per family. v3.1 CALIBRATION/FINAL are no longer in
+the gallery. Descriptors evaluated: HASH64 (LAB reference) and DACDHASH (integer-exact device
+path, ED-17). Scoring rules and the calibration selection rule are unchanged from v3.1.
+Calibration files: `l0/evidence/calibration/v4/`.

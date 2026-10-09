@@ -46,15 +46,21 @@ from .generator import (
     blank_frame,
 )
 
-FIXTURE_VERSION = "fixtures-v3.1"  # v3.1: 10 s shared intro and stock (DEV finding, before any CAL/FINAL outcome)
+FIXTURE_VERSION = "fixtures-v4"  # v4: fresh CAL4/FINAL4 seeds, larger families, separated starts, unique labels
+# History: v3.1 (10 s shared intro/stock) — its CALIBRATION and FINAL families are SEEN and kept only
+# so earlier reports stay traceable; they are not part of the v4 gallery.
 QUERY_LEN_S = 8.0
-FAMILIES = ("DEV", "CALIBRATION", "FINAL")
+FAMILIES = ("DEV", "CAL4", "FINAL4")
+MIN_START_SEPARATION_S = 3.0
 
 # family → seed bases and work-index bases (indices are disjoint across families)
 _SPEC = {
     "DEV":         dict(plain_seed=1000,  n_plain=20, plain_idx=0,  absent_seed=5000,  absent_idx=900, series_seed=3100,  series_idx=100, stock_seed=3200,  stock_idx=110, nat_seed=7000,  nat_idx=0),
     "CALIBRATION": dict(plain_seed=11000, n_plain=10, plain_idx=20, absent_seed=15000, absent_idx=910, series_seed=13100, series_idx=120, stock_seed=13200, stock_idx=130, nat_seed=17000, nat_idx=10),
     "FINAL":       dict(plain_seed=21000, n_plain=10, plain_idx=30, absent_seed=25000, absent_idx=920, series_seed=23100, series_idx=140, stock_seed=23200, stock_idx=150, nat_seed=27000, nat_idx=20),
+    # fixtures-v4 fresh families (never rendered or evaluated before their preregistration commit)
+    "CAL4":        dict(plain_seed=31000, n_plain=20, plain_idx=40, absent_seed=35000, absent_idx=930, series_seed=33100, series_idx=160, stock_seed=33200, stock_idx=170, nat_seed=37000, nat_idx=30, n_absent=20, n_natural=10),
+    "FINAL4":      dict(plain_seed=41000, n_plain=20, plain_idx=60, absent_seed=45000, absent_idx=960, series_seed=43100, series_idx=180, stock_seed=43200, stock_idx=190, nat_seed=47000, nat_idx=40, n_absent=20, n_natural=10),
 }
 N_ABSENT = 10
 N_EPISODES = 4
@@ -85,8 +91,8 @@ class FamilyFixtures:
 def build_family(name: str) -> FamilyFixtures:
     sp = _SPEC[name]
     plain = [SynthWork(sp["plain_idx"] + i, sp["plain_seed"] + i) for i in range(sp["n_plain"])]
-    absent = [SynthWork(sp["absent_idx"] + i, sp["absent_seed"] + i) for i in range(N_ABSENT)]
-    natural = [NaturalScene(sp["nat_idx"] + i, sp["nat_seed"] + i) for i in range(N_NATURAL)]
+    absent = [SynthWork(sp["absent_idx"] + i, sp["absent_seed"] + i) for i in range(sp.get("n_absent", N_ABSENT))]
+    natural = [NaturalScene(sp["nat_idx"] + i, sp["nat_seed"] + i) for i in range(sp.get("n_natural", N_NATURAL))]
 
     # Series: one shared intro base, one body base per episode. Never indexed on their own.
     intro = SynthWork(sp["series_idx"] + 9, sp["series_seed"])
@@ -139,8 +145,22 @@ class QueryCase:
 def _clip_case(fam, kind, ed: Edition, start, tr, idx, true_work, true_ep=None, acceptable=()) -> QueryCase:
     key = f"{FIXTURE_VERSION}|{fam}|{kind}|{idx}"
     clip = Clip(ed, start, QUERY_LEN_S, tr, key)
-    return QueryCase(fam, kind, f"{ed.asset_id}@{start:.1f}:{tr.value}", clip.frame_at, true_work or ed.work.work_id,
+    return QueryCase(fam, kind, f"{ed.asset_id}@{start:.2f}:{tr.value}#{idx}", clip.frame_at, true_work or ed.work.work_id,
                      true_work, true_ep, ed.edition_id if true_work else None, tuple(acceptable), QUERY_LEN_S, tr.value)
+
+
+def _starts(rng, lo: float, hi: float, n: int, min_sep: float = MIN_START_SEPARATION_S) -> List[float]:
+    """n clip starts in [lo, hi] at least min_sep apart (deterministic rejection sampling)."""
+    out: List[float] = []
+    for _ in range(400):
+        if len(out) == n:
+            break
+        s = float(rng.uniform(lo, hi))
+        if all(abs(s - o) >= min_sep for o in out):
+            out.append(s)
+    if len(out) < n:
+        raise ValueError("cannot place separated starts")
+    return out
 
 
 def make_queries(name: str) -> List[QueryCase]:
@@ -152,8 +172,7 @@ def make_queries(name: str) -> List[QueryCase]:
     for w in F.plain:
         for k in EditionKind:
             ed = Edition(w, k)
-            for _ in range(2):
-                start = float(rng.uniform(2.5, ed.duration_s - QUERY_LEN_S - 0.5))
+            for start in _starts(rng, 2.5, ed.duration_s - QUERY_LEN_S - 0.5, 2):
                 cases.append(_clip_case(name, "CLEAN", ed, start, QueryTransform.NONE, i, w.work_id)); i += 1
                 tr = EDITED_TRANSFORMS[edited_cycle % len(EDITED_TRANSFORMS)]; edited_cycle += 1
                 cases.append(_clip_case(name, "EDITED", ed, start, tr, i, w.work_id)); i += 1
@@ -181,24 +200,23 @@ def make_queries(name: str) -> List[QueryCase]:
                            acceptable=(wa.work_id, wb.work_id)); i += 1
             cases.append(c)
     # Montage: 4 s of one plain work + 4 s of another.
-    for m in range(6):
+    for m in range(12):
         a, b = rng.choice(len(F.plain), size=2, replace=False)
         ea, eb = Edition(F.plain[a], EditionKind.THEATRICAL), Edition(F.plain[b], EditionKind.THEATRICAL)
         sa, sb = float(rng.uniform(3, 50)), float(rng.uniform(3, 50))
         sc = SegmentClip(((ea, sa, 4.0), (eb, sb, 4.0)), f"{FIXTURE_VERSION}|{name}|MONTAGE|{m}")
-        cases.append(QueryCase(name, "MONTAGE", f"{ea.asset_id}@{sa:.1f}+{eb.asset_id}@{sb:.1f}", sc.frame_at,
+        cases.append(QueryCase(name, "MONTAGE", f"{ea.asset_id}@{sa:.1f}+{eb.asset_id}@{sb:.1f}#m{m}", sc.frame_at,
                                f"{sc.work_ids[0]}+{sc.work_ids[1]}", None, None, None, sc.work_ids))
     # Trailer: five 1.6 s cuts from one work, out of order.
-    for t in range(4):
+    for t in range(8):
         w = F.plain[int(rng.integers(0, len(F.plain)))]
         ed = Edition(w, EditionKind.THEATRICAL)
         starts = sorted(rng.uniform(3, 55, size=5), reverse=bool(t % 2))
         sc = SegmentClip(tuple((ed, float(s), 1.6) for s in starts), f"{FIXTURE_VERSION}|{name}|TRAILER|{t}")
-        cases.append(QueryCase(name, "TRAILER", f"{ed.asset_id} cuts", sc.frame_at, w.work_id, w.work_id, None, None, (w.work_id,)))
+        cases.append(QueryCase(name, "TRAILER", f"{ed.asset_id} cuts#t{t}", sc.frame_at, w.work_id, w.work_id, None, None, (w.work_id,)))
     for w in F.absent:
         ed = Edition(w, EditionKind.THEATRICAL)
-        for j in range(6):
-            start = float(rng.uniform(2.5, ed.duration_s - QUERY_LEN_S - 0.5))
+        for j, start in enumerate(_starts(rng, 2.5, ed.duration_s - QUERY_LEN_S - 0.5, 6)):
             tr = QueryTransform.NONE if j % 2 == 0 else EDITED_TRANSFORMS[int(rng.integers(0, len(EDITED_TRANSFORMS)))]
             c = _clip_case(name, "ABSENT", ed, start, tr, i, None); i += 1
             c.cluster = w.work_id
@@ -242,6 +260,6 @@ def fixture_manifest() -> Dict:
         }
     body = {"fixture_version": FIXTURE_VERSION, "generator_version": GENERATOR_VERSION,
             "content_rng_key": CONTENT_RNG_KEY, "families": fams,
-            "status": {"DEV": "SEEN (tuning allowed)", "CALIBRATION": "CALIBRATION ONLY", "FINAL": "SEALED"}}
+            "status": {"DEV": "SEEN (tuning allowed)", "CAL4": "CALIBRATION ONLY", "FINAL4": "SEALED"}}
     body["sha256"] = hashlib.sha256(json.dumps(body, sort_keys=True, default=str).encode()).hexdigest()
     return body

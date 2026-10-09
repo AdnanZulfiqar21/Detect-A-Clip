@@ -96,7 +96,7 @@ def cmd_lab(a):
     for d in _descs(a):
         th = load_frozen(Path(a.calibration_dir) / f"calibration_{d.value}.json") if a.calibrated else DecisionThresholds()
         fams = a.families.split(",")
-        if "FINAL" in fams and not a.i_understand_final_is_sealed:
+        if any(f.startswith("FINAL") for f in fams) and not a.i_understand_final_is_sealed:
             raise SystemExit("FINAL is sealed; pass --i-understand-final-is-sealed for the single preregistered run")
         p = run(Path(a.out), fams, [d], th, Path(a.cache), f"{a.label}_{d.value}",
                 calibration_file=str(Path(a.calibration_dir) / f"calibration_{d.value}.json") if a.calibrated else None)
@@ -108,7 +108,7 @@ def cmd_calibrate(a):
     from .eval.calibrate import calibrate
 
     for d in _descs(a):
-        out = calibrate(d, DecisionThresholds(), Path(a.cache), Path(a.out))
+        out = calibrate(d, DecisionThresholds(), Path(a.cache), Path(a.out), family=a.cal_family)
         print(d.value, out["status"], out.get("feasible_settings"), out.get("thresholds_digest", "")[:16], out["path"])
 
 
@@ -149,9 +149,9 @@ def main(argv=None):
     p = sp.add_parser("keygen"); p.add_argument("--out", default=str(ROOT / "keys")); p.set_defaults(fn=cmd_keygen)
     p = sp.add_parser("sign"); p.add_argument("--pack", required=True); p.add_argument("--key", required=True); p.add_argument("--pack-id", default="L0-SYNTH-001"); p.add_argument("--version", default="0.1.0"); p.set_defaults(fn=cmd_sign)
     p = sp.add_parser("verify"); p.add_argument("--manifest", required=True); p.add_argument("--pack", required=True); p.add_argument("--pub", required=True); p.add_argument("--release", action="store_true"); p.set_defaults(fn=cmd_verify)
-    p = sp.add_parser("lab"); p.add_argument("--out", default=str(ROOT / "evidence" / "lab")); p.add_argument("--families", default="DEV,CALIBRATION"); p.add_argument("--family", action="append"); p.add_argument("--cache", default=str(ROOT / ".cache")); p.add_argument("--calibrated", action="store_true"); p.add_argument("--calibration-dir", default=str(ROOT / "evidence" / "calibration")); p.add_argument("--label", default="run"); p.add_argument("--i-understand-final-is-sealed", action="store_true"); p.set_defaults(fn=cmd_lab)
-    p = sp.add_parser("calibrate"); p.add_argument("--family", action="append"); p.add_argument("--cache", default=str(ROOT / ".cache")); p.add_argument("--out", default=str(ROOT / "evidence" / "calibration")); p.set_defaults(fn=cmd_calibrate)
-    p = sp.add_parser("fixtures"); p.add_argument("--out", default=str(ROOT / "assets" / "FIXTURES_v3.json")); p.set_defaults(fn=cmd_fixtures)
+    p = sp.add_parser("lab"); p.add_argument("--out", default=str(ROOT / "evidence" / "lab")); p.add_argument("--families", default="DEV,CAL4"); p.add_argument("--family", action="append"); p.add_argument("--cache", default=str(ROOT / ".cache")); p.add_argument("--calibrated", action="store_true"); p.add_argument("--calibration-dir", default=str(ROOT / "evidence" / "calibration" / "v4")); p.add_argument("--label", default="run"); p.add_argument("--i-understand-final-is-sealed", action="store_true"); p.set_defaults(fn=cmd_lab)
+    p = sp.add_parser("calibrate"); p.add_argument("--family", action="append"); p.add_argument("--cal-family", default="CAL4"); p.add_argument("--cache", default=str(ROOT / ".cache")); p.add_argument("--out", default=str(ROOT / "evidence" / "calibration" / "v4")); p.set_defaults(fn=cmd_calibrate)
+    p = sp.add_parser("fixtures"); p.add_argument("--out", default=str(ROOT / "assets" / "FIXTURES_v4.json")); p.set_defaults(fn=cmd_fixtures)
     p = sp.add_parser("preview"); p.add_argument("--asset", default="SW000-E0_THEATRICAL"); p.add_argument("--out", default=str(ROOT / "assets" / "generated")); p.set_defaults(fn=cmd_preview)
     a = ap.parse_args(argv)
     a.fn(a)
