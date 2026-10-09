@@ -36,8 +36,9 @@ class FlatRetriever:
             diff = self._vecs - q
             dist = np.sqrt((diff * diff).sum(axis=1, dtype=np.int64)).astype(np.float32)
         k = min(top_k, dist.shape[0])
-        idx = np.argpartition(dist, k - 1)[:k]
-        idx = idx[np.argsort(dist[idx], kind="stable")]
+        # Deterministic, portable ranking: distance ascending, then vector index ascending.
+        # (argpartition's order among equal distances is implementation-defined; ED-16.)
+        idx = np.argsort(dist, kind="stable")[:k]
         out = []
         for i in idx:
             d = float(dist[i])

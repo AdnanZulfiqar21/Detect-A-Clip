@@ -75,4 +75,24 @@ object DacDhash {
         }
         return out
     }
+
+    /** Must match exact.py content_frame (block colours row-major, then noise y→x→channel). */
+    fun contentFrame(seed: Int, w: Int, h: Int, bx: Int = 16, by: Int = 9): ByteArray {
+        val rng = XorShift32(seed)
+        val cols = Array(by) { Array(bx) { IntArray(3) { (rng.next() and 255).toInt() } } }
+        val out = ByteArray(w * h * 3)
+        val bw = maxOf(1, w / bx)
+        val bh = maxOf(1, h / by)
+        for (y in 0 until h) {
+            val cy = minOf(by - 1, y / bh)
+            for (x in 0 until w) {
+                val cx = minOf(bx - 1, x / bw)
+                for (ch in 0 until 3) {
+                    val v = cols[cy][cx][ch] + (rng.next() ushr 28).toInt() - 8
+                    out[(y * w + x) * 3 + ch] = v.coerceIn(0, 255).toByte()
+                }
+            }
+        }
+        return out
+    }
 }

@@ -24,3 +24,12 @@ def test_dac_dhash_golden_file_is_current(tmp_path):
     write_golden(out)
     committed = COMMITTED.parent / "golden_dac_dhash_v1.txt"
     assert out.read_bytes().replace(b"\r\n", b"\n") == committed.read_bytes().replace(b"\r\n", b"\n")
+
+
+def test_e2e_golden_file_is_current(tmp_path):
+    from dac_l0.eval.e2e_golden import write as write_e2e
+
+    out = tmp_path / "e.txt"
+    write_e2e(out)
+    committed = COMMITTED.parent / "golden_e2e.txt"
+    assert out.read_bytes().replace(b"\r\n", b"\n") == committed.read_bytes().replace(b"\r\n", b"\n")

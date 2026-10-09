@@ -9,8 +9,8 @@ Windows 11 Pro x64, Python 3.13.15, Temurin JDK 17.0.20.1, kotlinc 2.4.21.
 
 | Suite | Command | Last result | Code |
 |---|---|---|---|
-| L0 Python (123 tests) | `cd l0 && python -m pytest -o addopts=""` | **123 passed** 2026-10-09 | branch `impl/l0-desktop` |
-| Pure-Kotlin JVM (29 tests: coordinator, lifecycle, consent, eligibility, recognition golden ×400 cases, DAC-DHASH-v1 golden ×42 frames) | `bash android/run-jvm-tests.sh` | **OK (29 tests)** 2026-10-09 | branch `impl/l0-desktop` |
+| L0 Python (124 tests) | `cd l0 && python -m pytest -o addopts=""` | **124 passed** 2026-10-09 | branch `impl/l0-desktop` |
+| Pure-Kotlin JVM (32 tests: coordinator, lifecycle, consent, eligibility, recognition golden ×400 cases, DAC-DHASH-v1 golden ×42 frames, end-to-end pack→decision golden ×6 queries, parser/JSON bounds) | `bash android/run-jvm-tests.sh` | **OK (32 tests)** 2026-10-09 | branch `impl/l0-desktop` |
 | Android app (Gradle, instrumented) | — | **NOT RUN** (SDK licence pending, B-09; no device, B-01) | — |
 | iOS (`swift test`, XCTest) | — | **NOT RUN** (no Mac, B-02) | — |
 
@@ -38,6 +38,7 @@ Windows 11 Pro x64, Python 3.13.15, Temurin JDK 17.0.20.1, kotlinc 2.4.21.
 | AI-06 | Independent evaluation | BLOCKED | — | no independent evaluator (B-06) |
 | (port) | Kotlin verification/decision = Python reference | PASS (JVM) | `RecognitionGoldenTest`, mutation check caught an injected off-by-one | Swift port uncompiled |
 | (port) | DAC-DHASH-v1 bit-exact Python = Kotlin | PASS (JVM) | `DacDhashGoldenTest` | candidate descriptor only |
+| (port) | End-to-end: Python pack → Kotlin parse/hash/retrieve/verify/decide | PASS (JVM) | `EndToEndGoldenTest` (single, brightness, absent, montage, shared intro, unique episode) | synthetic block frames; no OpenCV preprocessing, no quality checks, no device |
 | AI-07 | Distinct non-match states | PASS (LAB) | UNUSABLE 9/9 expected in every family; OUTSIDE_CATALOGUE unconstructible | — |
 | DATA-L00…L03, CAP-A*, CAP-I*, UX-*, OPS-*, REL-* | Device, network, store | BLOCKED | — | B-01, B-02, B-07, B-08, B-09 |
 

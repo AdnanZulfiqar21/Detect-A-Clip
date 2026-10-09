@@ -97,3 +97,21 @@ if __name__ == "__main__":
 
     write_golden(sys.argv[1])
     print("wrote", sys.argv[1])
+
+
+def content_frame(seed: int, w: int, h: int, bx: int = 16, by: int = 9) -> np.ndarray:
+    """Discriminative test content: a bx×by grid of seeded random colour blocks (block size
+    w//bx × h//by, remainder filled by the last block) plus ±8 noise. Consumption order:
+    block colours row-major (3 draws each), then per-pixel noise y→x→channel."""
+    rng = XorShift32(seed)
+    cols = [[(rng.next() & 255, rng.next() & 255, rng.next() & 255) for _ in range(bx)] for _ in range(by)]
+    out = np.zeros((h, w, 3), dtype=np.uint8)
+    bw, bh = max(1, w // bx), max(1, h // by)
+    for yy in range(h):
+        cy = min(by - 1, yy // bh)
+        for xx in range(w):
+            cx = min(bx - 1, xx // bw)
+            for ch in range(3):
+                v = cols[cy][cx][ch] + (rng.next() >> 28) - 8
+                out[yy, xx, ch] = max(0, min(255, v))
+    return out
