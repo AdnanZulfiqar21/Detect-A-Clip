@@ -10,7 +10,7 @@ Windows 11 Pro x64, Python 3.13.15, Temurin JDK 17.0.20.1, kotlinc 2.4.21.
 | Suite | Command | Last result | Code |
 |---|---|---|---|
 | L0 Python (127 tests) | `cd l0 && python -m pytest -o addopts=""` | **127 passed** 2026-10-10 | branch `impl/l0-desktop` |
-| Pure-Kotlin JVM (34 tests: coordinator, lifecycle, consent, eligibility, recognition golden ×400 cases, DAC-DHASH-v1 golden ×42 frames, exact crop/quality/mirror golden ×9 cases, end-to-end pack→decision golden ×6 queries, parser/JSON bounds) | `bash android/run-jvm-tests.sh` | **OK (34 tests)** 2026-10-10 | branch `impl/l0-desktop` |
+| Pure-Kotlin JVM (35 tests: coordinator, lifecycle, consent, eligibility, recognition golden ×400 cases, DAC-DHASH-v1 golden ×42 frames, exact crop/quality/mirror golden ×9 cases, end-to-end pack→decision golden ×6 queries, parser/JSON bounds) | `bash android/run-jvm-tests.sh` | **OK (35 tests)** 2026-10-10 | branch `impl/l0-desktop` |
 | Android app (Gradle, instrumented) | — | **NOT RUN** (SDK licence pending, B-09; no device, B-01) | — |
 | iOS (`swift test`, XCTest) | — | **NOT RUN** (no Mac, B-02) | — |
 

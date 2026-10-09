@@ -11,7 +11,7 @@ first, then resume here.
   Hamcrest 1.3, Gradle 8.14.3, Android cmdline-tools 22.0 with **no SDK packages**. Android SDK
   licence **not accepted** (B-09); never run `sdkmanager --licenses`.
 - **Verified:** `cd l0 && python -m pytest -o addopts=""` → 127 passed; `bash android/run-jvm-tests.sh`
-  → OK (34 tests, pure-Kotlin only).
+  → OK (35 tests, pure-Kotlin only).
 - **Evaluation state:** fixtures-v4 is current. DEV, CAL4 and FINAL4 are all SEEN (FINAL4 run once
   on 2026-10-10). A further held-out evaluation needs fresh seeds (v5). v3.1 results are historical.
 - **Device engine:** DACDHASH (DAC-CROP-v1 + DAC-QUAL-v1 + DAC-DHASH-v1) is the recommended device

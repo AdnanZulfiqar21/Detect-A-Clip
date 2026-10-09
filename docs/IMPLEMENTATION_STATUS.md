@@ -11,7 +11,7 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | Platform | Works now | Not verified / missing |
 |---|---|---|
 | Desktop L0 | Synthetic fixtures v3.1 with challenge cases; descriptors (24/48/160/528 B); index builder and bounded parser; temporal verification; series/episode-aware decision; calibration; signed UNCALIBRATED/L0-calibrated packs; atomic pack store; lab leases; LAB runner. 115 tests | Real footage, real devices, release statistics |
-| Android | Source for LAB app: no INTERNET, capture off by default, mediaProjection FGS adapter, pure-Kotlin coordinator, lifecycle, consent records, eligibility gate. 34 JVM tests pass (incl. bit-exact recognition, descriptor, exact-path and end-to-end golden tests) | Android compile (B-09), any device run (B-01), CAP-A03 source restriction |
+| Android | Source for LAB app: no INTERNET, capture off by default, mediaProjection FGS adapter, pure-Kotlin coordinator, lifecycle, consent records, eligibility gate. 35 JVM tests pass (incl. bit-exact recognition, descriptor, exact-path and end-to-end golden tests) | Android compile (B-09), any device run (B-01), CAP-A03 source restriction |
 | iOS | Swift sources for coordinator, frame selector, lifecycle with background-task guard, consent/eligibility, ScreenCaptureKit adapter skeleton, XCTests | Any compile or test (B-02) |
 
 ## Task register (86 tasks)
