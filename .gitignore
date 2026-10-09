@@ -62,3 +62,8 @@ tools/
 # --- OS ---
 Thumbs.db
 .DS_Store
+
+# Public development keys may be committed; private keys never.
+!l0/keys/*.public.pem
+l0/keys/*.private.pem
+# LAB evidence reports are sanitized aggregates of synthetic runs (committed deliberately).

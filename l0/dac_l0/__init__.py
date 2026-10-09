@@ -1,0 +1,16 @@
+"""Detect A Clip — desktop synthetic L0 track (reference / research harness).
+
+This package is the Python reference implementation of the on-device recognition
+pipeline described in roadmap v4.2.1 (F03–F05). It runs on a desktop against
+self-created synthetic assets only. It is not the shipped mobile engine; the product
+remains native Kotlin/Swift. Everything here is LAB-purpose evidence.
+"""
+
+__version__ = "0.1.0"
+
+# Identifiers that bind the recognition tuple (F04). Bumping any of these invalidates
+# previously built packs; the pack loader checks compatibility against them.
+GENERATOR_VERSION = "synth-gen-2"
+PREPROCESSING_VERSION = "prep-640x360-gray-crop-2"
+INDEX_FORMAT_VERSION = "idx-flat-1"
+CALIBRATION_STATUS_DEFAULT = "UNCALIBRATED"  # until P04-T05 freezes thresholds
