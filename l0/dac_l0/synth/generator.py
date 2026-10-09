@@ -21,6 +21,11 @@ import cv2
 import numpy as np
 
 from .. import GENERATOR_VERSION
+
+# Content randomness is keyed separately from the rendering version so that a rendering-only
+# change (labels, capture channel) keeps every seed's scenes identical. Changing this key
+# re-randomises all content and must be recorded as a fixture change.
+CONTENT_RNG_KEY = "synth-content-2"
 from ..sampler import FRAME_H, FRAME_W
 
 W, H = FRAME_W, FRAME_H
@@ -48,6 +53,11 @@ class QueryTransform(str, enum.Enum):
     SPEED_110 = "SPEED_110"
     ROTATED_3DEG = "ROTATED_3DEG"
     LETTERBOXED = "LETTERBOXED"
+    CROPPED_20 = "CROPPED_20"            # 20 % crop each side, rescaled
+    CAPTIONED_HEAVY = "CAPTIONED_HEAVY"  # two caption lines + top banner (social-video style)
+    SPEED_90 = "SPEED_90"
+    GAMMA_NOISE = "GAMMA_NOISE"          # gamma 1.3 + sensor-like noise
+    PIP_SCALED = "PIP_SCALED"            # video at 60 % inside a synthetic app frame
 
 
 EDITED_TRANSFORMS = [t for t in QueryTransform if t != QueryTransform.NONE]
@@ -78,6 +88,8 @@ class SynthWork:
     work_index: int
     seed: int
     duration_s: float = 60.0
+    series_id: Optional[str] = None
+    episode_id: Optional[str] = None
 
     @property
     def work_id(self) -> str:
@@ -105,7 +117,7 @@ _PAN_MARGIN = 220
 
 @functools.lru_cache(maxsize=256)
 def _scenes_cached(seed: int, duration_s: float) -> List[SceneSpec]:
-    rng = _rng(GENERATOR_VERSION, "scenes", seed)
+    rng = _rng(CONTENT_RNG_KEY, "scenes", seed)
     scenes: List[SceneSpec] = []
     t = 0.0
     i = 0
@@ -135,7 +147,7 @@ def _scenes_cached(seed: int, duration_s: float) -> List[SceneSpec]:
 def _scene_texture(work_seed: int, scene_index: int, p1: Tuple[int, int, int], p2: Tuple[int, int, int]) -> np.ndarray:
     """Seeded multi-octave value-noise texture mapped between the scene's palette colours.
     Larger than the frame so a slow pan never runs off the edge."""
-    rng = _rng(GENERATOR_VERSION, "texture", work_seed, scene_index)
+    rng = _rng(CONTENT_RNG_KEY, "texture", work_seed, scene_index)
     th, tw = H + 2 * _PAN_MARGIN, W + 2 * _PAN_MARGIN
     acc = np.zeros((th, tw), np.float32)
     for octave, (gh, gw, amp) in enumerate([(4, 6, 1.0), (8, 12, 0.5), (16, 24, 0.25)]):
@@ -169,8 +181,11 @@ def _render_work_frame(scenes: List[SceneSpec], synthetic_title: str, work_id: s
     # Visible synthetic title card for the first 2 s and a persistent corner tag.
     if t_s < 2.0:
         cv2.rectangle(frame, (60, 140), (W - 60, 220), (0, 0, 0), -1)
-        cv2.putText(frame, synthetic_title, (80, 195), cv2.FONT_HERSHEY_SIMPLEX, 1.4, (255, 255, 255), 3)
-    cv2.putText(frame, f"SYNTH {work_id}", (8, H - 8), cv2.FONT_HERSHEY_PLAIN, 1.0, (255, 255, 255), 1)
+        # synth-gen-3: identical card text for every work (no work number = no identity cue).
+        cv2.putText(frame, "SYNTHETIC WORK", (150, 195), cv2.FONT_HERSHEY_SIMPLEX, 1.4, (255, 255, 255), 3)
+    # Visible synthetic marker, identical for every work (gen-2 printed the work ID here,
+    # which was an artificial per-work identity cue present in every frame).
+    cv2.putText(frame, "SYNTHETIC", (8, H - 8), cv2.FONT_HERSHEY_PLAIN, 1.0, (255, 255, 255), 1)
     return frame
 
 
@@ -190,10 +205,10 @@ class Edition:
     # Edition time maps. EXTENDED inserts a 6 s scene (a re-coloured replay of an earlier
     # moment) at a seeded point; BROADCAST removes an 8 s window and letterboxes.
     def _insert_point(self) -> float:
-        return float(_rng(GENERATOR_VERSION, "ext", self.work.seed).uniform(15.0, 40.0))
+        return float(_rng(CONTENT_RNG_KEY, "ext", self.work.seed).uniform(15.0, 40.0))
 
     def _cut_window(self) -> Tuple[float, float]:
-        s = float(_rng(GENERATOR_VERSION, "cut", self.work.seed).uniform(10.0, 45.0))
+        s = float(_rng(CONTENT_RNG_KEY, "cut", self.work.seed).uniform(10.0, 45.0))
         return s, s + 8.0
 
     @property
@@ -259,6 +274,34 @@ def apply_transform(frame: np.ndarray, kind: QueryTransform, t_s: float = 0.0) -
         h, w = frame.shape[:2]
         m = cv2.getRotationMatrix2D((w / 2, h / 2), 3.0, 1.0)
         return cv2.warpAffine(frame, m, (w, h), borderMode=cv2.BORDER_REPLICATE)
+    if kind == QueryTransform.CROPPED_20:
+        h, w = frame.shape[:2]
+        y0, x0 = int(h * 0.2), int(w * 0.2)
+        return cv2.resize(frame[y0:h - y0, x0:w - x0], (w, h), interpolation=cv2.INTER_LINEAR)
+    if kind == QueryTransform.CAPTIONED_HEAVY:
+        out = frame.copy()
+        h, w = out.shape[:2]
+        cv2.rectangle(out, (0, 0), (w, 40), (20, 20, 20), -1)
+        cv2.putText(out, "@synthetic_account  #synthetic", (12, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+        cv2.rectangle(out, (0, h - 96), (w, h), (0, 0, 0), -1)
+        cv2.putText(out, "SYNTHETIC CAPTION LINE ONE", (20, h - 58), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
+        cv2.putText(out, "AND A SECOND CAPTION LINE", (20, h - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
+        return out
+    if kind == QueryTransform.SPEED_90:
+        return frame
+    if kind == QueryTransform.GAMMA_NOISE:
+        f = (frame.astype(np.float32) / 255.0) ** 1.3 * 255.0
+        noise = _rng(CONTENT_RNG_KEY, "noise", int(t_s * 1000)).normal(0, 6.0, f.shape).astype(np.float32)
+        return np.clip(f + noise, 0, 255).astype(np.uint8)
+    if kind == QueryTransform.PIP_SCALED:
+        h, w = frame.shape[:2]
+        out = np.full_like(frame, 235)
+        cv2.rectangle(out, (0, 0), (w, 34), (60, 60, 60), -1)
+        iw, ih = int(w * 0.6), int(h * 0.6)
+        inner = cv2.resize(frame, (iw, ih), interpolation=cv2.INTER_AREA)
+        x0, y0 = (w - iw) // 2, 50
+        out[y0:y0 + ih, x0:x0 + iw] = inner
+        return out
     if kind == QueryTransform.LETTERBOXED:
         h, w = frame.shape[:2]
         inner_h = int(h * 0.75)
@@ -270,21 +313,127 @@ def apply_transform(frame: np.ndarray, kind: QueryTransform, t_s: float = 0.0) -
     raise ValueError(kind)
 
 
+_SPEED = {QueryTransform.SPEED_110: 1.10, QueryTransform.SPEED_90: 0.90}
+
+
+def capture_channel(frame: np.ndarray, key: str, t_s: float) -> np.ndarray:
+    """Simulated screen-capture path applied to every query (synth-gen-3).
+
+    Approximates what a phone capture adds even to an unedited clip: display scaling and
+    re-sampling, mild blur, codec quantisation and a small gamma change. Seeded per query so
+    it is deterministic. References never pass through this channel, so a CLEAN query is no
+    longer pixel-identical to its reference frame.
+    """
+    rng = _rng(CONTENT_RNG_KEY, "channel", key)
+    scale = float(rng.uniform(0.6, 0.9))
+    q = int(rng.integers(55, 85))
+    gamma = float(rng.uniform(0.92, 1.1))
+    h, w = frame.shape[:2]
+    small = cv2.resize(frame, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
+    up = cv2.resize(small, (w, h), interpolation=cv2.INTER_LINEAR)
+    up = cv2.GaussianBlur(up, (3, 3), 0.6)
+    lut = np.clip(((np.arange(256) / 255.0) ** gamma) * 255.0, 0, 255).astype(np.uint8)
+    up = cv2.LUT(up, lut)
+    ok, buf = cv2.imencode(".jpg", up, [int(cv2.IMWRITE_JPEG_QUALITY), q])
+    assert ok
+    return cv2.imdecode(buf, cv2.IMREAD_COLOR)
+
+
 @dataclass(frozen=True)
 class Clip:
-    """A bounded query clip taken from an edition with an optional transform."""
+    """A bounded query clip taken from an edition with an optional transform.
 
-    edition: Edition
+    `channel_key` set: the simulated capture channel is applied after the transform.
+    """
+
+    edition: "Edition"
     start_s: float
     length_s: float
     transform: QueryTransform = QueryTransform.NONE
+    channel_key: Optional[str] = None
 
     def frame_at(self, rel_t_s: float) -> np.ndarray:
         if rel_t_s < 0 or rel_t_s > self.length_s:
             raise ValueError("rel_t out of clip")
-        src_rel = rel_t_s * (1.10 if self.transform == QueryTransform.SPEED_110 else 1.0)
+        src_rel = rel_t_s * _SPEED.get(self.transform, 1.0)
         t = min(self.start_s + src_rel, self.edition.duration_s - 1e-3)
-        return apply_transform(self.edition.render_frame(t), self.transform, t)
+        f = apply_transform(self.edition.render_frame(t), self.transform, t)
+        return capture_channel(f, self.channel_key, rel_t_s) if self.channel_key else f
+
+
+@dataclass(frozen=True)
+class SegmentClip:
+    """Concatenation of (edition, start_s, length_s) pieces: montages and trailer-style cuts.
+    The truth set is the set of works that contribute footage."""
+
+    pieces: Tuple[Tuple["Edition", float, float], ...]
+    channel_key: Optional[str] = None
+
+    @property
+    def length_s(self) -> float:
+        return float(sum(p[2] for p in self.pieces))
+
+    @property
+    def work_ids(self) -> Tuple[str, ...]:
+        return tuple(sorted({p[0].work.work_id for p in self.pieces}))
+
+    def frame_at(self, rel_t_s: float) -> np.ndarray:
+        acc = 0.0
+        last = len(self.pieces) - 1
+        for i, (ed, st, ln) in enumerate(self.pieces):
+            if rel_t_s < acc + ln or i == last:
+                t = min(st + max(0.0, rel_t_s - acc), ed.duration_s - 1e-3)
+                f = ed.render_frame(t)
+                return capture_channel(f, self.channel_key, rel_t_s) if self.channel_key else f
+            acc += ln
+        raise ValueError("rel_t out of clip")
+
+
+# ------------------------------------------------------------ composed works (series, stock)
+
+
+@dataclass(frozen=True)
+class ComposedWork:
+    """A work whose timeline is a sequence of segments taken from base SynthWorks.
+
+    Models TV episodes with a shared series intro and a recap of the previous episode, and
+    different works that reuse the same stock footage. `seed` drives edition insert/cut
+    points. segments: ((base_work, base_start_s, length_s), ...)
+    """
+
+    work_index: int
+    seed: int
+    segments: Tuple[Tuple[SynthWork, float, float], ...]
+    series_id: Optional[str] = None
+    episode_id: Optional[str] = None
+
+    @property
+    def work_id(self) -> str:
+        return f"SW{self.work_index:03d}"
+
+    @property
+    def synthetic_title(self) -> str:
+        if self.series_id:
+            return f"SYNTHETIC SERIES {self.series_id} EPISODE {self.episode_id}"
+        return f"SYNTHETIC WORK {self.work_index:03d}"
+
+    @property
+    def duration_s(self) -> float:
+        return float(sum(seg[2] for seg in self.segments))
+
+    def segment_at(self, t_s: float) -> Tuple[SynthWork, float]:
+        acc = 0.0
+        for base, st, ln in self.segments:
+            if t_s < acc + ln:
+                return base, st + (t_s - acc)
+            acc += ln
+        raise ValueError("t out of range")
+
+    def render_frame(self, t_s: float) -> np.ndarray:
+        if t_s < 0 or t_s >= self.duration_s:
+            raise ValueError("t out of range")
+        base, bt = self.segment_at(t_s)
+        return base.render_frame(min(bt, base.duration_s - 1e-3))
 
 
 # ---------------------------------------------------------------- negatives / screens
@@ -303,7 +452,7 @@ class NaturalScene:
         return f"NAT{self.index:03d}"
 
     def render_frame(self, t_s: float) -> np.ndarray:
-        rng = _rng(GENERATOR_VERSION, "nat", self.seed)
+        rng = _rng(CONTENT_RNG_KEY, "nat", self.seed)
         small = rng.random((9, 16, 3), dtype=np.float32)
         small2 = rng.random((9, 16, 3), dtype=np.float32)
         a = 0.5 + 0.5 * math.sin(0.4 * t_s)
@@ -345,7 +494,7 @@ class PrivateScreen:
         return f"PRIV-{self.kind.value}-{self.seed}"
 
     def render_frame(self, t_s: float = 0.0, underlay: Optional[np.ndarray] = None) -> np.ndarray:
-        rng = _rng(GENERATOR_VERSION, "priv", self.kind.value, self.seed)
+        rng = _rng(CONTENT_RNG_KEY, "priv", self.kind.value, self.seed)
         frame = underlay.copy() if underlay is not None else np.full((H, W, 3), 245, np.uint8)
         k = self.kind
         if k == PrivateScreenKind.CHAT:

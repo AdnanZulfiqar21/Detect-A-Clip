@@ -29,26 +29,21 @@ class Delivered:
     frame_bgr: np.ndarray
 
 
-def recognise(
-    scan_id: str,
-    generation: int,
+def extract_evidence(
     deliveries: Iterable[Delivered],
     retriever: FlatRetriever,
-    now_monotonic_ms: int,
     thresholds: DecisionThresholds = DecisionThresholds(),
     selector: Optional[FrameSelector] = None,
     is_cancelled: Callable[[], bool] = lambda: False,
-) -> Tuple[RecognitionResult, List[Hypothesis], FrameSummary]:
+) -> Tuple[List[Hypothesis], FrameSummary, bool]:
+    """Selection → quality → description → retrieval → temporal verification.
+    Returns (hypotheses, frame summary, cancelled). Descriptors are local variables only."""
     bundle: IndexBundle = retriever.bundle
     sel = selector or FrameSelector()
     summary = FrameSummary()
     per_frame: List[Tuple[int, List[Candidate]]] = []
     prev_gray = None
-    radius = {
-        DescriptorFamily.HASH64: thresholds.hash_max_distance,
-        DescriptorFamily.THUMB32: thresholds.thumb32_max_distance,
-        DescriptorFamily.THUMB144: thresholds.thumb144_max_distance,
-    }[bundle.family]
+    radius = thresholds.radius(bundle.family)
 
     for d in deliveries:
         if is_cancelled():
@@ -85,8 +80,24 @@ def recognise(
     sel.close()
 
     if is_cancelled():
-        # Cancellation wins: discard per-frame evidence, publish nothing but CANCELLED.
         per_frame.clear()
+        return [], summary, True
+    return verify(per_frame, int(bundle.sampling_interval_s * 1000)), summary, False
+
+
+def recognise(
+    scan_id: str,
+    generation: int,
+    deliveries: Iterable[Delivered],
+    retriever: FlatRetriever,
+    now_monotonic_ms: int,
+    thresholds: DecisionThresholds = DecisionThresholds(),
+    selector: Optional[FrameSelector] = None,
+    is_cancelled: Callable[[], bool] = lambda: False,
+) -> Tuple[RecognitionResult, List[Hypothesis], FrameSummary]:
+    hyps, summary, cancelled = extract_evidence(deliveries, retriever, thresholds, selector, is_cancelled)
+    if cancelled:
+        # Cancellation wins: discard evidence, publish nothing but CANCELLED.
         result = RecognitionResult(
             scan_id=scan_id, cancellation_generation=generation, state=ResultState.CANCELLED,
             candidate_work_id=None, candidate_edition_id=None, candidate_episode_id=None, segments=[],
@@ -96,6 +107,5 @@ def recognise(
             created_at_monotonic_ms=now_monotonic_ms, expires_at_monotonic_ms=now_monotonic_ms + RESULT_VALIDITY_MS,
             validity_clock_basis="monotonic")
         return result, [], summary
-    hyps = verify(per_frame, int(bundle.sampling_interval_s * 1000))
-    result = decide(scan_id, generation, hyps, summary, bundle, now_monotonic_ms, thresholds)
+    result = decide(scan_id, generation, hyps, summary, retriever.bundle, now_monotonic_ms, thresholds)
     return result, hyps, summary

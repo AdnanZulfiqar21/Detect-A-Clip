@@ -11,7 +11,7 @@ import json
 import struct
 import time
 from dataclasses import dataclass, field
-from typing import Dict, List, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -34,6 +34,8 @@ class WorkEntry:
     synthetic_title: str
     editions: List[str]
     durations_s: List[float]
+    series_id: Optional[str] = None   # idx-flat-2: work→series/episode hierarchy (P04-T04)
+    episode_id: Optional[str] = None
 
 
 @dataclass
@@ -122,7 +124,7 @@ class IndexBundle:
             raise ValueError("work table mismatch")
         works = []
         for w in works_raw:
-            if not isinstance(w, dict) or set(w) != {"work_index", "work_id", "synthetic_title", "editions", "durations_s"}:
+            if not isinstance(w, dict) or set(w) != {"work_index", "work_id", "synthetic_title", "editions", "durations_s", "series_id", "episode_id"}:
                 raise ValueError("bad work entry")
             works.append(WorkEntry(**w))
         vec = dbytes + LOCATOR_BYTES
@@ -161,7 +163,8 @@ def build_index(editions: Sequence[Edition], family: DescriptorFamily, sampling_
     for ed in editions:
         wid = ed.work.work_id
         if wid not in works:
-            works[wid] = WorkEntry(len(works), wid, ed.work.synthetic_title, [], [])
+            works[wid] = WorkEntry(len(works), wid, ed.work.synthetic_title, [], [],
+                                   getattr(ed.work, "series_id", None), getattr(ed.work, "episode_id", None))
         we = works[wid]
         if ed.edition_id in we.editions:
             raise ValueError(f"duplicate edition {ed.asset_id}")

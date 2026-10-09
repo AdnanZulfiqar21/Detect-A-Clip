@@ -67,3 +67,6 @@ Thumbs.db
 !l0/keys/*.public.pem
 l0/keys/*.private.pem
 # LAB evidence reports are sanitized aggregates of synthetic runs (committed deliberately).
+
+# Local evaluation caches (rebuildable)
+l0/.cache/

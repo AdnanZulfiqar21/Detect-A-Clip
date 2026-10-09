@@ -25,6 +25,12 @@ class Hypothesis:
     query_end_ms: int
     ambiguous_editions: List[int] = field(default_factory=list)
 
+    @property
+    def span_ms(self) -> int:
+        """Query time covered by supporting frames. Consecutive frames of a slow scene are
+        correlated, so span is reported alongside the raw frame count (OF-01)."""
+        return self.query_end_ms - self.query_start_ms
+
 
 def _cluster_offsets(pairs: Sequence[Tuple[int, int, float]], tol_ms: int) -> Tuple[int, List[Tuple[int, int, float]]]:
     """pairs = (query_t, offset, distance). Return (centre offset, members) of the largest

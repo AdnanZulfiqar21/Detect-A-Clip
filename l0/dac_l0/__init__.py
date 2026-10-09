@@ -10,7 +10,7 @@ __version__ = "0.1.0"
 
 # Identifiers that bind the recognition tuple (F04). Bumping any of these invalidates
 # previously built packs; the pack loader checks compatibility against them.
-GENERATOR_VERSION = "synth-gen-2"
-PREPROCESSING_VERSION = "prep-640x360-gray-crop-2"
-INDEX_FORMAT_VERSION = "idx-flat-1"
+GENERATOR_VERSION = "synth-gen-3"
+PREPROCESSING_VERSION = "prep-640x360-gray-uniformcrop-3"
+INDEX_FORMAT_VERSION = "idx-flat-2"
 CALIBRATION_STATUS_DEFAULT = "UNCALIBRATED"  # until P04-T05 freezes thresholds

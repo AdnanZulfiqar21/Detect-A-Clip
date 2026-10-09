@@ -60,11 +60,8 @@ def _gray_small(frame_bgr: np.ndarray, w: int, h: int) -> np.ndarray:
 
 def dhash64(frame_bgr: np.ndarray) -> int:
     s = _gray_small(frame_bgr, 9, 8).astype(np.int16)
-    bits = (s[:, 1:] > s[:, :-1]).ravel()
-    v = 0
-    for b in bits:
-        v = (v << 1) | int(b)
-    return v
+    bits = (s[:, 1:] > s[:, :-1]).ravel()  # 64 bits, MSB first
+    return int.from_bytes(np.packbits(bits).tobytes(), "big")
 
 
 def dhash64_bytes(frame_bgr: np.ndarray) -> bytes:

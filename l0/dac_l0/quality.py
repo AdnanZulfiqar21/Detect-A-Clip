@@ -55,35 +55,50 @@ def normalize(frame_bgr: np.ndarray) -> np.ndarray:
     return cv2.resize(frame_bgr, (FRAME_W, FRAME_H), interpolation=interp)
 
 
-def crop_black_bars(frame_bgr: np.ndarray, thresh: int = 16, min_keep: float = 0.5) -> np.ndarray:
-    """Remove uniform near-black letterbox/pillarbox bars, then rescale to 640x360.
+def _trim(flags: np.ndarray) -> tuple:
+    lo, hi = 0, len(flags)
+    while lo < hi and flags[lo]:
+        lo += 1
+    while hi > lo and flags[hi - 1]:
+        hi -= 1
+    return lo, hi
 
-    Applied identically to references and queries (PREPROCESSING_VERSION prep-2) so that
-    letterboxed editions and letterboxed queries describe the same picture area. Rows or
-    columns are cut only from the outside in and only while their max luma stays below
-    `thresh`; at least `min_keep` of each dimension is always kept.
+
+def crop_uniform_borders(frame_bgr: np.ndarray, dark_thresh: int = 16, flat_std: float = 3.0, min_keep: float = 0.4) -> np.ndarray:
+    """Remove uniform outer borders, then rescale to 640x360 (PREPROCESSING prep-3).
+
+    A border row/column is removed when it is near-black (letterbox/pillarbox) or has almost
+    no luma variation (a flat app background around a picture-in-picture or scaled player).
+    Rows and columns are trimmed alternately, outside-in, twice, so a uniform header bar
+    followed by a flat background is removed before columns are measured. Applied
+    identically to references and queries. At least `min_keep` of each dimension is kept;
+    otherwise the frame is returned unchanged (quality checks flag mostly-flat frames).
     """
     g = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
     h, w = g.shape
-    row_dark = g.max(axis=1) < thresh
-    col_dark = g.max(axis=0) < thresh
-    top = 0
-    while top < h and row_dark[top]:
-        top += 1
-    bot = h
-    while bot > top and row_dark[bot - 1]:
-        bot -= 1
-    left = 0
-    while left < w and col_dark[left]:
-        left += 1
-    right = w
-    while right > left and col_dark[right - 1]:
-        right -= 1
+    top, bot, left, right = 0, h, 0, w
+    for _ in range(2):
+        reg = g[top:bot, left:right]
+        if reg.size == 0:
+            break
+        rows = (reg.max(axis=1) < dark_thresh) | (reg.std(axis=1) < flat_std)
+        t, b = _trim(rows)
+        top, bot = top + t, top + b
+        reg = g[top:bot, left:right]
+        if reg.size == 0:
+            break
+        cols = (reg.max(axis=0) < dark_thresh) | (reg.std(axis=0) < flat_std)
+        l, r = _trim(cols)
+        left, right = left + l, left + r
     if (bot - top) < min_keep * h or (right - left) < min_keep * w:
-        return frame_bgr  # mostly dark: leave untouched; quality checks will flag it
+        return frame_bgr
     if (top, bot, left, right) == (0, h, 0, w):
         return frame_bgr
     return cv2.resize(frame_bgr[top:bot, left:right], (FRAME_W, FRAME_H), interpolation=cv2.INTER_LINEAR)
+
+
+# Backwards-compatible name used by descriptors.describe().
+crop_black_bars = crop_uniform_borders
 
 
 def to_gray(frame_bgr: np.ndarray) -> np.ndarray:
