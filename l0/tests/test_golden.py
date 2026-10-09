@@ -33,3 +33,12 @@ def test_e2e_golden_file_is_current(tmp_path):
     write_e2e(out)
     committed = COMMITTED.parent / "golden_e2e.txt"
     assert out.read_bytes().replace(b"\r\n", b"\n") == committed.read_bytes().replace(b"\r\n", b"\n")
+
+
+def test_exact_path_golden_file_is_current(tmp_path):
+    from dac_l0.eval.exact_golden import write as write_exact
+
+    out = tmp_path / "x.txt"
+    write_exact(out)
+    committed = COMMITTED.parent / "golden_exact.txt"
+    assert out.read_bytes().replace(b"\r\n", b"\n") == committed.read_bytes().replace(b"\r\n", b"\n")
