@@ -98,6 +98,11 @@ public final class ScanCoordinator {
         return true
     }
 
+    /// The native picker was declined or returned nothing (Kotlin/Python permissionDenied).
+    public func permissionDenied(_ now: Int64) {
+        if state == .awaitingPermission { abort(now, "PERMISSION_DENIED", .permissionDenied) }
+    }
+
     @discardableResult public func targetReady(_ now: Int64) -> Bool {
         guard state == .awaitingTarget else { return false }
         if now > switchDeadline || now > totalDeadline { abort(now, "TARGET_WAIT_TIMEOUT", .insufficientSignal); return false }

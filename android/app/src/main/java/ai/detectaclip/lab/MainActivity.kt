@@ -137,7 +137,10 @@ class MainActivity : Activity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode != REQ) return
-        CaptureService.start(this, resultCode, data) // fresh intent per session; never stored
+        // Denied or empty consent: PERMISSION_DENIED, and the mediaProjection service is never started.
+        if (CaptureStartPolicy.onPickerResult(coordinator, CaptureService.now(), resultCode == RESULT_OK, data != null)) {
+            CaptureService.start(this, resultCode, data) // fresh intent per session; never stored
+        }
         render()
     }
 

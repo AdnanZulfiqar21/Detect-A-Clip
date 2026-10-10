@@ -76,29 +76,40 @@ class CaptureService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == ACTION_STOP) {
-            lifecycle.userCancel()
-            releaseSurfaces()
-            stopSelf()
-            return START_NOT_STICKY
-        }
-        startForeground(NOTIFICATION_ID, buildNotification(postCapture = false), ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION)
-        registerReceiver(screenOff, IntentFilter(Intent.ACTION_SCREEN_OFF))
-        screenOffRegistered = true
-
         val c = LabState.coordinator
         val resultCode = intent?.getIntExtra(EXTRA_RESULT_CODE, Activity.RESULT_CANCELED) ?: Activity.RESULT_CANCELED
         val data: Intent? = intent?.getParcelableExtra(EXTRA_DATA, Intent::class.java)
-        if (resultCode != Activity.RESULT_OK || data == null) {
+        when (CaptureStartPolicy.onServiceStart(intent?.action == ACTION_STOP, resultCode == Activity.RESULT_OK, data != null)) {
+            CaptureStartPolicy.ServiceStart.STOP_REQUEST -> {
+                lifecycle.userCancel()
+                releaseSurfaces()
+                stopSelf()
+                return START_NOT_STICKY
+            }
+            CaptureStartPolicy.ServiceStart.DENY_NO_CONSENT -> {
+                // Never promote to a mediaProjection FGS without consent. MainActivity does not start
+                // the service in this case; this branch only guards other or stale starts.
+                c.permissionDenied(now()); stopSelf(); return START_NOT_STICKY
+            }
+            CaptureStartPolicy.ServiceStart.PROCEED -> Unit
+        }
+        try {
+            startForeground(NOTIFICATION_ID, buildNotification(postCapture = false), ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION)
+        } catch (e: SecurityException) {
+            // The OS refused the mediaProjection type (no valid consent): fail closed.
             c.permissionDenied(now()); stopSelf(); return START_NOT_STICKY
         }
+        registerReceiver(screenOff, IntentFilter(Intent.ACTION_SCREEN_OFF))
+        screenOffRegistered = true
+
         if (!c.permissionGranted(now())) { stopSelf(); return START_NOT_STICKY }
         if (!BuildConfig.CAPTURE_ENABLED) {
             c.cancel(now()); stopSelf(); return START_NOT_STICKY
         }
 
         val mpm = getSystemService(MediaProjectionManager::class.java)
-        val mp = mpm.getMediaProjection(resultCode, data)
+        val consent: Intent = data ?: run { c.permissionDenied(now()); stopSelf(); return START_NOT_STICKY }  // unreachable after PROCEED
+        val mp = mpm.getMediaProjection(resultCode, consent)
         if (mp == null) { c.permissionDenied(now()); stopSelf(); return START_NOT_STICKY }
         mp.registerCallback(object : MediaProjection.Callback() {
             override fun onStop() { lifecycle.onProjectionStopped(); releaseSurfaces() }

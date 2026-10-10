@@ -16,11 +16,22 @@ class FrameView(
     val pixelStride: Int,
 ) {
     init {
-        require(width >= 16 && height >= 9) { "frame too small" }
-        require(pixelStride >= 3) { "pixelStride must cover R, G and B" }
-        require(rowStride >= width * pixelStride) { "rowStride smaller than a row" }
+        // Bounds first, then 64-bit arithmetic: no overflow, no negative stride, no read past limit().
+        require(width in MIN_WIDTH..MAX_DIM && height in MIN_HEIGHT..MAX_DIM) { "frame size out of range" }
+        require(pixelStride in 3..MAX_PIXEL_STRIDE) { "pixelStride must cover R, G and B" }
+        require(rowStride in 1..MAX_ROW_STRIDE) { "rowStride out of range" }
+        require(rowStride.toLong() >= width.toLong() * pixelStride) { "rowStride smaller than a row" }
         val needed = (height - 1).toLong() * rowStride + width.toLong() * pixelStride
         require(needed <= buffer.limit()) { "buffer too small for the declared strides" }
+    }
+
+    companion object {
+        /** Smallest frame whose >= 40 % crop still covers the 16x9 quality grid (and the golden size). */
+        const val MIN_WIDTH = 64
+        const val MIN_HEIGHT = 36
+        const val MAX_DIM = 4096
+        const val MAX_PIXEL_STRIDE = 16
+        const val MAX_ROW_STRIDE = 1 shl 20
     }
 
     fun toLuma(): IntArray {
@@ -62,11 +73,13 @@ class RecognitionSession(
     private val perFrame = ArrayList<Pair<Int, List<Recognition.Candidate>>>()
     private var closed = false
 
-    /** Returns the quality flag (OK, BLANK, FLAT, STATIC) or CLOSED for a late frame. */
+    /** Returns the quality flag (OK, BLANK, FLAT, STATIC), CLOSED for a late frame, or INVALID
+     *  for a frame outside FrameView's bounds (refused without being counted). */
     @Synchronized
     fun process(tMs: Long, luma: IntArray, width: Int, height: Int): String {
         if (closed) return "CLOSED"
-        require(luma.size == width * height) { "luma size mismatch" }
+        if (width !in FrameView.MIN_WIDTH..FrameView.MAX_DIM || height !in FrameView.MIN_HEIGHT..FrameView.MAX_DIM ||
+            luma.size != width * height) return "INVALID"
         val rect = DacDhash.cropRect(luma, width, height)
         val (flag, means) = DacDhash.quality(luma, width, rect, prevMeans)
         selected += 1

@@ -13,12 +13,21 @@ public struct FrameView {
     public let order: Order
     private let base: UnsafeRawBufferPointer
 
-    /// `base` must stay valid only for the duration of `toLuma()`.
+    /// Smallest frame whose >= 40 % crop still covers the 16x9 quality grid (and the golden size).
+    public static let minWidth = 64, minHeight = 36, maxDim = 4096, maxPixelStride = 16, maxRowStride = 1 << 20
+
+    /// `base` must stay valid only for the duration of `toLuma()`. Bounds are checked before any
+    /// multiplication, so the size arithmetic cannot overflow, and every later read lies inside
+    /// `base` (UnsafeRawBufferPointer reads are not bounds-checked in release builds).
     public init(base: UnsafeRawBufferPointer, width: Int, height: Int, rowStride: Int, pixelStride: Int, order: Order = .rgb) throws {
-        guard width >= 16, height >= 9 else { throw PackError.invalid("frame too small") }
-        guard pixelStride >= 3 else { throw PackError.invalid("pixelStride must cover R, G and B") }
+        guard (FrameView.minWidth...FrameView.maxDim).contains(width), (FrameView.minHeight...FrameView.maxDim).contains(height) else {
+            throw PackError.invalid("frame size out of range")
+        }
+        guard (3...FrameView.maxPixelStride).contains(pixelStride) else { throw PackError.invalid("pixelStride must cover R, G and B") }
+        guard (1...FrameView.maxRowStride).contains(rowStride) else { throw PackError.invalid("rowStride out of range") }
         guard rowStride >= width * pixelStride else { throw PackError.invalid("rowStride smaller than a row") }
-        guard (height - 1) * rowStride + width * pixelStride <= base.count else { throw PackError.invalid("buffer too small for the declared strides") }
+        let needed: Int = (height - 1) * rowStride + width * pixelStride
+        guard needed <= base.count else { throw PackError.invalid("buffer too small for the declared strides") }
         self.base = base; self.width = width; self.height = height; self.rowStride = rowStride; self.pixelStride = pixelStride; self.order = order
     }
 
@@ -56,11 +65,13 @@ public final class RecognitionSession {
         self.pack = pack; self.th = thresholds; self.topK = topK; self.mirrorInvariant = mirrorInvariant
     }
 
-    /// Returns the quality flag (OK, BLANK, FLAT, STATIC) or CLOSED for a late frame.
+    /// Returns the quality flag (OK, BLANK, FLAT, STATIC), CLOSED for a late frame, or INVALID for
+    /// a frame outside FrameView's bounds (refused without being counted; never a trap).
     public func process(tMs: Int, luma: [Int], width: Int, height: Int) -> String {
         lock.lock(); defer { lock.unlock() }
         if closed { return "CLOSED" }
-        precondition(luma.count == width * height, "luma size mismatch")
+        guard (FrameView.minWidth...FrameView.maxDim).contains(width), (FrameView.minHeight...FrameView.maxDim).contains(height),
+              luma.count == width * height else { return "INVALID" }
         let rect = DacDhash.cropRect(luma, w: width, h: height)
         let (flag, means) = DacDhash.quality(luma, w: width, rect: rect, prev: prevMeans)
         selected += 1
