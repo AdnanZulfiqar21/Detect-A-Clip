@@ -2,17 +2,25 @@
 
 Statuses: NOT_STARTED · IN_PROGRESS · IMPLEMENTED_NOT_VERIFIED · PASS · FAIL · BLOCKED ·
 INCONCLUSIVE · DEFERRED · UNVERIFIED. PASS rows cite evidence in `docs/TEST_EVIDENCE.md`.
-"Compiled on the JVM" means pure-Kotlin files only, never the Android app.
+"Compiled on the JVM" means pure-Kotlin files only; the Android app is compiled separately with AGP.
 
 Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 
-## What exists, by platform (2026-10-09)
+## What exists, by platform (2026-10-10)
 
 | Platform | Works now | Not verified / missing |
 |---|---|---|
-| Desktop L0 | Synthetic fixtures v3.1 with challenge cases; descriptors (24/48/160/528 B); index builder and bounded parser; temporal verification; series/episode-aware decision; calibration; signed UNCALIBRATED/L0-calibrated packs; atomic pack store; lab leases; LAB runner. 115 tests | Real footage, real devices, release statistics |
-| Android | LAB app builds to a debug APK (AGP 9.4.1, compileSdk 37); lint clean; no INTERNET in the merged manifest; capture off by default; CAP-A03 `app_only` picker config compiled. 35 unit tests pass (Gradle-compiled and kotlinc-compiled) | Any device run (B-01), CAP-A03 enforcement on devices |
-| iOS | Swift sources for coordinator, frame selector, lifecycle with background-task guard, consent/eligibility, ScreenCaptureKit adapter skeleton, XCTests | Any compile or test (B-02) |
+| Desktop L0 | Synthetic fixtures (v3.1, v4) with challenge cases; descriptors incl. the integer-exact DACDHASH path; index format contract `idx-flat-4` (reads v3) with names, aliases and shared scenes; temporal verification; series/episode-aware decision; result display names; calibration; manifest V1/V2 with fail-closed validity rules; crash-safe pack store; lab leases; LAB runner. 172 tests | Real footage, real devices, release statistics |
+| Android | LAB app builds to a debug APK (AGP 9.4.1, compileSdk 37); lint clean; no INTERNET in the merged manifest; capture off by default; CAP-A03 `app_only` config compiled. Pure-Kotlin engine: format contract, manifest V2 loader, `RecognitionSession` + `FrameView`, lifecycle DIAGNOSTIC and RECOGNITION modes. 56 unit tests (kotlinc and Gradle-compiled, direct JUnit) | Any device run (B-01); RECOGNITION mode is not wired to real capture (ED-25) |
+| iOS | Swift core package mirrors the Kotlin engine (format v4, manifest V2 via CryptoKit, session, lifecycle with background-task guard, consent/eligibility) with XCTests on the shared golden files; ScreenCaptureKit adapter skeleton | Swift core compiled only by the macOS CI job; iOS app, signing and devices (B-02) |
+
+## Unfinished implementation vs external verification
+
+| Kind | Items |
+|---|---|
+| Executable here, done this round | Pack validity rules, edition index fix, format contract in three languages, crash-recovery proof, manifest V2, recognition path with injected frames, result display parity, CI workflows |
+| Implementation still open (no external input needed, but needs a method decision) | DACDHASH partial montage segmentation; POSSIBLE-under-competition setting; UI_LIKE has no exact-path counterpart; series display names (format has no series-name table, results show the series ID); wiring RECOGNITION mode to real capture (waits for gate evidence by design) |
+| External verification only | Device runs (B-01, B-02, B-07); rights and licensed packs (B-05); independent evaluation (B-06); legal review (P05-T01); store review (B-08); owner decisions (B-04) |
 
 ## Task register (86 tasks)
 
@@ -31,23 +39,23 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | P01-T02…T08 | BLOCKED | B-01 (device). Lifecycle races covered on JVM only; CAP-A03 `app_only` source configuration compiled (API 37 guard) |
 | P02-T01 | UNVERIFIED | documentary symbol review in SDK_MATRIX; headers need Mac (B-02) |
 | P02-T02…T06 | BLOCKED | B-02; Swift sources prepared |
-| P03-T01 | IMPLEMENTED_NOT_VERIFIED | work/edition/series/episode IDs (idx-flat-2); alias tables not built |
+| P03-T01 | IMPLEMENTED_NOT_VERIFIED | work/edition/series/episode IDs, names, aliases and shared scenes in `idx-flat-4` (v3 migrates); same contract in Python/Kotlin/Swift (49 cases). Real catalogue metadata needs B-05 |
 | P03-T02 | BLOCKED | B-05 (L0 self-grant manifest exists) |
 | P03-T03 | PASS (desktop) | reproducible builder, bytes/hour per descriptor |
-| P03-T04 | PASS (L0 dev scope) | signed manifest, fail-closed loader, SEC-01 |
+| P03-T04 | PASS (L0 dev scope) | signed manifests V1/V2, fail-closed loader (ED-21, ED-24), SEC-01; 68 manifest cases Python = Kotlin; Swift via CI |
 | P03-T05 | BLOCKED | B-05 |
-| P03-T06 | IMPLEMENTED_NOT_VERIFIED (dev fixtures) | atomic store, epoch marker, lab leases; licensed/final-tuple part BLOCKED (B-05) |
+| P03-T06 | IMPLEMENTED_NOT_VERIFIED (dev fixtures) | immutable slots, single commit point, floors, recovery proven by `os._exit` at every I/O step (ED-23); device storage and licensed/final-tuple part BLOCKED (B-01, B-05) |
 | P03-T07 | BLOCKED | B-05 |
 | P04-T01 | IMPLEMENTED_NOT_VERIFIED | quality flags, uniform-border crop; device frames BLOCKED |
 | P04-T02 | PASS (LAB) | 4 descriptors; sampling study (DEV) in `evidence/studies/` |
 | P04-T03 | PASS (LAB, exploratory) | temporal verification, montage segments, recaps, stock footage |
-| P04-T04 | IN_PROGRESS | series→episode→edition→time hierarchy done; multilingual names not built |
+| P04-T04 | IMPLEMENTED_NOT_VERIFIED | series→episode→edition→time hierarchy; multilingual names with locale fallback; result display parity Python = Kotlin (11 cases), Swift via CI. Series-level results show the series ID (no series-name table) |
 | P04-T05 | PASS (L0 synthetic calibration) | v3.1 (CALIBRATION) and v4 (CAL4) frozen per descriptor; LAB-only status |
 | P04-T06 | PASS (LAB) | all kinds incl. leakage audit; sealed FINAL (v3.1) and FINAL4 (v4) each run once; failures kept in reports |
 | P04-T07 | BLOCKED | independent evaluator (B-06) |
-| P04-T08 | BLOCKED (device) · prep IMPLEMENTED | Kotlin recognition port bit-exact vs Python (400 golden cases); DAC-DHASH-v1 exact descriptor (Python = Kotlin); device budgets need B-01/B-02/B-07 |
+| P04-T08 | BLOCKED (device) · prep IMPLEMENTED | recognition path (selector → FrameView → DAC-CROP/QUAL/DHASH → retrieval → verification → decision → memory-only commit) = Python on 12 pipeline queries; injected-frame lifecycle tests (ED-25). Device budgets need B-01/B-02/B-07 |
 | P05-T01 | IMPLEMENTED_NOT_VERIFIED | `docs/legal/*` DRAFT_FOR_COUNSEL; legal review required |
-| P05-T02 | IMPLEMENTED_NOT_VERIFIED | `ConsentRecords` (JVM-tested); Android UI uncompiled |
+| P05-T02 | IMPLEMENTED_NOT_VERIFIED | `ConsentRecords` (JVM-tested); Android UI compiled; no device run (B-01) |
 | P05-T03 | IMPLEMENTED_NOT_VERIFIED | native picker from user action; `EligibilityGate` (JVM-tested) |
 | P05-T04 | IMPLEMENTED_NOT_VERIFIED | canonical states, uncertain-result wording, memory-only result |
 | P05-T05 | IMPLEMENTED_NOT_VERIFIED | in-app Stop/Cancel, notification Stop→Cancel switch; UX-02 device runs BLOCKED |
@@ -58,7 +66,7 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | P06-T03 | IMPLEMENTED_NOT_VERIFIED | no logs/SDKs/backups in source; DATA-L02 device inspection BLOCKED |
 | P06-T04 | BLOCKED | device soak |
 | P06-T05 | IN_PROGRESS | SBOM; bounded parsers; release signing not designed |
-| P06-T06 | IMPLEMENTED_NOT_VERIFIED | cell/pack expiry and untrusted-time denial (JVM + Python) |
+| P06-T06 | IMPLEMENTED_NOT_VERIFIED | cell/pack expiry, parsed instants with offsets, untrusted-time denial (JVM + Python, ED-21/ED-26) |
 | P06-T07 | IMPLEMENTED_NOT_VERIFIED | data inventory in THREAT_MODEL/privacy draft; counsel BLOCKED |
 | P06-T08 | BLOCKED | independent reviewer |
 | P07-T01…T07 | BLOCKED | B-03 + native gates; Snapchat OFF |
@@ -72,7 +80,7 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | Gate | Status |
 |---|---|
 | G00 desktop | Engineering items ready; named reviewer sign-off missing (D5 in CTRL-G00) |
-| G00 Android / iOS | BLOCKED (B-01/B-09, B-02) |
+| G00 Android / iOS | BLOCKED (B-01, B-02) |
 | G01 / G02 | BLOCKED |
 | G03-L0 | Engineering items ready; rights-reviewer sign-off of the synthetic self-grant missing |
 | G03-L1 | BLOCKED (B-05) |

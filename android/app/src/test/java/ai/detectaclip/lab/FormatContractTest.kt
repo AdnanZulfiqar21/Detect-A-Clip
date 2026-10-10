@@ -40,6 +40,19 @@ class FormatContractTest {
         assertEquals("SW100", PackIndex.resolveDisplayName(emptyMap(), listOf("en"), "SW100"))
     }
 
+    @Test fun resultDisplayNamesMatchPython() {
+        val lines = file("golden_format_cases.txt").readLines()
+        val p = PackIndex.parse(hex(lines.first { it.startsWith("CASE valid_v4_aliases_series_shared_scene ") }.split(" ")[3]))
+        val cases = lines.filter { it.startsWith("DISPLAY ") }.map { it.split(" ") }
+        assertTrue(cases.size >= 10)
+        for (c in cases) {
+            val prefs = if (c[3] == "-") emptyList() else c[3].split(",")
+            val expected = if (c[4] == "-") null else String(hex(c[4]), Charsets.UTF_8)
+            assertEquals(c.joinToString(" "), expected,
+                p.resultDisplayName(c[1].takeIf { it != "-" }, c[2].takeIf { it != "-" }, prefs))
+        }
+    }
+
     @Test fun v3PayloadMigratesWithEmptyAliasesAndScenes() {
         val line = file("golden_format_cases.txt").readLines().first { it.startsWith("CASE valid_v3_migration_no_aliases ") }
         val p = PackIndex.parse(hex(line.split(" ")[3]))

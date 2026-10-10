@@ -31,9 +31,18 @@ Merged manifest verified 2026-10-10: no network or audio permissions. The app ha
 ## iOS research package
 
 Swift standard library and Apple frameworks only (Foundation; ScreenCaptureKit/CoreMedia
-behind `canImport`). No third-party packages. Not compiled (B-02).
+behind `canImport`; CryptoKit for Ed25519/SHA-256). No third-party packages. Compiled only by
+the `swift-core` CI job on a macOS runner; no iOS app build (B-02).
+
+## CI (not shipped)
+
+GitHub Actions: actions/checkout, actions/setup-python, actions/setup-java (Temurin 17),
+gradle/actions/setup-gradle (Gradle 9.8.1), actions/upload-artifact; PyPI numpy,
+opencv-python-headless, cryptography, pytest; kotlinc 2.4.21 and JUnit 4.13.2/Hamcrest 1.3
+fetched from GitHub releases and Maven Central at run time.
 
 ## Local toolchain (not shipped, not committed)
 
 Temurin JDK 17.0.20.1+1 (GPLv2 with Classpath Exception), Kotlin compiler 2.4.21 (Apache-2.0),
-Gradle 8.14.3 (Apache-2.0), Android command-line tools 22.0 (no packages installed).
+Gradle 9.8.1 (Apache-2.0; 8.14.3 also present, unused), Android command-line tools 22.0 with
+`platforms;android-37.0`, `build-tools;37.0.0`, `platform-tools` (Android SDK License, accepted by the owner 2026-10-10).

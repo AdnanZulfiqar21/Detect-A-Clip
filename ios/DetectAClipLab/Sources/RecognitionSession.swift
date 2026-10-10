@@ -99,11 +99,6 @@ public final class RecognitionSession {
 
     /// Display name for a decision: the episode's or work's localized name, else its ID.
     public func displayName(_ d: Recognition.Decision, preferences: [String]) -> String? {
-        guard let id = d.workId else { return nil }
-        let idx = pack.works.firstIndex { w in
-            if let ep = d.episodeId { return w.seriesId == id && w.episodeId == ep }
-            return w.workId == id && w.seriesId == nil
-        }
-        return idx.map { pack.displayName(workIndex: $0, preferences: preferences) } ?? id
+        pack.resultDisplayName(workId: d.workId, episodeId: d.episodeId, preferences: preferences)
     }
 }

@@ -1,25 +1,24 @@
-# iPhone track (P02): source and specification only
+# iPhone track (P02): Swift core and specification
 
-**Status: BLOCKED for compile, archive and every device test (B-02).** This Windows host has
-no macOS, Xcode, iOS SDK, provisioning or iPhone. Nothing in this folder has been compiled.
-No iOS build is claimed to pass.
+**Status:** the iOS app build, archive, signing and every device test are BLOCKED (B-02): this
+Windows host has no Xcode project, iOS SDK, provisioning or iPhone. The platform-independent
+Swift core in `DetectAClipLab/` is a SwiftPM package. It is compiled and tested only by the
+`swift-core` GitHub Actions job on a macOS runner (`.github/workflows/swift-core.yml`); results
+are recorded in `docs/TEST_EVIDENCE.md`. That job is not an iOS app build and not device evidence.
 
 ## What is here
 
-| File | Purpose | Status |
-|---|---|---|
-| `DetectAClipLab/Package.swift` | Swift package for the platform-independent coordinator and its tests (`swift test` on a Mac) | IMPLEMENTED_NOT_VERIFIED |
-| `DetectAClipLab/Sources/ScanCoordinator.swift` | Port of `l0/dac_l0/coordinator.py` (F03 event table) | IMPLEMENTED_NOT_VERIFIED |
-| `DetectAClipLab/Tests/ScanCoordinatorTests.swift` | LIFE-01/03 orderings, fail-closed stop attribution, background expiry | NOT_RUN |
-| `DetectAClipLab/Sources/FrameSelector.swift` | ≤2 fps, ≤3 owned frames, monotonic timestamps | IMPLEMENTED_NOT_VERIFIED |
-| `DetectAClipLab/Sources/CaptureLifecycle.swift` | Port of the JVM-tested Kotlin lifecycle + early background-task request and expiry cancel | IMPLEMENTED_NOT_VERIFIED |
-| `DetectAClipLab/Sources/ConsentAndEligibility.swift` | Terms receipt (translation-only change re-prompts) and pre-scan eligibility gate | IMPLEMENTED_NOT_VERIFIED |
-| `DetectAClipLab/Sources/ScreenCaptureAdapter.swift` | ScreenCaptureKit adapter skeleton behind `canImport(ScreenCaptureKit) && os(iOS)`; symbol signatures UNVERIFIED | NOT COMPILED |
-| `DetectAClipLab/Tests/CaptureLifecycleTests.swift`, `ConsentAndEligibilityTests.swift` | Lifecycle races, background expiry, consent, eligibility | NOT_RUN |
-| `DetectAClipLab/Sources/Recognition.swift`, `DacDhash.swift` | Ports of verification/decision and the DAC-DHASH-v1 descriptor | IMPLEMENTED_NOT_VERIFIED |
-| `DetectAClipLab/Tests/RecognitionGoldenTests.swift`, `DacDhashGoldenTests.swift` | Must match the same golden files as the JVM tests | NOT_RUN |
-| `DetectAClipLab/Sources/PackIndex.swift`, `Tests/EndToEndGoldenTests.swift` | Bounded pack parser + retrieval; Python pack → Swift engine end-to-end golden | IMPLEMENTED_NOT_VERIFIED / NOT_RUN |
-| `DetectAClipLab/Sources/DacExact.swift`, `Tests/ExactPathGoldenTests.swift` | DAC-CROP-v1, DAC-QUAL-v1, mirrored hash (device path, ED-17) | IMPLEMENTED_NOT_VERIFIED / NOT_RUN |
+| File | Purpose |
+|---|---|
+| `Sources/ScanCoordinator.swift`, `Tests/ScanCoordinatorTests.swift` | Port of `l0/dac_l0/coordinator.py` (F03 event table); LIFE-01/03 orderings |
+| `Sources/FrameSelector.swift` | ≤2 fps, ≤3 owned frames, monotonic timestamps |
+| `Sources/CaptureLifecycle.swift`, `Tests/CaptureLifecycleTests.swift`, `Tests/RecognitionLifecycleTests.swift` | Port of the Kotlin lifecycle: DIAGNOSTIC and RECOGNITION modes, background-task guard, injected-frame races |
+| `Sources/ConsentAndEligibility.swift`, `Tests/ConsentAndEligibilityTests.swift` | Terms receipt (translation-only change re-prompts) and pre-scan eligibility gate |
+| `Sources/MiniJson.swift`, `Sources/PackIndex.swift`, `Tests/FormatContractTests.swift` | Strict JSON and the `idx-flat-4` format contract (49 shared cases, result display names) |
+| `Sources/PackLoader.swift`, `Tests/ManifestContractTests.swift` | Manifest V2 loader (CryptoKit Ed25519/SHA-256); 68 shared cases |
+| `Sources/RecognitionSession.swift`, `Tests/PipelineGoldenTests.swift` | FrameView (RGB/BGR, strides) + session; 12 shared pipeline queries |
+| `Sources/Recognition.swift`, `DacDhash.swift`, `DacExact.swift` and their golden tests | Verification/decision, DAC-DHASH-v1, DAC-CROP-v1/DAC-QUAL-v1 |
+| `Sources/ScreenCaptureAdapter.swift` | ScreenCaptureKit adapter skeleton behind `canImport(ScreenCaptureKit) && os(iOS)`; excluded from the macOS build; symbol signatures UNVERIFIED |
 
 ## Capture paths to investigate separately (D11: no blanket minimum)
 
@@ -34,7 +33,7 @@ No iOS build is claimed to pass.
 ## First Mac session checklist (P02-T01/T02, DATA-L00 Part A)
 
 1. Record Xcode, SDK, device OS build and provisioning profile.
-2. Run `swift test` in `DetectAClipLab/` and record the result in `docs/TEST_EVIDENCE.md`.
+2. Run `swift test` in `DetectAClipLab/` on that Mac as well and record it next to the CI result in `docs/TEST_EVIDENCE.md`.
 3. Build a minimal visual-only app target with capture disabled: no camera, microphone,
    Photos or file output, and no analytics or crash SDK. ATS is **not** an egress firewall (Q01),
    so DATA-L00 Part A needs independently verified network isolation.

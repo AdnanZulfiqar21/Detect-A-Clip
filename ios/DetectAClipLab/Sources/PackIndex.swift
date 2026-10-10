@@ -89,6 +89,17 @@ public struct PackIndex {
         PackIndex.resolveDisplayName(names[workIndex], preferences: preferences, fallback: works[workIndex].workId)
     }
 
+    /// Same as Python result_display_name: an episode result shows that episode's name; a
+    /// series-level result or an unknown ID shows the ID itself; no candidate -> nil.
+    public func resultDisplayName(workId: String?, episodeId: String?, preferences: [String]) -> String? {
+        guard let id = workId else { return nil }
+        let idx = works.firstIndex { w -> Bool in
+            if let ep = episodeId { return w.seriesId == id && w.episodeId == ep }
+            return w.workId == id && w.seriesId == nil
+        }
+        return idx.map { displayName(workIndex: $0, preferences: preferences) } ?? id
+    }
+
     public static func parse(_ d: [UInt8], maxPayloadBytes: Int = 250_000_000) throws -> PackIndex {
         func fail(_ m: String) -> PackError { .invalid(m) }
         guard d.count <= maxPayloadBytes else { throw fail("payload exceeds installed index budget") }

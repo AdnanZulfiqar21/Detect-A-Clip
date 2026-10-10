@@ -36,6 +36,20 @@ final class FormatContractTests: XCTestCase {
         XCTAssertEqual(PackIndex.resolveDisplayName([:], preferences: ["en"], fallback: "SW100"), "SW100")
     }
 
+    func testResultDisplayNamesMatchPython() throws {
+        let lines = try Golden.lines("golden_format_cases.txt")
+        let v4 = try cases().first { $0.name == "valid_v4_aliases_series_shared_scene" }!
+        let p = try PackIndex.parse(v4.payload)
+        let rows = lines.filter { $0.hasPrefix("DISPLAY ") }.map { $0.split(separator: " ").map(String.init) }
+        XCTAssertGreaterThanOrEqual(rows.count, 10)
+        for c in rows {
+            let prefs = c[3] == "-" ? [] : c[3].split(separator: ",").map(String.init)
+            let expected: String? = c[4] == "-" ? nil : String(decoding: Golden.hex(c[4]), as: UTF8.self)
+            let got = p.resultDisplayName(workId: c[1] == "-" ? nil : c[1], episodeId: c[2] == "-" ? nil : c[2], preferences: prefs)
+            XCTAssertEqual(got, expected, c.joined(separator: " "))
+        }
+    }
+
     func testV3PayloadMigratesWithEmptyAliasesAndScenes() throws {
         let c = try cases().first { $0.name == "valid_v3_migration_no_aliases" }!
         let p = try PackIndex.parse(c.payload)

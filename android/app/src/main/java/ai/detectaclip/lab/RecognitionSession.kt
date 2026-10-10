@@ -104,11 +104,6 @@ class RecognitionSession(
     }
 
     /** Display name for a decision: the episode's or work's localized name, else its ID. */
-    fun displayName(d: Recognition.Decision, preferences: List<String>): String? {
-        val id = d.workId ?: return null
-        val idx = pack.works.indexOfFirst { w ->
-            if (d.episodeId != null) w.seriesId == id && w.episodeId == d.episodeId else w.workId == id && w.seriesId == null
-        }
-        return if (idx >= 0) pack.displayName(idx, preferences) else id
-    }
+    fun displayName(d: Recognition.Decision, preferences: List<String>): String? =
+        pack.resultDisplayName(d.workId, d.episodeId, preferences)
 }

@@ -201,7 +201,7 @@ public final class PackLoader {
         guard m["preprocessing_version"]?.string == PackIndex.exactPreprocessing else { throw R("incompatible preprocessing") }
         guard let calibration = m["calibration_status"]?.string, PackLoader.calibration.contains(calibration) else { throw R("unknown calibration_status") }
         if dev && calibration == "CALIBRATED" { throw R("synthetic development pack cannot claim release calibration") }
-        // generator_version is provenance only for this engine (Python LAB tools pin it for development packs).
+        // generator_version is provenance only (same rule in Python and Kotlin).
 
         // 4. versions
         let version = try PackLoader.parseVersion(m["pack_version"], "pack_version")

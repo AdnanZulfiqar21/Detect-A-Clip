@@ -170,6 +170,23 @@ def resolve_display_name(names: Dict[str, str], preferences: Sequence[str], fall
     return names[sorted(names)[0]] if names else fallback
 
 
+def result_display_name(bundle: "IndexBundle", work_id: Optional[str], episode_id: Optional[str],
+                        preferences: Sequence[str]) -> Optional[str]:
+    """Name to show for a committed result. A series-level result (episode not unique) or an ID
+    absent from the pack shows the ID itself: the format has no series-name table, and a
+    result never borrows another work's name. No candidate -> None."""
+    if work_id is None:
+        return None
+    for w in bundle.works:
+        if episode_id is not None:
+            hit = w.series_id == work_id and w.episode_id == episode_id
+        else:
+            hit = w.work_id == work_id and w.series_id is None
+        if hit:
+            return resolve_display_name(w.names, preferences, w.work_id)
+    return work_id
+
+
 def build_index(editions: Sequence[Edition], family: DescriptorFamily, sampling_interval_s: float = 2.0,
                 shared_scenes: Optional[Sequence[Tuple[str, Sequence[Tuple[str, str, int, int]]]]] = None) -> IndexBundle:
     """Build a flat index from authorised gallery editions.

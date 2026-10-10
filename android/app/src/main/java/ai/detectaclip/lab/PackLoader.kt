@@ -140,8 +140,7 @@ class PackLoader(private val state: DeviceRightsState) {
         val calibration = m["calibration_status"] as String? ?: throw Rejected("unknown calibration_status")
         if (calibration !in CALIBRATION) throw Rejected("unknown calibration_status")
         if (dev && calibration == "CALIBRATED") throw Rejected("synthetic development pack cannot claim release calibration")
-        // The synthetic generator version is provenance only for this engine; Python LAB tools
-        // additionally pin it for development packs.
+        // generator_version is provenance only (same rule in Python and Swift).
 
         // 4. versions
         val version = parseVersion(m["pack_version"], "pack_version")

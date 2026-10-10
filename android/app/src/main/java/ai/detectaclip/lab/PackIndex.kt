@@ -46,6 +46,17 @@ class PackIndex private constructor(
     fun displayName(workIndex: Int, preferences: List<String>): String =
         resolveDisplayName(names[workIndex], preferences, works[workIndex].workId)
 
+    /** Same as Python result_display_name: an episode result shows that episode's name; a
+     *  series-level result or an unknown ID shows the ID itself (no series-name table exists,
+     *  and a result never borrows another work's name); no candidate -> null. */
+    fun resultDisplayName(workId: String?, episodeId: String?, preferences: List<String>): String? {
+        if (workId == null) return null
+        val idx = works.indexOfFirst { w ->
+            if (episodeId != null) w.seriesId == workId && w.episodeId == episodeId else w.workId == workId && w.seriesId == null
+        }
+        return if (idx >= 0) displayName(idx, preferences) else workId
+    }
+
     companion object {
         private val MAGIC = "DACL0IDX".toByteArray(Charsets.US_ASCII)
         const val FORMAT_V3 = "idx-flat-3"
