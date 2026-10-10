@@ -5,8 +5,8 @@ Order of checks (all must pass; any failure raises PackRejected and leaves the d
 state unchanged; state is only written after the last check):
   1. manifest size, JSON shape, field types, identifiers
   2. key ID known, not revoked, signature valid
-  3. compatibility: index format, preprocessing for the descriptor family, generator
-     (development packs), calibration status/version, descriptor family/bytes
+  3. compatibility: index format, preprocessing for the descriptor family, calibration
+     status/version, descriptor family/bytes (generator_version is provenance only)
   4. versions: strict MAJOR.MINOR.PATCH; pack >= its declared minimum; pack >= the highest
      minimum this device has already accepted for that pack ID (rollback restriction)
   5. payload size within the total installed budget (D10), declared size and hash
@@ -34,13 +34,13 @@ from typing import Dict, Optional, Set, Tuple, Union
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
-from .. import EXACT_PREPROCESSING_VERSION, GENERATOR_VERSION, PREPROCESSING_VERSION
+from .. import EXACT_PREPROCESSING_VERSION, PREPROCESSING_VERSION
 from ..index.builder import TOTAL_INSTALLED_INDEX_BUDGET_BYTES, IndexBundle
 from ..index.descriptors import DescriptorFamily
 from ..schemas import PermittedAct, RegionAssuranceMethod
 from ..synth.manifest import L0_GRANT_ID
 from ..index.format import SUPPORTED_FORMATS, strict_json_loads
-from .manifest import MAX_MANIFEST_BYTES, verify_signature
+from .manifest import MANIFEST_V1, MANIFEST_V2, MAX_MANIFEST_BYTES, verify_detached, verify_signature
 
 REQUIRED_KEYS = {
     "pack_id", "pack_version", "payload_sha256", "payload_size_bytes", "generator_version",
@@ -50,6 +50,7 @@ REQUIRED_KEYS = {
     "indexed_hours", "title_count", "descriptor_bytes", "sampling_interval_s", "descriptor_family",
     "vector_count", "grant_id", "manifest_type", "signature",
 }
+REQUIRED_KEYS_V2 = REQUIRED_KEYS - {"signature"}
 CALIBRATION_STATUSES = {"UNCALIBRATED", "CALIBRATED_L0_SYNTHETIC", "CALIBRATED"}
 SUPPORTED_INDEX_FORMATS = set(SUPPORTED_FORMATS)
 _PACK_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$")
@@ -108,7 +109,7 @@ def parse_version(value, what: str) -> Version:
 
 
 def is_development_pack(m: Dict) -> bool:
-    return m.get("grant_id") == L0_GRANT_ID and m.get("manifest_type") == "L0_DEV_INTEGRITY_MANIFEST"
+    return m.get("grant_id") == L0_GRANT_ID and m.get("manifest_type") in (MANIFEST_V1, MANIFEST_V2)
 
 
 def expected_preprocessing(family: DescriptorFamily) -> str:
@@ -135,7 +136,10 @@ def load_pack(
     time_trustworthy: bool,
     release_mode: bool = False,
     budget_bytes: int = TOTAL_INSTALLED_INDEX_BUDGET_BYTES,
+    signature: Optional[bytes] = None,
 ) -> LoadedPack:
+    """`signature` is required for manifest V2 (detached, over the exact manifest bytes) and
+    must be absent for V1 (embedded signature)."""
     # 1. bounds, shape, types
     if len(manifest_json) > MAX_MANIFEST_BYTES:
         raise PackRejected("manifest too large")
@@ -143,9 +147,20 @@ def load_pack(
         m = strict_json_loads(manifest_json)
     except (UnicodeDecodeError, ValueError):
         raise PackRejected("manifest not valid JSON")
-    if not isinstance(m, dict) or set(m.keys()) != REQUIRED_KEYS:
+    if not isinstance(m, dict):
         raise PackRejected("manifest keys mismatch")
-    if m["manifest_type"] != "L0_DEV_INTEGRITY_MANIFEST":
+    mtype = m.get("manifest_type")
+    if mtype == MANIFEST_V2:
+        if set(m.keys()) != REQUIRED_KEYS_V2:
+            raise PackRejected("manifest keys mismatch")
+        if signature is None:
+            raise PackRejected("manifest V2 needs its detached signature")
+    elif mtype == MANIFEST_V1:
+        if set(m.keys()) != REQUIRED_KEYS:
+            raise PackRejected("manifest keys mismatch")
+        if signature is not None:
+            raise PackRejected("manifest V1 carries an embedded signature; no detached signature expected")
+    else:
         raise PackRejected("unknown manifest type")
     for k in ("payload_size_bytes", "rights_epoch", "title_count", "descriptor_bytes", "vector_count"):
         if not isinstance(m[k], int) or isinstance(m[k], bool) or m[k] < 0:
@@ -180,7 +195,8 @@ def load_pack(
     pub = state.trusted_keys.get(key_id)
     if pub is None:
         raise PackRejected("unknown signing key")
-    if not verify_signature(m, pub):
+    ok = verify_detached(manifest_json, signature, pub) if mtype == MANIFEST_V2 else verify_signature(m, pub)
+    if not ok:
         raise PackRejected("bad signature")
 
     # 3. compatibility
@@ -194,8 +210,8 @@ def load_pack(
         raise PackRejected("descriptor family/bytes mismatch")
     if m["preprocessing_version"] != expected_preprocessing(family):
         raise PackRejected("incompatible preprocessing for the descriptor family")
-    if dev and m["generator_version"] != GENERATOR_VERSION:
-        raise PackRejected("incompatible synthetic generator version")
+    # generator_version is provenance only (non-empty string checked above); engines on every
+    # platform apply the same rule, so it is not a compatibility gate.
     if m["calibration_status"] not in CALIBRATION_STATUSES:
         raise PackRejected("unknown calibration_status")
     if dev and m["calibration_status"] == "CALIBRATED":

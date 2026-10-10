@@ -199,7 +199,7 @@ class PackStore:
 
     # ------------------------------------------------------------------ install
     def install(self, manifest_json: bytes, payload: bytes, now: Union[None, str, datetime], time_trustworthy: bool,
-                release_mode: bool = False) -> LoadedPack:
+                release_mode: bool = False, signature: Optional[bytes] = None) -> LoadedPack:
         if len(payload) + len(manifest_json) > self.staging_cap:
             raise PackRejected("staging cap exceeded")
         try:
@@ -213,9 +213,12 @@ class PackStore:
         try:
             self.io.write_bytes(stage / "payload.pack", payload)
             self.io.write_bytes(stage / "manifest.json", manifest_json)
+            if signature is not None:
+                self.io.write_bytes(stage / "manifest.sig", bytes(signature))
             # Validate exactly what was written, against a scratch copy of the rights state.
             lp = load_pack((stage / "manifest.json").read_bytes(), (stage / "payload.pack").read_bytes(),
-                           self._scratch_rights(exclude_pack=pack_id), now, time_trustworthy, release_mode, self.budget)
+                           self._scratch_rights(exclude_pack=pack_id), now, time_trustworthy, release_mode, self.budget,
+                           (stage / "manifest.sig").read_bytes() if signature is not None else None)
             slot = secrets.token_hex(8)
             (self.root / "packs" / pack_id).mkdir(exist_ok=True)
             self.io.replace(stage, self.root / "packs" / pack_id / slot)   # new immutable slot
@@ -250,8 +253,9 @@ class PackStore:
         if entry is None:
             raise StoreError("no active pack")
         d = self.root / "packs" / pack_id / entry["slot"]
+        sig = (d / "manifest.sig").read_bytes() if (d / "manifest.sig").exists() else None
         return load_pack((d / "manifest.json").read_bytes(), (d / "payload.pack").read_bytes(),
-                         self._scratch_rights(exclude_pack=pack_id), now, time_trustworthy, False, self.budget)
+                         self._scratch_rights(exclude_pack=pack_id), now, time_trustworthy, False, self.budget, sig)
 
 
 # ---------------------------------------------------------------------- lab leases

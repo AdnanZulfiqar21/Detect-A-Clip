@@ -25,6 +25,9 @@ from ..synth.manifest import L0_GRANT_ID
 
 DEV_KEY_ID_PREFIX = "DEVKEY-"
 MAX_MANIFEST_BYTES = 64 * 1024
+MANIFEST_V1 = "L0_DEV_INTEGRITY_MANIFEST"      # embedded signature over re-serialised JSON (LAB tools)
+MANIFEST_V2 = "L0_DEV_INTEGRITY_MANIFEST_V2"   # detached Ed25519 signature over the exact manifest bytes
+SIGNATURE_BYTES = 64
 
 
 def canonical_bytes(manifest_dict: Dict) -> bytes:
@@ -131,6 +134,25 @@ def verify_signature(signed: Dict, pub: Ed25519PublicKey) -> bool:
         return False
     try:
         pub.verify(sig, canonical_bytes(signed))
+        return True
+    except InvalidSignature:
+        return False
+
+
+def sign_manifest_v2(m: PackManifest, priv: Ed25519PrivateKey) -> Tuple[bytes, bytes]:
+    """Manifest V2: (manifest bytes, detached 64-byte signature over exactly those bytes).
+    Verifiers never re-serialise JSON, so every language checks the same bytes."""
+    d = manifest_to_dict(m)
+    d["manifest_type"] = MANIFEST_V2
+    data = json.dumps(d, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")
+    return data, priv.sign(data)
+
+
+def verify_detached(manifest_bytes: bytes, signature: bytes, pub: Ed25519PublicKey) -> bool:
+    if not isinstance(signature, (bytes, bytearray)) or len(signature) != SIGNATURE_BYTES:
+        return False
+    try:
+        pub.verify(bytes(signature), manifest_bytes)
         return True
     except InvalidSignature:
         return False
