@@ -5,9 +5,9 @@ name: swift-core
 on:
   push:
     branches: [main, "impl/**"]
-    paths: ["ios/**", "android/app/src/test/resources/**", ".github/workflows/swift-core.yml"]
+    paths: ["ios/**", "!ios/**/*.md", "android/app/src/test/resources/**", ".github/workflows/swift-core.yml"]
   pull_request:
-    paths: ["ios/**", "android/app/src/test/resources/**", ".github/workflows/swift-core.yml"]
+    paths: ["ios/**", "!ios/**/*.md", "android/app/src/test/resources/**", ".github/workflows/swift-core.yml"]
   workflow_dispatch:
 
 permissions:

@@ -18,7 +18,12 @@ pass at `3f77273` (macOS 26.6.2, Xcode 26.6, Swift 6.3.3); results in `docs/TEST
 | `Sources/PackLoader.swift`, `Tests/ManifestContractTests.swift` | Manifest V2 loader (CryptoKit Ed25519/SHA-256); 68 shared cases |
 | `Sources/RecognitionSession.swift`, `Tests/PipelineGoldenTests.swift` | FrameView (RGB/BGR, strides) + session; 12 shared pipeline queries |
 | `Sources/Recognition.swift`, `DacDhash.swift`, `DacExact.swift` and their golden tests | Verification/decision, DAC-DHASH-v1, DAC-CROP-v1/DAC-QUAL-v1 |
-| `Sources/ScreenCaptureAdapter.swift` | ScreenCaptureKit adapter skeleton behind `canImport(ScreenCaptureKit) && os(iOS)`; excluded from the macOS build; symbol signatures UNVERIFIED |
+| `Sources/PackStore.swift`, `CrashChild/main.swift`, `Tests/PackStoreTests.swift` | Installed pack store (same layout as Kotlin/Python) and its `_exit` crash-child recovery test |
+| `Sources/PixelBufferFrame.swift`, `Tests/PixelBufferFrameTests.swift` | CVPixelBuffer (32BGRA) → app-owned luma, locked only during the copy |
+| `Sources/LabFlow.swift`, `Tests/LabFlowTests.swift` | The LAB journey used by the app (Terms, eligibility, disclosure, picker result, cancel, result text) |
+| `Sources/ScreenCaptureAdapter.swift` | ScreenCaptureKit adapter skeleton behind `canImport(ScreenCaptureKit) && os(iOS)`; **not compilable**: the framework is absent from the newest available iOS SDK (26.5); symbol signatures UNVERIFIED |
+| `../LabApp/` | SwiftUI LAB app shell (XcodeGen `project.yml`, privacy manifest, XCUITest). CI: unsigned iOS device build + simulator UI test |
+| `../scripts/sdk_probe.sh` | Installed-header probe (CAP-I03); output in the `ios-sdk` CI job summary |
 
 ## Capture paths to investigate separately (D11: no blanket minimum)
 
@@ -29,6 +34,14 @@ pass at `3f77273` (macOS 26.6.2, Xcode 26.6, Swift 6.3.3); results in `docs/TEST
 2. **ReplayKit broadcast extension** (S13, V11, V12). Research candidate only. Verify
    introduced, deprecated and obsoleted attributes separately. Deprecation is not removal,
    and neither is a store rejection.
+
+## Build the LAB app on a Mac
+
+```bash
+brew install xcodegen
+cd ios/LabApp && xcodegen generate
+xcodebuild -project DetectAClipLabApp.xcodeproj -scheme DetectAClipLabApp -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build
+```
 
 ## First Mac session checklist (P02-T01/T02, DATA-L00 Part A)
 
