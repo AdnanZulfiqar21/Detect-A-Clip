@@ -38,13 +38,22 @@ final class ScreenCaptureAdapter: NSObject, SCStreamOutput, SCStreamDelegate, Pr
         }
     }
 
+    /// Frames whose pixel-buffer format or geometry the FrameView contract refused (diagnostic counter).
+    private(set) var refusedGeometry = 0
+
     // SCStreamOutput
     func stream(_ stream: SCStream, didOutputSampleBuffer sampleBuffer: CMSampleBuffer, of type: SCStreamOutputType) {
         guard type == .screen else { return }
-        guard lifecycle.onFrame() else { return }   // refused: the buffer is simply not retained
+        guard let ts = lifecycle.acceptFrame() else { return }   // refused: the buffer is simply not retained
         defer { lifecycle.frameDone() }
-        // Bounded in-memory work only; nothing persisted.
-        _ = CMSampleBufferGetImageBuffer(sampleBuffer)
+        // Same structure as the Android service: the OS buffer is locked only while the bounded
+        // FrameView exists; in DIAGNOSTIC mode processFrame reads no pixel. Nothing is persisted.
+        guard let pb = CMSampleBufferGetImageBuffer(sampleBuffer) else { refusedGeometry += 1; return }
+        do {
+            try PixelBufferFrame.withView(pb) { view in _ = lifecycle.processFrame(timestampMs: ts, view: view) }
+        } catch {
+            refusedGeometry += 1
+        }
     }
 
     // SCStreamDelegate

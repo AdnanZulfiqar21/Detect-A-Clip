@@ -48,6 +48,8 @@ class CaptureService : Service() {
     private var reader: ImageReader? = null
     private val worker: ExecutorService = Executors.newSingleThreadExecutor()
     private var screenOffRegistered = false
+    /** Frames whose plane geometry the FrameView contract refused (CAP-A04 diagnostic counter). */
+    var refusedGeometry = 0; private set
 
     private val lifecycle: CaptureLifecycle by lazy {
         // DIAGNOSTIC mode only (CAP-A04): no recognizer factory is passed, so frames are counted,
@@ -126,9 +128,16 @@ class CaptureService : Service() {
         reader = r
         r.setOnImageAvailableListener({ rd ->
             val img = rd.acquireLatestImage() ?: return@setOnImageAvailableListener
-            if (!lifecycle.onFrame()) { img.close(); return@setOnImageAvailableListener }
+            val ts = lifecycle.acceptFrame()
+            if (ts == null) { img.close(); return@setOnImageAvailableListener }
             try {
-                img.planes[0].buffer.get(0) // dummy bounded in-memory work (P01-T05b)
+                // Real ImageReader geometry goes through the bounded FrameView. In DIAGNOSTIC mode
+                // processFrame returns before any pixel is read; geometry the contract refuses is
+                // counted, never decoded. (P01-T05b bounded in-memory work.)
+                val plane = img.planes[0]
+                val view = try { FrameView(plane.buffer, img.width, img.height, plane.rowStride, plane.pixelStride) }
+                           catch (e: IllegalArgumentException) { refusedGeometry += 1; null }
+                if (view != null) lifecycle.processFrame(ts, view)
             } finally {
                 img.close()
                 lifecycle.frameDone()

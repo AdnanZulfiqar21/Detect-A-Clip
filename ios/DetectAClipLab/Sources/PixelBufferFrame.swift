@@ -9,9 +9,10 @@ import CoreVideo
 public enum PixelBufferFrame {
     public enum Failure: Error, Equatable { case unsupportedFormat(OSType), lockFailed(Int32), noBaseAddress }
 
-    /// Copies luma out of a 32BGRA (or 32RGBA) pixel buffer. Throws for any other format, a lock
-    /// failure, or geometry FrameView refuses (bounds checked before any read).
-    public static func luma(_ pb: CVPixelBuffer) throws -> (luma: [Int], width: Int, height: Int) {
+    /// Locks a 32BGRA (or 32RGBA) pixel buffer read-only, builds the bounds-checked FrameView over
+    /// the locked bytes (no pixel is read by the constructor), runs `body`, and unlocks before
+    /// returning. Throws for any other format, a lock failure, or geometry FrameView refuses.
+    public static func withView<T>(_ pb: CVPixelBuffer, _ body: (FrameView) throws -> T) throws -> T {
         let format = CVPixelBufferGetPixelFormatType(pb)
         let order: FrameView.Order
         switch format {
@@ -27,7 +28,12 @@ public enum PixelBufferFrame {
         let size = CVPixelBufferGetDataSize(pb)
         let view = try FrameView(base: UnsafeRawBufferPointer(start: base, count: size), width: w, height: h,
                                  rowStride: rowBytes, pixelStride: 4, order: order)
-        return (view.toLuma(), w, h)
+        return try body(view)
+    }
+
+    /// Copies luma out of the pixel buffer (app-owned result; the buffer is unlocked on return).
+    public static func luma(_ pb: CVPixelBuffer) throws -> (luma: [Int], width: Int, height: Int) {
+        try withView(pb) { view in (view.toLuma(), view.width, view.height) }
     }
 }
 #endif

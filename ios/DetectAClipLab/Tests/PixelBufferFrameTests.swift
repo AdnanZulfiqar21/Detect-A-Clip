@@ -47,6 +47,17 @@ final class PixelBufferFrameTests: XCTestCase {
         XCTAssertEqual(first.count, w * h)
     }
 
+    func testWithViewUnlocksAfterTheBodyAndReadsNothingByItself() throws {
+        let w = 64, h = 36
+        let pb = try bgraBuffer(DacDhash.contentFrame(seed: 9, w: w, h: h), w, h)
+        var seenWidth = 0
+        try PixelBufferFrame.withView(pb) { view in seenWidth = view.width }   // no toLuma: geometry only
+        XCTAssertEqual(seenWidth, w)
+        struct Boom: Error {}
+        XCTAssertThrowsError(try PixelBufferFrame.withView(pb) { _ in throw Boom() })
+        XCTAssertEqual(try PixelBufferFrame.luma(pb).luma.count, w * h)                   // still usable afterwards
+    }
+
     func testUnsupportedFormatAndTinyFramesAreRefused() throws {
         var yuv: CVPixelBuffer?
         CVPixelBufferCreate(nil, 64, 36, kCVPixelFormatType_420YpCbCr8BiPlanarFullRange, nil, &yuv)
