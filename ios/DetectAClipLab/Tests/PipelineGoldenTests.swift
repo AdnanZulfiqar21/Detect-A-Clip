@@ -70,9 +70,9 @@ final class PipelineGoldenTests: XCTestCase {
         XCTAssertEqual(luma, copy)
     }
 
-    func testInconsistentStridesAreRefused() {
+    func testInconsistentStridesAreRefused() throws {
         let buf = [UInt8](repeating: 0, count: 64 * 4 * 36)
-        buf.withUnsafeBytes { b in
+        try buf.withUnsafeBytes { (b: UnsafeRawBufferPointer) throws -> Void in
             XCTAssertThrowsError(try FrameView(base: b, width: 64, height: 36, rowStride: 64 * 4 - 1, pixelStride: 4))
             XCTAssertThrowsError(try FrameView(base: b, width: 64, height: 36, rowStride: 64 * 4 + 8, pixelStride: 4))
             XCTAssertThrowsError(try FrameView(base: b, width: 64, height: 36, rowStride: 64 * 2, pixelStride: 2))
