@@ -43,7 +43,8 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        status = TextView(this).apply { textSize = 18f }
+        // Live region: TalkBack announces state and result changes without focus moving (P05-T07a).
+        status = TextView(this).apply { textSize = 18f; accessibilityLiveRegion = android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE }
         startButton = Button(this).apply { text = getString(R.string.start_scan); setOnClickListener { confirmAndStart() } }
         val cancel = Button(this).apply {
             text = getString(R.string.stop_cancel)

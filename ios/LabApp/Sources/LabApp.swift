@@ -35,11 +35,12 @@ struct ContentView: View {
                 Button("Terms and privacy (draft)") { model.openTerms() }
                     .accessibilityIdentifier("terms")
                 if let m = model.message {
-                    Text(m).accessibilityIdentifier("message")
+                    Text(m).accessibilityIdentifier("message").accessibilityAddTraits(.updatesFrequently)
                 }
                 Text(model.lines.joined(separator: "\n"))
                     .font(.body.monospaced())
                     .accessibilityIdentifier("status")
+                    .accessibilityAddTraits(.updatesFrequently)   // VoiceOver announces state/result changes (P05-T07a)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
