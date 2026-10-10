@@ -1,6 +1,12 @@
 """SEC-01 (basic L0), RIGHTS-02 epoch logic, RIGHTS-03 region method, D10 total budget,
 and untrusted payload parsing bounds."""
 import json
+from datetime import datetime, timezone
+
+
+def now():
+    return datetime.now(timezone.utc)
+
 import struct
 
 import pytest
@@ -42,7 +48,7 @@ def state(keys, **kw):
 
 def test_valid_pack_loads_and_commits_state(bundle, keys):
     s = state(keys)
-    lp = load_pack(signed(bundle, keys, rights_epoch=3), bundle.to_bytes(), s, None, True)
+    lp = load_pack(signed(bundle, keys, rights_epoch=3), bundle.to_bytes(), s, now(), True)
     assert lp.bundle.vector_count == bundle.vector_count
     assert lp.manifest["calibration_status"] == "UNCALIBRATED"
     assert s.minimum_rights_epoch == 3
@@ -61,40 +67,40 @@ def test_payload_byte_flip_rejected(bundle, keys):
     s = state(keys)
     p = bytearray(bundle.to_bytes())
     p[-5] ^= 0x01
-    _assert_rejected_unchanged(lambda: load_pack(signed(bundle, keys), bytes(p), s, None, True), s, "hash mismatch")
+    _assert_rejected_unchanged(lambda: load_pack(signed(bundle, keys), bytes(p), s, now(), True), s, "hash mismatch")
 
 
 def test_manifest_field_tamper_breaks_signature(bundle, keys):
     s = state(keys)
     m = json.loads(signed(bundle, keys))
     m["calibration_status"] = "CALIBRATED"
-    _assert_rejected_unchanged(lambda: load_pack(json.dumps(m).encode(), bundle.to_bytes(), s, None, True), s, "bad signature")
+    _assert_rejected_unchanged(lambda: load_pack(json.dumps(m).encode(), bundle.to_bytes(), s, now(), True), s, "bad signature")
 
 
 def test_unknown_and_revoked_signers_rejected(bundle, keys):
     s = state(keys)
-    _assert_rejected_unchanged(lambda: load_pack(signed(bundle, keys, priv=keys["priv2"], kid=keys["kid2"]), bundle.to_bytes(), s, None, True), s, "unknown signing key")
+    _assert_rejected_unchanged(lambda: load_pack(signed(bundle, keys, priv=keys["priv2"], kid=keys["kid2"]), bundle.to_bytes(), s, now(), True), s, "unknown signing key")
     s.revoked_key_ids.add(keys["kid"])
-    _assert_rejected_unchanged(lambda: load_pack(signed(bundle, keys), bundle.to_bytes(), s, None, True), s, "signer revoked")
+    _assert_rejected_unchanged(lambda: load_pack(signed(bundle, keys), bundle.to_bytes(), s, now(), True), s, "signer revoked")
 
 
 def test_key_substitution_with_other_trusted_key_rejected(bundle, keys):
     """Signed by key2 but claiming key1's ID."""
     s = state(keys)
-    _assert_rejected_unchanged(lambda: load_pack(signed(bundle, keys, priv=keys["priv2"], kid=keys["kid"]), bundle.to_bytes(), s, None, True), s, "bad signature")
+    _assert_rejected_unchanged(lambda: load_pack(signed(bundle, keys, priv=keys["priv2"], kid=keys["kid"]), bundle.to_bytes(), s, now(), True), s, "bad signature")
 
 
 def test_rights_epoch_cannot_roll_back(bundle, keys):
     s = state(keys)
-    load_pack(signed(bundle, keys, rights_epoch=5), bundle.to_bytes(), s, None, True)
-    _assert_rejected_unchanged(lambda: load_pack(signed(bundle, keys, rights_epoch=4), bundle.to_bytes(), s, None, True), s, "epoch rollback")
+    load_pack(signed(bundle, keys, rights_epoch=5), bundle.to_bytes(), s, now(), True)
+    _assert_rejected_unchanged(lambda: load_pack(signed(bundle, keys, rights_epoch=4), bundle.to_bytes(), s, now(), True), s, "epoch rollback")
 
 
 @pytest.mark.parametrize("method", [RegionAssuranceMethod.ONLINE_ACTIVATION, RegionAssuranceMethod.STORE_COUNTRY_ATTESTATION, RegionAssuranceMethod.COARSE_LOCATION])
 def test_unaccepted_region_assurance_method_refused_at_activation(bundle, keys, method):
     """D07: online activation (or any method) is not territory proof until accepted."""
     s = state(keys)
-    _assert_rejected_unchanged(lambda: load_pack(signed(bundle, keys, region_assurance_method=method), bundle.to_bytes(), s, None, True), s, "not accepted")
+    _assert_rejected_unchanged(lambda: load_pack(signed(bundle, keys, region_assurance_method=method), bundle.to_bytes(), s, now(), True), s, "not accepted")
 
 
 def test_total_installed_budget_is_not_per_pack(bundle, keys):
@@ -102,10 +108,10 @@ def test_total_installed_budget_is_not_per_pack(bundle, keys):
     size = len(bundle.to_bytes())
     s = state(keys)
     budget = int(size * 1.5)
-    load_pack(signed(bundle, keys, pack_id="A"), bundle.to_bytes(), s, None, True, budget_bytes=budget)
-    _assert_rejected_unchanged(lambda: load_pack(signed(bundle, keys, pack_id="B"), bundle.to_bytes(), s, None, True, budget_bytes=budget), s, "budget exceeded")
+    load_pack(signed(bundle, keys, pack_id="A"), bundle.to_bytes(), s, now(), True, budget_bytes=budget)
+    _assert_rejected_unchanged(lambda: load_pack(signed(bundle, keys, pack_id="B"), bundle.to_bytes(), s, now(), True, budget_bytes=budget), s, "budget exceeded")
     # Replacing the same pack id is allowed (its old bytes are excluded from the total).
-    load_pack(signed(bundle, keys, pack_id="A"), bundle.to_bytes(), s, None, True, budget_bytes=budget)
+    load_pack(signed(bundle, keys, pack_id="A"), bundle.to_bytes(), s, now(), True, budget_bytes=budget)
 
 
 def test_expiry_requires_trustworthy_time(bundle, keys):
@@ -118,19 +124,19 @@ def test_expiry_requires_trustworthy_time(bundle, keys):
 
 def test_release_mode_refuses_uncalibrated(bundle, keys):
     s = state(keys)
-    _assert_rejected_unchanged(lambda: load_pack(signed(bundle, keys), bundle.to_bytes(), s, None, True, release_mode=True), s, "UNCALIBRATED")
+    _assert_rejected_unchanged(lambda: load_pack(signed(bundle, keys), bundle.to_bytes(), s, now(), True, release_mode=True), s, "release")
 
 
 def test_oversized_manifest_rejected(bundle, keys):
     s = state(keys)
-    _assert_rejected_unchanged(lambda: load_pack(b"{" + b" " * 70_000 + b"}", bundle.to_bytes(), s, None, True), s, "too large")
+    _assert_rejected_unchanged(lambda: load_pack(b"{" + b" " * 70_000 + b"}", bundle.to_bytes(), s, now(), True), s, "too large")
 
 
 def test_extra_manifest_key_rejected(bundle, keys):
     s = state(keys)
     m = json.loads(signed(bundle, keys))
     m["dynamic_code_url"] = "https://example.invalid/x.js"
-    _assert_rejected_unchanged(lambda: load_pack(json.dumps(m).encode(), bundle.to_bytes(), s, None, True), s, "keys mismatch")
+    _assert_rejected_unchanged(lambda: load_pack(json.dumps(m).encode(), bundle.to_bytes(), s, now(), True), s, "keys mismatch")
 
 
 # ---------------------------------------------------------- untrusted payload parsing

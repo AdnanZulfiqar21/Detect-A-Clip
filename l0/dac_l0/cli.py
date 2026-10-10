@@ -74,7 +74,8 @@ def cmd_verify(a):
     key_id = Path(a.pub).name.split(".")[0]
     state.trusted_keys[key_id] = load_public(Path(a.pub))
     try:
-        lp = load_pack(Path(a.manifest).read_bytes(), Path(a.pack).read_bytes(), state, now_iso=None, time_trustworthy=True, release_mode=a.release)
+        from datetime import datetime, timezone
+        lp = load_pack(Path(a.manifest).read_bytes(), Path(a.pack).read_bytes(), state, now=datetime.now(timezone.utc), time_trustworthy=True, release_mode=a.release)
         print(f"ACCEPTED {lp.manifest['pack_id']} v{lp.manifest['pack_version']}: {lp.bundle.vector_count} vectors, {lp.bundle.title_count} titles, {lp.manifest['calibration_status']}")
     except PackRejected as e:
         print(f"REJECTED: {e.reason}")

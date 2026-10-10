@@ -18,7 +18,7 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 
-from .. import GENERATOR_VERSION, INDEX_FORMAT_VERSION, PREPROCESSING_VERSION
+from .. import EXACT_PREPROCESSING_VERSION, GENERATOR_VERSION, INDEX_FORMAT_VERSION, PREPROCESSING_VERSION
 from ..index.builder import IndexBundle
 from ..schemas import PackManifest, PermittedAct, RegionAssuranceMethod
 from ..synth.manifest import L0_GRANT_ID
@@ -74,6 +74,7 @@ def build_manifest(
     region_assurance_method: RegionAssuranceMethod = RegionAssuranceMethod.NONE,
     tombstones: Optional[list] = None,
     minimum_allowed_version: str = "0.1.0",
+    valid_from: Optional[str] = None,
 ) -> PackManifest:
     payload = bundle.to_bytes()
     return PackManifest(
@@ -82,12 +83,12 @@ def build_manifest(
         payload_sha256=hashlib.sha256(payload).hexdigest(),
         payload_size_bytes=len(payload),
         generator_version=GENERATOR_VERSION,
-        preprocessing_version=PREPROCESSING_VERSION,
+        preprocessing_version=EXACT_PREPROCESSING_VERSION if bundle.family.value == "DACDHASH" else PREPROCESSING_VERSION,
         index_format_version=INDEX_FORMAT_VERSION,
         calibration_version=calibration_version,
         calibration_status=calibration_status,
         rights_epoch=rights_epoch,
-        valid_from=datetime.now(timezone.utc).isoformat(),
+        valid_from=valid_from or datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         valid_until=valid_until,
         signed_time_basis="build-host-utc",
         key_id=key_id,

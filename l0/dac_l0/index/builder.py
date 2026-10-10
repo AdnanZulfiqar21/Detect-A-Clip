@@ -16,10 +16,11 @@ from typing import Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 
-from .. import GENERATOR_VERSION, INDEX_FORMAT_VERSION, PREPROCESSING_VERSION
+from .. import EXACT_PREPROCESSING_VERSION, GENERATOR_VERSION, INDEX_FORMAT_VERSION, PREPROCESSING_VERSION
 from ..quality import normalize
 from ..synth.generator import Edition, EditionKind
 from .descriptors import LOCATOR_BYTES, DescriptorFamily, Locator, describe
+from .format import FORMAT_V4, SharedScene, SharedSceneMember, check_names, strict_json_loads, validate_locators, validate_metadata
 
 MAGIC = b"DACL0IDX"
 HEADER_FMT = "<8sHHIId"  # magic, version, descriptor_bytes, vector_count, work_count, sampling_interval
@@ -37,7 +38,8 @@ class WorkEntry:
     durations_s: List[float]
     series_id: Optional[str] = None   # idx-flat-2: work→series/episode hierarchy (P04-T04)
     episode_id: Optional[str] = None
-    names: Dict[str, str] = field(default_factory=dict)  # idx-flat-3: locale tag → display name (P04-T04a)
+    names: Dict[str, str] = field(default_factory=dict)  # idx-flat-3: locale tag -> display name (P04-T04a)
+    aliases: List[str] = field(default_factory=list)     # idx-flat-4: alternative titles (P03-T01)
 
 
 @dataclass
@@ -47,6 +49,8 @@ class IndexBundle:
     descriptors: np.ndarray  # (N, D) uint8
     locators: np.ndarray     # (N, 16) uint8
     works: List[WorkEntry]
+    shared_scenes: List[SharedScene] = field(default_factory=list)   # idx-flat-4 metadata only
+    source_format: str = FORMAT_V4                                     # format the payload was read from
     build_seconds: float = 0.0
     indexed_hours: float = 0.0
     stats: Dict[str, float] = field(default_factory=dict)
@@ -67,9 +71,10 @@ class IndexBundle:
         meta = {
             "index_format_version": INDEX_FORMAT_VERSION,
             "generator_version": GENERATOR_VERSION,
-            "preprocessing_version": PREPROCESSING_VERSION,
+            "preprocessing_version": preprocessing_for(self.family),
             "family": self.family.value,
-            "works": [w.__dict__ for w in self.works],
+            "works": [dict(w.__dict__) for w in self.works],
+            "shared_scenes": [{"group_id": g.group_id, "members": [m.__dict__ for m in g.members]} for g in self.shared_scenes],
         }
         return json.dumps(meta, sort_keys=True, separators=(",", ":")).encode()
 
@@ -113,26 +118,19 @@ class IndexBundle:
             raise ValueError("truncated metadata")
         off += meta_len
         try:
-            meta = json.loads(meta_raw.decode("utf-8"))
-        except (UnicodeDecodeError, json.JSONDecodeError) as e:
+            meta = strict_json_loads(meta_raw)
+        except (UnicodeDecodeError, ValueError) as e:
             raise ValueError(f"metadata not valid JSON: {e}") from e
-        if meta.get("index_format_version") != INDEX_FORMAT_VERSION:
-            raise ValueError("incompatible index format version")
+        fmt, works_raw, scenes = validate_metadata(meta, nworks)
         try:
-            family = DescriptorFamily(meta.get("family"))
+            family = DescriptorFamily(meta["family"])
         except ValueError:
             raise ValueError("unknown descriptor family")
         if family.descriptor_bytes != dbytes:
             raise ValueError("metadata/header family mismatch")
-        works_raw = meta.get("works")
-        if not isinstance(works_raw, list) or len(works_raw) != nworks:
-            raise ValueError("work table mismatch")
-        works = []
-        for w in works_raw:
-            if not isinstance(w, dict) or set(w) != {"work_index", "work_id", "synthetic_title", "editions", "durations_s", "series_id", "episode_id", "names"}:
-                raise ValueError("bad work entry")
-            _check_names(w["names"])
-            works.append(WorkEntry(**w))
+        if meta["preprocessing_version"] != preprocessing_for(family):
+            raise ValueError("preprocessing version does not match the descriptor family")
+        works = [WorkEntry(**w) for w in works_raw]
         vec = dbytes + LOCATOR_BYTES
         body = data[off:]
         if len(body) != n * vec:
@@ -140,12 +138,8 @@ class IndexBundle:
         arr = np.frombuffer(body, dtype=np.uint8).reshape(n, vec) if n else np.zeros((0, vec), np.uint8)
         desc = np.ascontiguousarray(arr[:, :dbytes])
         locs = np.ascontiguousarray(arr[:, dbytes:])
-        # Locator sanity: work/edition indices must exist in the table.
-        if n:
-            wi = locs.view("<u4")[:, 0]
-            if wi.max() >= nworks:
-                raise ValueError("locator references unknown work")
-        b = cls(family, float(interval), desc, locs, works)
+        validate_locators(locs, works_raw)
+        b = cls(family, float(interval), desc, locs, works, scenes, fmt)
         b.indexed_hours = n * interval / 3600.0
         return b
 
@@ -153,20 +147,11 @@ class IndexBundle:
         return hashlib.sha256(self.to_bytes()).hexdigest()
 
 
-_LOCALE = re.compile(r"^[a-z]{2,3}(-[A-Za-z0-9]{2,8}){0,3}$")
-MAX_NAMES = 16
-MAX_NAME_CHARS = 200
+_check_names = check_names  # backwards-compatible name
 
 
-def _check_names(names) -> None:
-    """Untrusted metadata bounds for display names."""
-    if not isinstance(names, dict) or len(names) > MAX_NAMES:
-        raise ValueError("bad names table")
-    for k, v in names.items():
-        if not isinstance(k, str) or not _LOCALE.match(k):
-            raise ValueError("bad locale tag")
-        if not isinstance(v, str) or not (0 < len(v) <= MAX_NAME_CHARS) or any(ord(c) < 32 for c in v):
-            raise ValueError("bad display name")
+def preprocessing_for(family: DescriptorFamily) -> str:
+    return EXACT_PREPROCESSING_VERSION if family == DescriptorFamily.DACDHASH else PREPROCESSING_VERSION
 
 
 def resolve_display_name(names: Dict[str, str], preferences: Sequence[str], fallback: str) -> str:
@@ -185,16 +170,18 @@ def resolve_display_name(names: Dict[str, str], preferences: Sequence[str], fall
     return names[sorted(names)[0]] if names else fallback
 
 
-def build_index(editions: Sequence[Edition], family: DescriptorFamily, sampling_interval_s: float = 2.0) -> IndexBundle:
+def build_index(editions: Sequence[Edition], family: DescriptorFamily, sampling_interval_s: float = 2.0,
+                shared_scenes: Optional[Sequence[Tuple[str, Sequence[Tuple[str, str, int, int]]]]] = None) -> IndexBundle:
     """Build a flat index from authorised gallery editions.
 
     Sampling: one reference descriptor every `sampling_interval_s` seconds of each edition.
+    Locator edition indices are positions in *that work's own* edition list (format contract).
+    shared_scenes: optional declarations (group_id, [(work_id, edition_id, start_ms, end_ms), ...]).
     """
     if not (0.1 <= sampling_interval_s <= 60.0):
         raise ValueError("sampling interval out of bounds")
     t0 = time.perf_counter()
     works: Dict[str, WorkEntry] = {}
-    edition_order = [k.value for k in EditionKind]
     desc_rows: List[bytes] = []
     loc_rows: List[bytes] = []
     total_s = 0.0
@@ -203,13 +190,14 @@ def build_index(editions: Sequence[Edition], family: DescriptorFamily, sampling_
         if wid not in works:
             works[wid] = WorkEntry(len(works), wid, ed.work.synthetic_title, [], [],
                                    getattr(ed.work, "series_id", None), getattr(ed.work, "episode_id", None),
-                                   dict(getattr(ed.work, "display_names", None) or {"en": ed.work.synthetic_title}))
+                                   dict(getattr(ed.work, "display_names", None) or {"en": ed.work.synthetic_title}),
+                                   list(getattr(ed.work, "aliases", None) or []))
         we = works[wid]
         if ed.edition_id in we.editions:
             raise ValueError(f"duplicate edition {ed.asset_id}")
         we.editions.append(ed.edition_id)
         we.durations_s.append(ed.duration_s)
-        eidx = edition_order.index(ed.edition_id)
+        eidx = len(we.editions) - 1   # position in this work's own edition list
         n = int(np.floor(ed.duration_s / sampling_interval_s))
         for i in range(n):
             t = i * sampling_interval_s
@@ -220,7 +208,14 @@ def build_index(editions: Sequence[Edition], family: DescriptorFamily, sampling_
     d = family.descriptor_bytes
     desc = np.frombuffer(b"".join(desc_rows), dtype=np.uint8).reshape(-1, d) if desc_rows else np.zeros((0, d), np.uint8)
     locs = np.frombuffer(b"".join(loc_rows), dtype=np.uint8).reshape(-1, LOCATOR_BYTES) if loc_rows else np.zeros((0, LOCATOR_BYTES), np.uint8)
-    bundle = IndexBundle(family, sampling_interval_s, desc.copy(), locs.copy(), list(works.values()))
+    scenes: List[SharedScene] = []
+    for gid, members in (shared_scenes or []):
+        ms = []
+        for wid, eid, s_ms, e_ms in members:
+            we = works[wid]
+            ms.append(SharedSceneMember(we.work_index, we.editions.index(eid), int(s_ms), int(e_ms)))
+        scenes.append(SharedScene(gid, ms))
+    bundle = IndexBundle(family, sampling_interval_s, desc.copy(), locs.copy(), list(works.values()), scenes)
     bundle.build_seconds = time.perf_counter() - t0
     bundle.indexed_hours = total_s / 3600.0
     bundle.stats = {

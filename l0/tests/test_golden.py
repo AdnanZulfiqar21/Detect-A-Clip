@@ -42,3 +42,12 @@ def test_exact_path_golden_file_is_current(tmp_path):
     write_exact(out)
     committed = COMMITTED.parent / "golden_exact.txt"
     assert out.read_bytes().replace(b"\r\n", b"\n") == committed.read_bytes().replace(b"\r\n", b"\n")
+
+
+def test_format_contract_cases_are_current(tmp_path):
+    from dac_l0.eval.format_golden import write as write_cases
+
+    out = tmp_path / "f.txt"
+    write_cases(out)    # also asserts the Python parser agrees with every intended verdict
+    committed = COMMITTED.parent / "golden_format_cases.txt"
+    assert out.read_bytes().replace(b"\r\n", b"\n") == committed.read_bytes().replace(b"\r\n", b"\n")
