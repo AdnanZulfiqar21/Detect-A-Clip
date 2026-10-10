@@ -74,7 +74,7 @@ jobs:
             if grep -q "System has crashed" instrument.txt; then
               echo "Emulator system_server crashed (not a test assertion); waiting for reboot and retrying once."
               "$ADB" wait-for-device
-              for i in $(seq 1 120); do [ "$("$ADB" shell getprop sys.boot_completed | tr -d '')" = "1" ] && break; sleep 5; done
+              for i in $(seq 1 120); do [ "$("$ADB" shell getprop sys.boot_completed | tr -d '\r')" = "1" ] && break; sleep 5; done
               sleep 30; "$ADB" shell input keyevent 82
               run_suite
             else
