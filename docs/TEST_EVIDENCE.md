@@ -34,6 +34,8 @@ Windows 11 Pro x64, Python 3.13.15, Temurin JDK 17.0.20.1, kotlinc 2.4.21.
 | `0be2ccc` | swift-core (3 jobs) | **success**: `swift test` 57 tests, 0 failures, 0 skipped (incl. `PackStoreTests` 7 with the `_exit` crash child, `LabFlowTests` 7); iOS core compile; LAB app build + UI test; run 38075819185 |
 | `0be2ccc` | ci | **success**: Python 180 passed; pure Kotlin OK (71); Gradle `testDebugUnitTest` 71, 0 failures; run 38075819156 |
 | `d0727fb` | ci + swift-core | **success**: Python, pure Kotlin, Android (ci); `swift test` 60 tests, 0 failures, 0 skipped (incl. `PixelBufferFrameTests` 3); iOS core compile; LAB app build + UI test with the accessibility changes; runs 38076577340 / 38076574765 |
+| `2fb5544` (final code) | ci | **success**: Python 180 passed; pure Kotlin OK (72); Android assemble + lint + Gradle `testDebugUnitTest` 72 tests, 0 failures, 0 skipped; run 38077113139 |
+| `2fb5544` (final code) | swift-core (3 jobs) | **success**: `swift test` 61 tests, 0 failures, 0 skipped (incl. revoked-signer store test); Swift core built for iOS device + simulator; LAB app built unsigned for iOS devices, `LabJourneyUITests` passed on iPhone 17 Pro simulator iOS 26.5; run 38077108303 |
 
 The CI rows are source-level evidence only. `swift-core` compiles the platform-independent
 Swift package; it is not an iOS app build, archive, signing or device test, and the
