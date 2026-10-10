@@ -20,6 +20,7 @@ android {
         buildConfigField("boolean", "CAPTURE_ENABLED", captureEnabled.toString())
         buildConfigField("String", "BUILD_PURPOSE", "\"LAB\"")
         buildConfigField("String", "SOURCE_MODE", "\"$sourceMode\"")
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { buildConfig = true }
     buildTypes {
@@ -35,4 +36,8 @@ android {
 // No analytics, crash, logging or networking dependency (CTRL-G00 step 1).
 dependencies {
     testImplementation("junit:junit:4.13.2")
+    // Instrumented UI tests only (emulator/device); never packaged into the app.
+    androidTestImplementation("androidx.test:runner:1.7.0")
+    androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.4.0")
 }

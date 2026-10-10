@@ -62,8 +62,14 @@ device, signing, archive or store evidence.
 | Force-stop and reopen | IDLE, no result (memory-only), Terms acceptance kept | PASS |
 | CAP-A03 `app_only` build (`-Pdac.sourceMode=app_only`, `SOURCE_MODE = "app_only"`, API 37 path compiled) | The system picker still listed **"Share entire screen"**, it was selectable and enabled **"Share screen"**. The system log did not show which projection config the picker received, so this run cannot tell "config not honoured" from "config not delivered" | **NOT ENFORCED on this emulator**; CAP-A03 stays a device test; D01 consumer scope must not rely on the app-only request |
 | App-private files | only `shared_prefs/consent.xml` with key `terms.receipt`; no INTERNET/network permission | PASS |
+| Instrumented `LabJourneyTest` (UiAutomator 2.4.0, `am instrument`, 7 tests: Terms gate, controls below the status bar, Not now, picker Cancel, rotation + Back, grant with capture off, font scale 2.0) | **OK (7 tests)** in 210 s after two harness fixes (emulator System UI freezes; Android 17 prompt hides its buttons in landscape) | PASS (emulator) |
+| Rotate while the system prompt is open | Prompt stays, buttons off-screen in landscape; Back → PERMISSION_DENIED, no service, no projection; result survives rotating back | PASS |
+| Kill the app process (`kill -9`) while the prompt is open | Prompt stays; after the emulator's System UI froze in the app chooser and was restarted, the app reopened IDLE with no service, no projection and no ghost scan. The grant-after-kill step itself could not be completed on this emulator | PARTIAL (emulator ANR) |
+| Screen off while the prompt is open | Android dismissed the prompt; app recorded PERMISSION_DENIED; projection null | PASS |
+| Forced backup (`bmgr backupnow`) | "Backup is not allowed" (`allowBackup=false`) | PASS |
 
-Not covered by the emulator: frames, OEM behaviour, real lock/chip/notification timing, energy, and
+Host limits: 15.5 GB RAM with about 2 GB free made the emulator's System UI freeze several times (ANR); a CI
+emulator job (`android-emulator.yml`, KVM) repeats the instrumented suite. Not covered by the emulator: frames, OEM behaviour, real lock/chip/notification timing, energy, and
 anything needing capture enabled (G00/DATA-L00 Part B). These stay device tests (B-01).
 
 ## Roadmap test IDs
