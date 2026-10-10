@@ -1,5 +1,4 @@
-// Versions are PROPOSED pins, UNVERIFIED on this host (no SDK installed; see docs/BLOCKERS.md B-01/B-09).
+// AGP 9.4.1 (latest stable on 2026-10-10) with built-in Kotlin support; Gradle 9.8.1.
 plugins {
-    id("com.android.application") version "8.13.0" apply false
-    id("org.jetbrains.kotlin.android") version "2.2.20" apply false
+    id("com.android.application") version "9.4.1" apply false
 }

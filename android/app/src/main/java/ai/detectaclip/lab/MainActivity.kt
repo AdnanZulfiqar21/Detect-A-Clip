@@ -35,7 +35,7 @@ class MainActivity : Activity() {
         TermsDocument(
             termsVersion = "0.1-draft",
             locale = "en-GB",
-            renderedText = LAB_TERMS_TEXT, // exactly the text shown in the dialog
+            renderedText = getString(R.string.lab_terms_text), // exactly the text shown in the dialog
             governingLanguageVersion = "en-GB-draft",
             disclosureVersion = "lab-disclosure-1",
         )
@@ -44,22 +44,22 @@ class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         status = TextView(this).apply { textSize = 18f }
-        startButton = Button(this).apply { text = "Start scan (LAB)"; setOnClickListener { confirmAndStart() } }
+        startButton = Button(this).apply { text = getString(R.string.start_scan); setOnClickListener { confirmAndStart() } }
         val cancel = Button(this).apply {
-            text = "Stop / Cancel"
-            contentDescription = "Stop capture and cancel matching"
+            text = getString(R.string.stop_cancel)
+            contentDescription = getString(R.string.stop_cancel_description)
             setOnClickListener {
                 startService(Intent(this@MainActivity, CaptureService::class.java).setAction(CaptureService.ACTION_STOP))
                 coordinator.cancel(CaptureService.now()); render()
             }
         }
-        val discard = Button(this).apply { text = "Discard result"; setOnClickListener { coordinator.discard(); render() } }
-        val legal = Button(this).apply { text = "Terms and privacy (draft)"; setOnClickListener { showTerms(required = false) } }
+        val discard = Button(this).apply { text = getString(R.string.discard_result); setOnClickListener { coordinator.discard(); render() } }
+        val legal = Button(this).apply { text = getString(R.string.terms_button); setOnClickListener { showTerms(required = false) } }
         setContentView(ScrollView(this).apply {
             addView(LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(48, 96, 48, 48)
-                addView(TextView(context).apply { text = "Detect A Clip — LAB build (synthetic only)\nCapture enabled in this build: ${BuildConfig.CAPTURE_ENABLED}" })
+                addView(TextView(context).apply { text = getString(R.string.build_banner, BuildConfig.CAPTURE_ENABLED.toString()) })
                 addView(startButton); addView(cancel); addView(discard); addView(legal); addView(status)
             })
         })
@@ -76,14 +76,14 @@ class MainActivity : Activity() {
     private fun showTerms(required: Boolean) {
         val st = consent.termsStatus(terms)
         val heading = when (st) {
-            ConsentRecords.TermsStatus.CHANGED_NEEDS_NEW_NOTICE -> "The terms changed (this includes translation changes). Please review them again."
+            ConsentRecords.TermsStatus.CHANGED_NEEDS_NEW_NOTICE -> getString(R.string.terms_changed)
             else -> ""
         }
         AlertDialog.Builder(this)
-            .setTitle("Terms and privacy (DRAFT, lab only)")
-            .setMessage(heading + "\n\n" + LAB_TERMS_TEXT)
-            .setPositiveButton("Accept") { _, _ -> consent.accept(terms); render() }
-            .setNegativeButton(if (required) "Decline" else "Close") { _, _ -> if (required) consent.decline(terms); render() }
+            .setTitle(R.string.terms_title)
+            .setMessage(heading + "\n\n" + terms.renderedText)
+            .setPositiveButton(R.string.accept) { _, _ -> consent.accept(terms); render() }
+            .setNegativeButton(if (required) R.string.decline else R.string.close) { _, _ -> if (required) consent.decline(terms); render() }
             .show()
     }
 
@@ -98,30 +98,39 @@ class MainActivity : Activity() {
 
     private fun confirmAndStart() {
         val e = eligibility()
-        if (e is EligibilityGate.Decision.Denied) { status.text = "Scanning unavailable: ${e.reason}"; return }
+        if (e is EligibilityGate.Decision.Denied) { status.text = getString(R.string.scanning_unavailable, e.reason); return }
         AlertDialog.Builder(this)
-            .setTitle("Before you scan")
-            .setMessage(
-                "Android will ask you to share your screen or one app. Only frames from this scan are used, " +
-                    "in memory on this phone, and nothing leaves the device.\n\n" +
-                    "To stop capture: use the system sharing indicator, the notification's Stop action, or Stop here.\n" +
-                    "To cancel matching after capture ends: tap Cancel in the notification or return here and tap Stop / Cancel.\n\n" +
-                    "This LAB build only recognises synthetic test clips."
-            )
-            .setPositiveButton("Continue") { _, _ -> launchPicker() }
-            .setNegativeButton("Not now", null)
+            .setTitle(R.string.before_scan_title)
+            .setMessage(R.string.before_scan_body)
+            .setPositiveButton(R.string.continue_) { _, _ -> launchPicker() }
+            .setNegativeButton(R.string.not_now, null)
             .show()
     }
 
     private fun launchPicker() {
         if (!coordinator.start(CaptureService.now())) { render(); return }
         val mpm = getSystemService(MediaProjectionManager::class.java)
-        // API 34: user chooses display or a single app. The API 37 source-restriction
-        // experiment (CAP-A03) is specified in android/CAP-A03_PLAN.md.
-        val intent = mpm.createScreenCaptureIntent(MediaProjectionConfig.createConfigForUserChoice())
+        val intent = mpm.createScreenCaptureIntent(projectionConfig())
         @Suppress("DEPRECATION")
         startActivityForResult(intent, REQ)
         tickLoop() // UI refresh + permission deadline; capture deadlines run in CaptureService
+    }
+
+    /**
+     * CAP-A03: API 34 user-choice picker by default. With dac.sourceMode=app_only on API 37+,
+     * the display source is disabled and the app source enabled, so the picker should not
+     * offer full-display sharing. Whether a user can still escape to the display is exactly
+     * what CAP-A03 must test on devices; this code is not evidence of enforcement.
+     */
+    private fun projectionConfig(): MediaProjectionConfig {
+        if (BuildConfig.SOURCE_MODE == "app_only" && Build.VERSION.SDK_INT >= 37) {
+            return MediaProjectionConfig.Builder()
+                .setSourceEnabled(MediaProjectionConfig.PROJECTION_SOURCE_DISPLAY, false)
+                .setSourceEnabled(MediaProjectionConfig.PROJECTION_SOURCE_APP, true)
+                .setInitiallySelectedSource(MediaProjectionConfig.PROJECTION_SOURCE_APP)
+                .build()
+        }
+        return MediaProjectionConfig.createConfigForUserChoice()
     }
 
     @Deprecated("Activity result API kept minimal for the lab build")
@@ -148,19 +157,20 @@ class MainActivity : Activity() {
     private fun render() {
         startButton.isEnabled = consent.scanningAllowed(terms)
         val r = coordinator.result
-        status.text = buildString {
-            if (!consent.scanningAllowed(terms)) append("Terms not accepted: scanning is off. Legal pages stay available.\n")
-            append("State: ${coordinator.state}\n")
-            if (r != null) {
-                append("Result: ${when (r.outcome) {
-                    ScanCoordinator.Outcome.VERIFIED_MATCH -> "Match"
-                    ScanCoordinator.Outcome.POSSIBLE_MATCH -> "Possible match, not confirmed"
-                    else -> r.outcome.name
-                }}")
-                r.candidateWorkId?.let { append(" — $it (SYNTHETIC)") }
-                if (r.flags.isNotEmpty()) append("\n${r.flags.joinToString()}")
-            } else append("NOT SCANNING / no result")
-        }
+        val lines = ArrayList<String>()
+        if (!consent.scanningAllowed(terms)) lines += getString(R.string.terms_not_accepted)
+        lines += getString(R.string.state_line, coordinator.state.name)
+        if (r != null) {
+            val outcome = when (r.outcome) {
+                ScanCoordinator.Outcome.VERIFIED_MATCH -> getString(R.string.result_match)
+                ScanCoordinator.Outcome.POSSIBLE_MATCH -> getString(R.string.result_possible)
+                else -> r.outcome.name
+            }
+            val shown = r.candidateWorkId?.let { getString(R.string.synthetic_suffix, "$outcome — $it") } ?: outcome
+            lines += getString(R.string.result_line, shown)
+            if (r.flags.isNotEmpty()) lines += r.flags.joinToString()
+        } else lines += getString(R.string.no_result)
+        status.text = lines.joinToString("\n")
     }
 
     /** Terms receipt and purpose choices only; excluded from backup by data-extraction rules. */
@@ -173,9 +183,5 @@ class MainActivity : Activity() {
 
     companion object {
         private const val REQ = 41
-        private const val LAB_TERMS_TEXT =
-            "DRAFT, not legally reviewed, lab use only. Each scan needs your tap and the system's permission. " +
-                "Frames are processed in memory on this phone and never saved or sent. Results expire after 15 minutes " +
-                "or at your next scan. This build recognises synthetic test clips only. Full drafts: docs/legal/."
     }
 }

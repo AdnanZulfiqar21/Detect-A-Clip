@@ -17,7 +17,7 @@ required (P00-T04). Desktop L0 and each mobile track are scoped separately.
 
 | # | Control | State | How to check |
 |---|---|---|---|
-| A1 | Lab build has no INTERNET (incl. merged dependencies) | Source done; **merged manifest not inspected** | `./gradlew :app:processDebugManifest` then read `build/intermediates/merged_manifests/...` (needs SDK, B-09) |
+| A1 | Lab build has no INTERNET (incl. merged dependencies) | **Verified at build level 2026-10-10**: merged manifest and `aapt2 dump permissions` of `app-debug.apk` list only FOREGROUND_SERVICE, FOREGROUND_SERVICE_MEDIA_PROJECTION, POST_NOTIFICATIONS; `allowBackup=false` | Re-check on every dependency change; witness sign-off still open |
 | A2 | Capture disabled in the Part A build | Source done | `dac.captureEnabled=false` in `android/gradle.properties`; `BuildConfig.CAPTURE_ENABLED` |
 | A3 | No file output from capture code | Code review done | grep for `FileOutputStream`, `openFileOutput`, `MediaStore` in `android/` → none |
 | A4 | Backups disabled | Source done | `allowBackup=false`, `no_backup.xml` |

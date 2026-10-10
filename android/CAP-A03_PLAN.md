@@ -1,7 +1,8 @@
 # CAP-A03 / CAP-04 plan — Android capture-source restriction (P01-T04)
 
-Status: **NOT_STARTED / UNVERIFIED.** Nothing here is compiled. Symbols come from the
-official documentation (S03, S04, Q03), not from an installed SDK (P00-T02 open, B-09).
+Status: **code compiled, device test NOT_STARTED (B-01).** Symbols verified in the installed
+API 37 SDK on 2026-10-10 (javap). Build the experiment with `-Pdac.sourceMode=app_only`
+(display source disabled, app source enabled and initially selected; API 37+ only).
 
 ## Question
 

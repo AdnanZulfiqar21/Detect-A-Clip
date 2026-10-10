@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- LAB build UI text (en-GB). Legal wording is a DRAFT for counsel (docs/legal). Translating
+     lab_terms_text changes its rendered-text hash and therefore re-prompts (CONS-03). -->
+<resources>
+    <string name="app_name">Detect A Clip LAB</string>
+    <string name="build_banner">Detect A Clip — LAB build (synthetic only)\nCapture enabled in this build: %1$s</string>
+    <string name="start_scan">Start scan (LAB)</string>
+    <string name="stop_cancel">Stop / Cancel</string>
+    <string name="stop_cancel_description">Stop capture and cancel matching</string>
+    <string name="discard_result">Discard result</string>
+    <string name="terms_button">Terms and privacy (draft)</string>
+    <string name="terms_title">Terms and privacy (DRAFT, lab only)</string>
+    <string name="terms_changed">The terms changed (this includes translation changes). Please review them again.</string>
+    <string name="lab_terms_text">DRAFT, not legally reviewed, lab use only. Each scan needs your tap and the system\'s permission. Frames are processed in memory on this phone and never saved or sent. Results expire after 15 minutes or at your next scan. This build recognises synthetic test clips only. Full drafts: docs/legal/.</string>
+    <string name="accept">Accept</string>
+    <string name="decline">Decline</string>
+    <string name="close">Close</string>
+    <string name="scanning_unavailable">Scanning unavailable: %1$s</string>
+    <string name="before_scan_title">Before you scan</string>
+    <string name="before_scan_body">Android will ask you to share your screen or one app. Only frames from this scan are used, in memory on this phone, and nothing leaves the device.\n\nTo stop capture: use the system sharing indicator, the notification\'s Stop action, or Stop here.\nTo cancel matching after capture ends: tap Cancel in the notification or return here and tap Stop / Cancel.\n\nThis LAB build only recognises synthetic test clips.</string>
+    <string name="continue_">Continue</string>
+    <string name="not_now">Not now</string>
+    <string name="terms_not_accepted">Terms not accepted: scanning is off. Legal pages stay available.</string>
+    <string name="state_line">State: %1$s</string>
+    <string name="result_match">Match</string>
+    <string name="result_possible">Possible match, not confirmed</string>
+    <string name="result_line">Result: %1$s</string>
+    <string name="synthetic_suffix">%1$s (SYNTHETIC)</string>
+    <string name="no_result">NOT SCANNING / no result</string>
+    <string name="channel_name">Scan in progress</string>
+    <string name="notif_capturing_title">Detect A Clip LAB is capturing your screen</string>
+    <string name="notif_capturing_text">Synthetic lab test. Tap Stop to end capture and cancel matching.</string>
+    <string name="notif_matching_title">Screen capture stopped. Matching on this phone…</string>
+    <string name="notif_matching_text">Synthetic lab test. Tap Cancel to discard the match.</string>
+    <string name="action_stop">Stop</string>
+    <string name="action_cancel">Cancel</string>
+</resources>

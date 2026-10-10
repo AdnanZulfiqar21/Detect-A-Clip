@@ -11,7 +11,11 @@ Windows 11 Pro x64, Python 3.13.15, Temurin JDK 17.0.20.1, kotlinc 2.4.21.
 |---|---|---|---|
 | L0 Python (127 tests) | `cd l0 && python -m pytest -o addopts=""` | **127 passed** 2026-10-10 | branch `impl/l0-desktop` |
 | Pure-Kotlin JVM (35 tests: coordinator, lifecycle, consent, eligibility, recognition golden ×400 cases, DAC-DHASH-v1 golden ×42 frames, exact crop/quality/mirror golden ×9 cases, end-to-end pack→decision golden ×6 queries, parser/JSON bounds) | `bash android/run-jvm-tests.sh` | **OK (35 tests)** 2026-10-10 | branch `impl/l0-desktop` |
-| Android app (Gradle, instrumented) | — | **NOT RUN** (SDK licence pending, B-09; no device, B-01) | — |
+| Android app build (AGP 9.4.1, Gradle 9.8.1, compileSdk 37, minSdk 34) | `bash android/gradle-local.sh :app:assembleDebug` | **BUILD SUCCESSFUL** 2026-10-10; both `dac.sourceMode=user_choice` (default) and `app_only` | `app-debug.apk`, capture disabled |
+| Android merged manifest / APK permissions | `aapt2 dump permissions app/build/outputs/apk/debug/app-debug.apk` | **only** FOREGROUND_SERVICE, FOREGROUND_SERVICE_MEDIA_PROJECTION, POST_NOTIFICATIONS; no INTERNET / network / audio; allowBackup=false | CTRL-G00 A1 (build level) |
+| Android lint | `bash android/gradle-local.sh :app:lintDebug` | **No issues found** (after moving UI text to resources and setting an icon) | — |
+| Gradle-compiled unit tests | `bash android/gradle-local.sh :app:compileDebugUnitTestKotlin` then `bash android/junit-on-gradle-classes.sh` | **OK (35 tests)** | Gradle's own `testDebugUnitTest` cannot fork its test JVM on this host (loopback blocked); normal elsewhere |
+| Android instrumented / device tests | — | **NOT RUN** (no device, B-01) | — |
 | iOS (`swift test`, XCTest) | — | **NOT RUN** (no Mac, B-02) | — |
 
 ## Roadmap test IDs

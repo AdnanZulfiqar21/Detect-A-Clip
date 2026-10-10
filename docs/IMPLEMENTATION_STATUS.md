@@ -11,7 +11,7 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | Platform | Works now | Not verified / missing |
 |---|---|---|
 | Desktop L0 | Synthetic fixtures v3.1 with challenge cases; descriptors (24/48/160/528 B); index builder and bounded parser; temporal verification; series/episode-aware decision; calibration; signed UNCALIBRATED/L0-calibrated packs; atomic pack store; lab leases; LAB runner. 115 tests | Real footage, real devices, release statistics |
-| Android | Source for LAB app: no INTERNET, capture off by default, mediaProjection FGS adapter, pure-Kotlin coordinator, lifecycle, consent records, eligibility gate. 35 JVM tests pass (incl. bit-exact recognition, descriptor, exact-path and end-to-end golden tests) | Android compile (B-09), any device run (B-01), CAP-A03 source restriction |
+| Android | LAB app builds to a debug APK (AGP 9.4.1, compileSdk 37); lint clean; no INTERNET in the merged manifest; capture off by default; CAP-A03 `app_only` picker config compiled. 35 unit tests pass (Gradle-compiled and kotlinc-compiled) | Any device run (B-01), CAP-A03 enforcement on devices |
 | iOS | Swift sources for coordinator, frame selector, lifecycle with background-task guard, consent/eligibility, ScreenCaptureKit adapter skeleton, XCTests | Any compile or test (B-02) |
 
 ## Task register (86 tasks)
@@ -19,7 +19,7 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | Task | Status | Evidence / note |
 |---|---|---|
 | P00-T01 | PASS | `docs/ENVIRONMENT.md`, `docs/SDK_MATRIX.md` toolchain table |
-| P00-T02 | UNVERIFIED | `docs/SDK_MATRIX.md`: documented only; installed/measured need B-09/B-02 |
+| P00-T02 | PASS (Android installed/compiled) · UNVERIFIED (iOS) | `docs/SDK_MATRIX.md`: API 34/37 MediaProjection symbols verified with javap and compiled 2026-10-10; device measurement B-01; iOS B-02 |
 | P00-T03 | BLOCKED | B-03 |
 | P00-T04 | BLOCKED | B-04 |
 | P00-T05 | BLOCKED | B-05 |
@@ -27,8 +27,8 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | P00-T07 | IMPLEMENTED_NOT_VERIFIED | fixtures v3.1, asset/rights manifests; rights-reviewer sign-off missing |
 | P00-T08 | PASS (L0 exploratory protocol) | EVAL_PROTOCOL, preregistered scoring/calibration, sealed FINAL; independent AI-06 setup review missing |
 | P00-T09 | PASS (document level) | TRACE-01 |
-| P01-T01 | IMPLEMENTED_NOT_VERIFIED | Part A source items done; Android compile + merged-manifest check BLOCKED (B-09); signed Part A BLOCKED (B-01) |
-| P01-T02…T08 | BLOCKED | B-01, B-09. Lifecycle races covered on JVM only |
+| P01-T01 | IN_PROGRESS (build items PASS) | Debug APK builds (AGP 9.4.1, compileSdk 37); merged manifest without INTERNET; lint clean; capture disabled by default. Device, network isolation and witness items of Part A BLOCKED (B-01) |
+| P01-T02…T08 | BLOCKED | B-01 (device). Lifecycle races covered on JVM only; CAP-A03 `app_only` source configuration compiled (API 37 guard) |
 | P02-T01 | UNVERIFIED | documentary symbol review in SDK_MATRIX; headers need Mac (B-02) |
 | P02-T02…T06 | BLOCKED | B-02; Swift sources prepared |
 | P03-T01 | IMPLEMENTED_NOT_VERIFIED | work/edition/series/episode IDs (idx-flat-2); alias tables not built |

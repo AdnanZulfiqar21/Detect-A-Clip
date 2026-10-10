@@ -41,3 +41,15 @@ python -m pytest l0/tests -q
 ```
 
 See `l0/README.md` for the generator, index builder and evaluation commands.
+
+## Building the Android LAB app
+
+Open `android/` in Android Studio (compileSdk 37, AGP 9.4.1), or with the local toolchain in
+`tools/` (git-ignored):
+
+```bash
+bash android/gradle-local.sh :app:assembleDebug :app:lintDebug
+```
+
+The debug APK has capture **disabled** (`dac.captureEnabled=false`) and no network permission.
+Pure-Kotlin logic tests: `bash android/run-jvm-tests.sh`. No device test has been run yet.

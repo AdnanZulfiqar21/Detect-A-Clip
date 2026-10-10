@@ -19,13 +19,14 @@ datasets or third-party media are used anywhere in the project.
 
 | Component | Version | Declared licence | Shipped? |
 |---|---|---|---|
-| Android framework APIs | compileSdk 37 (proposed) | Android SDK licence (**not accepted**, B-09) | platform |
-| Kotlin stdlib | via Kotlin Gradle plugin 2.2.20 (proposed pin) | Apache-2.0 | yes |
+| Android framework APIs | compileSdk 37 (platform 37.0 rev 2) | Android SDK License Agreement (accepted by the owner 2026-10-10) | platform |
+| Kotlin stdlib | 2.4.10 (AGP 9.4.1 built-in Kotlin) | Apache-2.0 | yes |
+| Android Gradle Plugin | 9.4.1 | Apache-2.0 | build only |
 | junit | 4.13.2 | EPL-1.0 | test only |
 | hamcrest-core | 1.3 | BSD-3-Clause | test only |
 | Analytics / crash / networking SDKs | none | — | — |
 
-Merged-manifest and dependency-tree verification need a Gradle build (B-09).
+Merged manifest verified 2026-10-10: no network or audio permissions. The app has no runtime dependencies besides the Kotlin stdlib.
 
 ## iOS research package
 

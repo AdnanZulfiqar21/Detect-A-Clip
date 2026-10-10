@@ -1,9 +1,11 @@
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    id("com.android.application")   // AGP 9 compiles Kotlin sources itself (built-in Kotlin)
 }
 
 val captureEnabled = (project.findProperty("dac.captureEnabled") as String?)?.toBoolean() ?: false
+// CAP-A03: "user_choice" (API 34 picker) or "app_only" (API 37+: display source disabled).
+val sourceMode = (project.findProperty("dac.sourceMode") as String?) ?: "user_choice"
+require(sourceMode == "user_choice" || sourceMode == "app_only") { "dac.sourceMode must be user_choice or app_only" }
 
 android {
     namespace = "ai.detectaclip.lab"
@@ -17,6 +19,7 @@ android {
         versionName = "0.1.0-lab"
         buildConfigField("boolean", "CAPTURE_ENABLED", captureEnabled.toString())
         buildConfigField("String", "BUILD_PURPOSE", "\"LAB\"")
+        buildConfigField("String", "SOURCE_MODE", "\"$sourceMode\"")
     }
     buildFeatures { buildConfig = true }
     buildTypes {
@@ -26,7 +29,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
     testOptions { unitTests.isReturnDefaultValues = true }
 }
 

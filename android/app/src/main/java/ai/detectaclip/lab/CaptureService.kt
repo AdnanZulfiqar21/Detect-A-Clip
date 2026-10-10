@@ -147,16 +147,16 @@ class CaptureService : Service() {
 
     private fun buildNotification(postCapture: Boolean): Notification {
         val nm = getSystemService(NotificationManager::class.java)
-        nm.createNotificationChannel(NotificationChannel(CHANNEL, "Scan in progress", NotificationManager.IMPORTANCE_LOW))
+        nm.createNotificationChannel(NotificationChannel(CHANNEL, getString(R.string.channel_name), NotificationManager.IMPORTANCE_LOW))
         val stop = PendingIntent.getService(this, 0, Intent(this, CaptureService::class.java).setAction(ACTION_STOP), PendingIntent.FLAG_IMMUTABLE)
-        val title = if (postCapture) "Screen capture stopped. Matching on this phone…" else "Detect A Clip LAB is capturing your screen"
-        val text = if (postCapture) "Synthetic lab test. Tap Cancel to discard the match." else "Synthetic lab test. Tap Stop to end capture and cancel matching."
+        val title = getString(if (postCapture) R.string.notif_matching_title else R.string.notif_capturing_title)
+        val text = getString(if (postCapture) R.string.notif_matching_text else R.string.notif_capturing_text)
         return Notification.Builder(this, CHANNEL)
             .setContentTitle(title)
             .setContentText(text)
             .setSmallIcon(android.R.drawable.ic_media_pause)
             .setOngoing(true)
-            .addAction(Notification.Action.Builder(null, if (postCapture) "Cancel" else "Stop", stop).build())
+            .addAction(Notification.Action.Builder(null, getString(if (postCapture) R.string.action_cancel else R.string.action_stop), stop).build())
             .build()
     }
 
