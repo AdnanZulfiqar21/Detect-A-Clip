@@ -35,3 +35,21 @@ jobs:
       - name: swift test
         working-directory: ios/DetectAClipLab
         run: swift test
+
+  ios-sdk:
+    name: iOS SDK probe + core compile for iOS (no signing, no device)
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Installed-header probe (CAP-I03)
+        run: bash ios/scripts/sdk_probe.sh | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Package schemes
+        working-directory: ios/DetectAClipLab
+        run: xcodebuild -list
+      - name: Compile the Swift core for iOS devices (arm64, unsigned) and the iOS Simulator
+        working-directory: ios/DetectAClipLab
+        run: |
+          set -o pipefail
+          xcodebuild -scheme DetectAClipCore -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build | tail -20
+          xcodebuild -scheme DetectAClipCore -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build | tail -5

@@ -5,7 +5,9 @@ name: ci
 on:
   push:
     branches: [main, "impl/**"]
+    paths-ignore: ["ios/**", "docs/**", "*.md", ".github/workflows/swift-core.yml"]
   pull_request:
+    paths-ignore: ["ios/**", "docs/**", "*.md", ".github/workflows/swift-core.yml"]
 
 permissions:
   contents: read
