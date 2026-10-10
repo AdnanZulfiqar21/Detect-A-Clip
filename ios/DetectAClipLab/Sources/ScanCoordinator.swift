@@ -1,4 +1,4 @@
-// Port of l0/dac_l0/coordinator.py (roadmap F03). Status: IMPLEMENTED_NOT_VERIFIED.
+// Port of l0/dac_l0/coordinator.py (roadmap F03). Status: compiled/tested only where CI runs `swift test`.
 // Pure and clock-injected; call from one serial queue.
 import Foundation
 
@@ -27,6 +27,8 @@ public final class ScanCoordinator {
         public let flags: [String]
         public let createdAtMs: Int64
         public let expiresAtMs: Int64
+        public var candidateEditionId: String? = nil
+        public var candidateEpisodeId: String? = nil
         public let synthetic = true
 
         public func valid(at now: Int64, clockTrustworthy: Bool) -> Bool {
@@ -69,6 +71,7 @@ public final class ScanCoordinator {
         generation += 1
         leaseActive = false
         state = outcome == .cancelled ? .cancelled : .failed
+        closedReason = reason
         result = Result(scanId: scanId ?? "none", generation: generation, outcome: outcome, candidateWorkId: nil,
                         flags: [reason], createdAtMs: now, expiresAtMs: now + budgets.resultValidityMs)
     }
@@ -152,15 +155,21 @@ public final class ScanCoordinator {
         }
     }
 
+    public private(set) var staleWorkerResults = 0
+    public private(set) var closedReason = "NOT_CLOSED"
+
     @discardableResult
-    public func workerResult(_ now: Int64, generation g: Int64, outcome: Outcome, workId: String?, entitlementOk: Bool = true) -> Bool {
-        guard g == generation, state == .postCapture, !abortObserved, leaseActive else { return false }
+    public func workerResult(_ now: Int64, generation g: Int64, outcome: Outcome, workId: String?, flags: [String] = [],
+                             entitlementOk: Bool = true, editionId: String? = nil, episodeId: String? = nil) -> Bool {
+        guard g == generation, state == .postCapture, !abortObserved, leaseActive else { staleWorkerResults += 1; return false }
         if now > postCaptureDeadline { abort(now, "POST_CAPTURE_DEADLINE_EXPIRED", .error); return false }
         if !entitlementOk { abort(now, "ENTITLEMENT_FAILED", .error); return false }
         let isMatch = outcome == .verifiedMatch || outcome == .possibleMatch
         precondition(isMatch == (workId != nil), "match states need a candidate; others must not name one")
+        precondition(isMatch || (editionId == nil && episodeId == nil), "non-match states must not name an edition or episode")
         result = Result(scanId: scanId!, generation: generation, outcome: outcome, candidateWorkId: workId,
-                        flags: [], createdAtMs: now, expiresAtMs: now + budgets.resultValidityMs)
+                        flags: flags, createdAtMs: now, expiresAtMs: now + budgets.resultValidityMs,
+                        candidateEditionId: editionId, candidateEpisodeId: episodeId)
         state = .committed
         leaseActive = false
         commits += 1

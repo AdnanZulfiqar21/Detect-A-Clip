@@ -3,7 +3,7 @@
 // Ordering: insertion order + stable sorts, exactly as the Python reference.
 
 public enum Recognition {
-    public struct Locator { public let work: Int, edition: Int, tMs: Int }
+    public struct Locator: Hashable { public let work: Int, edition: Int, tMs: Int }
     public struct Candidate { public let locator: Locator; public let distance: Double }
 
     public final class Hypothesis {

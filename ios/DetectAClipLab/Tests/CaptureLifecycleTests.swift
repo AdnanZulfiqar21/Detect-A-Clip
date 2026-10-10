@@ -1,4 +1,4 @@
-// NOT RUN (no Mac). Mirrors android CaptureLifecycleTest.kt plus background-task expiry.
+// Mirrors android CaptureLifecycleTest.kt (DIAGNOSTIC mode) plus background-task expiry.
 import XCTest
 @testable import DetectAClipCore
 
@@ -19,9 +19,9 @@ private final class FakeBackground: BackgroundTaskGuard {
 private final class ManualCompute: ComputeRunner {
     final class Token: Cancellable { var cancelled = false; func cancel() { cancelled = true } }
     var token = Token()
-    var work: ((() -> Bool) -> ScanCoordinator.Outcome)?
-    var done: ((ScanCoordinator.Outcome?) -> Void)?
-    func submit(_ work: @escaping (() -> Bool) -> ScanCoordinator.Outcome, onDone: @escaping (ScanCoordinator.Outcome?) -> Void) -> Cancellable {
+    var work: ((() -> Bool) -> WorkOutcome?)?
+    var done: ((WorkOutcome?) -> Void)?
+    func submit(_ work: @escaping (() -> Bool) -> WorkOutcome?, onDone: @escaping (WorkOutcome?) -> Void) -> Cancellable {
         token = Token(); self.work = work; self.done = onDone; return token
     }
     func finish() { guard let w = work, let d = done else { return }; work = nil; done = nil; let t = token; d(w { t.cancelled }) }
@@ -52,6 +52,7 @@ final class CaptureLifecycleTests: XCTestCase {
         acquire(c, l, p)
         now += 1_000; comp.finish()
         XCTAssertEqual(c.state, .committed)
+        XCTAssertEqual(c.result?.flags, ["LAB_DUMMY_COMPUTE"])
         XCTAssertEqual(p.stops, 1)
         XCTAssertEqual(bg.began, 1); XCTAssertEqual(bg.ended, 1)
     }
