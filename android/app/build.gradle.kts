@@ -31,6 +31,13 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     testOptions { unitTests.isReturnDefaultValues = true }
+    sourceSets {
+        // Golden runner shared by JVM unit tests and the instrumented ART test; golden files
+        // from src/test/resources are packaged as instrumented-test assets.
+        getByName("test").kotlin.srcDir("src/sharedTest/java")
+        getByName("androidTest").kotlin.srcDir("src/sharedTest/java")
+        getByName("androidTest").assets.srcDir("src/test/resources")
+    }
 }
 
 // No analytics, crash, logging or networking dependency (CTRL-G00 step 1).

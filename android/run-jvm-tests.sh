@@ -18,7 +18,7 @@ OUT="$T/kbuild"
 rm -rf "$OUT"; mkdir -p "$OUT"
 
 MAIN=(); while IFS= read -r f; do MAIN+=("$(W "$f")"); done < <(grep -L "^import android\." "$ROOT"/android/app/src/main/java/ai/detectaclip/lab/*.kt)
-TESTS=(); while IFS= read -r f; do TESTS+=("$(W "$f")"); done < <(ls "$ROOT"/android/app/src/test/java/ai/detectaclip/lab/*.kt)
+TESTS=(); while IFS= read -r f; do TESTS+=("$(W "$f")"); done < <(ls "$ROOT"/android/app/src/test/java/ai/detectaclip/lab/*.kt "$ROOT"/android/app/src/sharedTest/java/ai/detectaclip/lab/*.kt)
 echo "pure-Kotlin sources: ${#MAIN[@]} main, ${#TESTS[@]} test"
 "$JAVA" -cp "$(W "$KC")" org.jetbrains.kotlin.cli.jvm.K2JVMCompiler -no-stdlib -cp "$(W "$STD")$SEP$(W "$JU")" -jvm-target 17 -d "$(W "$OUT")" "${MAIN[@]}" "${TESTS[@]}"
 CLASSES=$(for f in "$ROOT"/android/app/src/test/java/ai/detectaclip/lab/*.kt; do b="$(basename "$f" .kt)"; echo "ai.detectaclip.lab.$b"; done)

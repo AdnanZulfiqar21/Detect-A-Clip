@@ -13,7 +13,8 @@ import java.time.format.DateTimeParseException
  * golden_manifest_cases.txt. Device state is only changed after every check passed.
  *
  * Engine scope: DACDHASH payloads only (PackIndex). Ed25519 is used through the platform
- * provider (JDK 15+ on the JVM; on Android its availability per OS version is a device check).
+ * provider (JDK 15+ on the JVM; on Android served by AndroidOpenSSL on the API 37 emulator and the
+ * API 36 CI emulator (EngineOnArtTest); other OS versions remain a device check).
  */
 class PackLoader(private val state: DeviceRightsState) {
 
