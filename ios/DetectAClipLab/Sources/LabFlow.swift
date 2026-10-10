@@ -78,16 +78,18 @@ public final class LabFlow {
 
     // MARK: Presentation (plain text; the app localizes the fixed phrases)
 
+    /// Honest, outcome-specific text (P05-T04b); identical to the Android result_* strings
+    /// (checked by l0/tests/test_ui_text_parity.py).
     public static func outcomeText(_ o: ScanCoordinator.Outcome) -> String {
         switch o {
         case .verifiedMatch: return "Match"
         case .possibleMatch: return "Possible match, not confirmed"
-        case .noConfidentMatch: return "NO_CONFIDENT_MATCH"
-        case .insufficientSignal: return "INSUFFICIENT_SIGNAL"
-        case .unsupportedCapture: return "UNSUPPORTED_CAPTURE"
-        case .permissionDenied: return "PERMISSION_DENIED"
-        case .cancelled: return "CANCELLED"
-        case .error: return "ERROR"
+        case .noConfidentMatch: return "No confident match in the synthetic test catalogue"
+        case .insufficientSignal: return "Not enough usable picture to decide. Try again while the clip is playing."
+        case .unsupportedCapture: return "The shared screen could not be used, for example it was blank or protected."
+        case .permissionDenied: return "Screen sharing was not allowed or was revoked. Nothing was kept."
+        case .cancelled: return "Cancelled. No result was kept."
+        case .error: return "Something went wrong or took too long. No result was kept."
         }
     }
 
@@ -104,7 +106,7 @@ public final class LabFlow {
         lines.append("State: \(String(describing: coordinator.state))")
         if let r = coordinator.result {
             lines.append(LabFlow.resultLine(r))
-            if !r.flags.isEmpty { lines.append(r.flags.joined(separator: ", ")) }
+            if !r.flags.isEmpty { lines.append("Details: " + r.flags.joined(separator: ", ")) }
         } else {
             lines.append("NOT SCANNING / no result")
         }

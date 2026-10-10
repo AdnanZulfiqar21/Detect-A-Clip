@@ -10,6 +10,8 @@ let package = Package(
     products: [.library(name: "DetectAClipCore", targets: ["DetectAClipCore"])],
     targets: [
         .target(name: "DetectAClipCore", path: "Sources"),
-        .testTarget(name: "DetectAClipCoreTests", dependencies: ["DetectAClipCore"], path: "Tests"),
+        // Test helper only: installs a pack and halts itself at a chosen I/O step (PackStoreTests).
+        .executableTarget(name: "DACStoreCrashChild", dependencies: ["DetectAClipCore"], path: "CrashChild"),
+        .testTarget(name: "DetectAClipCoreTests", dependencies: ["DetectAClipCore", "DACStoreCrashChild"], path: "Tests"),
     ]
 )

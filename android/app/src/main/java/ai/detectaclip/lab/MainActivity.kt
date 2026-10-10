@@ -164,14 +164,20 @@ class MainActivity : Activity() {
         if (!consent.scanningAllowed(terms)) lines += getString(R.string.terms_not_accepted)
         lines += getString(R.string.state_line, coordinator.state.name)
         if (r != null) {
-            val outcome = when (r.outcome) {
-                ScanCoordinator.Outcome.VERIFIED_MATCH -> getString(R.string.result_match)
-                ScanCoordinator.Outcome.POSSIBLE_MATCH -> getString(R.string.result_possible)
-                else -> r.outcome.name
-            }
+            // Honest, outcome-specific text (P05-T04b); identical wording on iOS (LabFlow.outcomeText).
+            val outcome = getString(when (r.outcome) {
+                ScanCoordinator.Outcome.VERIFIED_MATCH -> R.string.result_verified_match
+                ScanCoordinator.Outcome.POSSIBLE_MATCH -> R.string.result_possible_match
+                ScanCoordinator.Outcome.NO_CONFIDENT_MATCH -> R.string.result_no_confident_match
+                ScanCoordinator.Outcome.INSUFFICIENT_SIGNAL -> R.string.result_insufficient_signal
+                ScanCoordinator.Outcome.UNSUPPORTED_CAPTURE -> R.string.result_unsupported_capture
+                ScanCoordinator.Outcome.PERMISSION_DENIED -> R.string.result_permission_denied
+                ScanCoordinator.Outcome.CANCELLED -> R.string.result_cancelled
+                ScanCoordinator.Outcome.ERROR -> R.string.result_error
+            })
             val shown = r.candidateWorkId?.let { getString(R.string.synthetic_suffix, "$outcome — $it") } ?: outcome
             lines += getString(R.string.result_line, shown)
-            if (r.flags.isNotEmpty()) lines += r.flags.joinToString()
+            if (r.flags.isNotEmpty()) lines += getString(R.string.result_details, r.flags.joinToString())
         } else lines += getString(R.string.no_result)
         status.text = lines.joinToString("\n")
     }

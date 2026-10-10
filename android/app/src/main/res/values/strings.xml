@@ -22,8 +22,15 @@
     <string name="not_now">Not now</string>
     <string name="terms_not_accepted">Terms not accepted: scanning is off. Legal pages stay available.</string>
     <string name="state_line">State: %1$s</string>
-    <string name="result_match">Match</string>
-    <string name="result_possible">Possible match, not confirmed</string>
+    <string name="result_verified_match">Match</string>
+    <string name="result_possible_match">Possible match, not confirmed</string>
+    <string name="result_no_confident_match">No confident match in the synthetic test catalogue</string>
+    <string name="result_insufficient_signal">Not enough usable picture to decide. Try again while the clip is playing.</string>
+    <string name="result_unsupported_capture">The shared screen could not be used, for example it was blank or protected.</string>
+    <string name="result_permission_denied">Screen sharing was not allowed or was revoked. Nothing was kept.</string>
+    <string name="result_cancelled">Cancelled. No result was kept.</string>
+    <string name="result_error">Something went wrong or took too long. No result was kept.</string>
+    <string name="result_details">Details: %1$s</string>
     <string name="result_line">Result: %1$s</string>
     <string name="synthetic_suffix">%1$s (SYNTHETIC)</string>
     <string name="no_result">NOT SCANNING / no result</string>

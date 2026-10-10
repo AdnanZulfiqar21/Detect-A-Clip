@@ -74,7 +74,8 @@ final class LabFlowTests: XCTestCase {
         XCTAssertFalse(f.pickerResult(granted: false))
         XCTAssertEqual(c.result?.outcome, .permissionDenied)
         XCTAssertFalse(f.pickerResult(granted: true))              // late grant cannot revive it
-        XCTAssertEqual(f.statusLines()[1], "Result: PERMISSION_DENIED")
+        XCTAssertEqual(f.statusLines()[1], "Result: Screen sharing was not allowed or was revoked. Nothing was kept.")
+        XCTAssertEqual(f.statusLines()[2], "Details: PERMISSION_DENIED")
     }
 
     func testGrantAfterCancelIsRefused() {

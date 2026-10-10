@@ -51,8 +51,8 @@ jobs:
         working-directory: ios/DetectAClipLab
         run: |
           set -o pipefail
-          xcodebuild -scheme DetectAClipLab -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build | tail -20
-          xcodebuild -scheme DetectAClipLab -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build | tail -5
+          xcodebuild -scheme DetectAClipCore -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build | tail -20
+          xcodebuild -scheme DetectAClipCore -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build | tail -5
 
   ios-app:
     name: iOS LAB app (unsigned device build, simulator UI test)
