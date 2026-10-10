@@ -57,9 +57,16 @@ class MainActivity : Activity() {
         val discard = Button(this).apply { text = getString(R.string.discard_result); setOnClickListener { coordinator.discard(); render() } }
         val legal = Button(this).apply { text = getString(R.string.terms_button); setOnClickListener { showTerms(required = false) } }
         setContentView(ScrollView(this).apply {
+            // targetSdk 35+ is edge-to-edge: keep every control clear of the status bar, display
+            // cutout and gesture bar (emulator finding: Start was hidden under the bars).
+            setOnApplyWindowInsetsListener { v, insets ->
+                val b = insets.getInsets(android.view.WindowInsets.Type.systemBars() or android.view.WindowInsets.Type.displayCutout())
+                v.setPadding(b.left, b.top, b.right, b.bottom)
+                insets
+            }
             addView(LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
-                setPadding(48, 96, 48, 48)
+                setPadding(48, 48, 48, 48)
                 addView(TextView(context).apply { text = getString(R.string.build_banner, BuildConfig.CAPTURE_ENABLED.toString()) })
                 addView(startButton); addView(cancel); addView(discard); addView(legal); addView(status)
             })

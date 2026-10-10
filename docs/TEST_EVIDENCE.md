@@ -43,8 +43,27 @@ ScreenCaptureKit adapter is not compiled anywhere (the framework is absent from 
 available iOS SDK, 26.5). The `ios-app` job's simulator UI test and unsigned device build are not
 device, signing, archive or store evidence.
 
+| Android **emulator** manual run (not a device) | Android Emulator 37.2.12, AVD Pixel 7, `system-images;android-37.0;google_apis;x86_64` (Android 17, build `CE2A.260420.019`, userdebug), WHPX; APK installed with `adb install -r`, driven by `adb`/`uiautomator` | 2026-10-10, see the emulator table below | capture disabled build; synthetic only |
 | Android instrumented / device tests | — | **NOT RUN** (no device, B-01) | — |
 | iOS app build / ScreenCaptureKit adapter / device tests | — | **NOT RUN** (no Xcode project, provisioning or iPhone, B-02) | — |
+
+### Android emulator session (2026-10-10, LAB debug APK with capture disabled; emulator ≠ device)
+
+| Check | Observed | Result |
+|---|---|---|
+| Launch | Terms dialog first; `dumpsys media_projection` = null; no app service | PASS |
+| Layout on Android 15+ edge-to-edge | **FAIL before fix**: banner and *Start scan* drawn under the action bar (Start at y=253, bar to y≈283). Fixed (NoActionBar theme + system-bar/cutout insets); after the fix every control is below the status bar | FIXED, re-checked |
+| Decline, reopen | Start disabled, "Terms not accepted"; Terms prompt shown again on reopen | PASS |
+| Start → disclosure → *Not now* | No system prompt; state IDLE | PASS |
+| Start → *Continue* | Real Android 17 prompt "Share your screen with Detect A Clip LAB?", default "Share one app"; `user_choice` mode also offers "Share entire screen" (CAP-A03 data point, emulator) | observed |
+| Prompt → *Cancel* | State FAILED, "Screen sharing was not allowed or was revoked. Nothing was kept.", Details PERMISSION_DENIED; no app service; media projection null (ED-28) | PASS |
+| Prompt → share one app (Clock) within 29 s | State CANCELLED, "Cancelled. No result was kept.", Details IN_APP_CANCEL; no media projection created (capture disabled) | PASS |
+| Grant later than the 60 s permission budget | State FAILED, PERMISSION_TIMEOUT (fail closed) | PASS |
+| Force-stop and reopen | IDLE, no result (memory-only), Terms acceptance kept | PASS |
+| App-private files | only `shared_prefs/consent.xml` with key `terms.receipt`; no INTERNET/network permission | PASS |
+
+Not covered by the emulator: frames, OEM behaviour, real lock/chip/notification timing, energy, and
+anything needing capture enabled (G00/DATA-L00 Part B). These stay device tests (B-01).
 
 ## Roadmap test IDs
 
