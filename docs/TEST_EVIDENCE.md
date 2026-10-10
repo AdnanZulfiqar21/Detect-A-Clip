@@ -67,9 +67,12 @@ device, signing, archive or store evidence.
 | Kill the app process (`kill -9`) while the prompt is open | Prompt stays; after the emulator's System UI froze in the app chooser and was restarted, the app reopened IDLE with no service, no projection and no ghost scan. The grant-after-kill step itself could not be completed on this emulator | PARTIAL (emulator ANR) |
 | Screen off while the prompt is open | Android dismissed the prompt; app recorded PERMISSION_DENIED; projection null | PASS |
 | Forced backup (`bmgr backupnow`) | "Backup is not allowed" (`allowBackup=false`) | PASS |
+| CI emulator (`android-emulator.yml`, ubuntu-latest + KVM, Android 16 `BE2A.250530.026.F3`, `swiftshader_indirect`) | `LabJourneyTest` **OK (7 tests)** in 84 s at `640113d`, run 38087540726 | PASS (emulator, CI) |
+| CI emulator on API 37 (Linux host) | `surfaceflinger` aborts in the goldfish mapper (`Assertion failed: !rcEnc->featureInfo()->hasReadColorBufferDma`) with `swiftshader_indirect`, `swangle_indirect` (+`-feature -ReadColorBufferDma`) and `guest`; an emulator/host defect, not the app. API 37 coverage comes from the Windows host run above | emulator limitation |
 
 Host limits: 15.5 GB RAM with about 2 GB free made the emulator's System UI freeze several times (ANR); a CI
-emulator job (`android-emulator.yml`, KVM) repeats the instrumented suite. Not covered by the emulator: frames, OEM behaviour, real lock/chip/notification timing, energy, and
+emulator job (`android-emulator.yml`, KVM, API 36) repeats the instrumented suite. Locally `-gpu swiftshader_indirect`
+worked; `swangle_indirect` made the whole system unresponsive on this host. Not covered by the emulator: frames, OEM behaviour, real lock/chip/notification timing, energy, and
 anything needing capture enabled (G00/DATA-L00 Part B). These stay device tests (B-01).
 
 ## Roadmap test IDs
