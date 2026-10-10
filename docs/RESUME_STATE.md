@@ -3,8 +3,9 @@
 On continuation: verify live git state (`git status`, `git log -1`, `git ls-remote origin`)
 first, then resume here.
 
-- **Updated:** 2026-10-10 (session 4: pack validity, format contract, recognition path, Swift parity, CI, capture-boundary review,
-  iOS SDK probe, iOS LAB app shell, device-side pack stores, result text, privacy guard)
+- **Updated:** 2026-10-11 (session 5: engine goldens on ART, idx-flat-5 series names, FrameView geometry in both capture
+  adapters, emulator journey incl. notifications denied; session 4 before that: pack validity, format contract, recognition
+  path, Swift parity, CI, capture-boundary review, iOS SDK probe, iOS LAB app shell, pack stores, result text, privacy guard)
 - **Branches:** `main` = `bbdbe06` (baseline). Work on `impl/l0-desktop` (pushed; `git log -1`).
   Draft PR: https://github.com/AdnanZulfiqar21/Detect-A-Clip/pull/1. CI: `ci.yml` (Python,
   pure Kotlin, Android) and `swift-core.yml` (Swift core on macOS); latest outcomes in
@@ -25,7 +26,8 @@ first, then resume here.
   `adb shell am instrument -w -r ai.detectaclip.lab.test/androidx.test.runner.AndroidJUnitRunner`. With ~2 GB
   free host RAM the emulator's System UI can freeze (tap Wait); keep `-gpu swiftshader_indirect` locally. CI job
   `android-emulator.yml` runs the same suite on API 36 (API 37 crashes surfaceflinger on Linux runners).
-- **Verified:** locally Python 180, pure-Kotlin 71, Android assemble + lint (no issues), direct JUnit 71.
+- **Verified:** locally Python 180, pure-Kotlin 73, Android assemble + lint (no issues), direct JUnit 73, EngineOnArtTest 8/8
+  and LabJourneyTest on the API 37 emulator.
   CI (see TEST_EVIDENCE): ci.yml (Python, pure Kotlin, Android incl. Gradle `testDebugUnitTest`) and
   swift-core.yml (`swift test` on macOS, Swift core compile for iOS device/simulator, iOS LAB app unsigned
   device build + simulator UI test, installed-header probe). ci.yml skips iOS/docs-only changes.

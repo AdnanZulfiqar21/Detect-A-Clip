@@ -68,6 +68,7 @@ device, signing, archive or store evidence.
 | Screen off while the prompt is open | Android dismissed the prompt; app recorded PERMISSION_DENIED; projection null | PASS |
 | Forced backup (`bmgr backupnow`) | "Backup is not allowed" (`allowBackup=false`) | PASS |
 | `EngineOnArtTest` (instrumented): every golden on Android's ART runtime | **OK (8 tests)** on the API 37 emulator, 2026-10-11: recognition 400, dac_dhash 42, exact 9, e2e 6, format 60 + 15 display, manifest 68, pipeline 12, all 0 mismatches (idx-flat-5 goldens); Ed25519 served by `AndroidOpenSSL`; pipeline per-frame median 3 ms / max 36 ms, finish max 7 ms at 64×36 on x86 emulator (not a device number) | PASS (emulator) |
+| `LabJourneyTest#journeyWorksWithNotificationsDenied` (P05-T06b, D09) | POST_NOTIFICATIONS revoked: Terms, Start, system prompt and Cancel -> PERMISSION_DENIED work unchanged; no notification prompt from the app; no service, no projection | PASS (emulator, 2026-10-11) |
 | CI emulator (`android-emulator.yml`, ubuntu-latest + KVM, Android 16 `BE2A.250530.026.F3`, `swiftshader_indirect`) | `LabJourneyTest` **OK (7 tests)** in 84 s at `640113d`, run 38087540726 | PASS (emulator, CI) |
 | CI emulator on API 37 (Linux host) | `surfaceflinger` aborts in the goldfish mapper (`Assertion failed: !rcEnc->featureInfo()->hasReadColorBufferDma`) with `swiftshader_indirect`, `swangle_indirect` (+`-feature -ReadColorBufferDma`) and `guest`; an emulator/host defect, not the app. API 37 coverage comes from the Windows host run above | emulator limitation |
 

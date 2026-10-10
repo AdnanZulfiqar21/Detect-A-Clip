@@ -159,6 +159,25 @@ class LabJourneyTest {
         assertTrue(status().contains("Cancelled. No result was kept."))
     }
 
+    /** P05-T06b / D09: the optional notification permission is denied; scanning, the system
+     *  prompt and the fail-closed denial path must work exactly as before (no re-prompt). */
+    @Test fun journeyWorksWithNotificationsDenied() {
+        shell("pm revoke $pkg android.permission.POST_NOTIFICATIONS")
+        try {
+            launch()
+            acceptTerms()
+            openSystemPicker()
+            obj("Cancel", "com.android.systemui").click()
+            assertTrue(device.wait(Until.hasObject(By.pkg(pkg).textContains("PERMISSION_DENIED")), timeout))
+            assertEquals(ScanCoordinator.Outcome.PERMISSION_DENIED, c.result!!.outcome)
+            assertFalse("app must not prompt for notifications by itself",
+                device.hasObject(By.pkg("com.google.android.permissioncontroller")) || device.hasObject(By.pkg("com.android.permissioncontroller")))
+            noAppServiceAndNoProjection()
+        } finally {
+            shell("pm grant $pkg android.permission.POST_NOTIFICATIONS")
+        }
+    }
+
     /** P05-T07a: with the largest common font scale every control is still reachable. */
     @Test fun largeFontScaleKeepsEveryControlReachable() {
         device.executeShellCommand("settings put system font_scale 2.0")
