@@ -9,12 +9,12 @@ Windows 11 Pro x64, Python 3.13.15, Temurin JDK 17.0.20.1, kotlinc 2.4.21.
 
 | Suite | Command | Last result | Code |
 |---|---|---|---|
-| L0 Python (172 tests, incl. freshness of every committed golden file) | `cd l0 && python -m pytest -o addopts=""` | **172 passed** 2026-10-10 locally (171 also from a clean clone at `05f437b`); CI see below | `70f672c`+ |
-| Pure-Kotlin JVM (64 tests: coordinator, lifecycle DIAGNOSTIC + RECOGNITION with injected frames, capture boundary, consent, eligibility, recognition golden ×400, DAC-DHASH-v1 ×42, exact path ×9, end-to-end ×6, format contract ×49, manifest contract ×68, full pipeline ×12, result display ×11, FrameView strides/ownership) | `bash android/run-jvm-tests.sh` | **OK (64 tests)** 2026-10-10 | `8ea39ae` |
+| L0 Python (180 tests, incl. golden freshness, static privacy guard and result-text parity) | `cd l0 && python -m pytest -o addopts=""` | **180 passed** 2026-10-10 locally; CI see below | `0be2ccc` |
+| Pure-Kotlin JVM (72 tests: installed pack store incl. halted-child-JVM recovery and revoked signer, coordinator, lifecycle DIAGNOSTIC + RECOGNITION with injected frames, capture boundary, consent, eligibility, recognition golden ×400, DAC-DHASH-v1 ×42, exact path ×9, end-to-end ×6, format contract ×49, manifest contract ×68, full pipeline ×12, result display ×11, FrameView strides/ownership) | `bash android/run-jvm-tests.sh` | **OK (72 tests)** 2026-10-10 | final commit |
 | Android app build (AGP 9.4.1, Gradle 9.8.1, compileSdk 37, minSdk 34) | `bash android/gradle-local.sh :app:assembleDebug` | **BUILD SUCCESSFUL** 2026-10-10 (`8ea39ae`); both `dac.sourceMode=user_choice` (default) and `app_only` built earlier | `app-debug.apk`, capture disabled (`BuildConfig.CAPTURE_ENABLED = false`) |
 | Android APK permissions | `aapt2 dump permissions app/build/outputs/apk/debug/app-debug.apk` | **only** FOREGROUND_SERVICE, FOREGROUND_SERVICE_MEDIA_PROJECTION, POST_NOTIFICATIONS (re-checked at `8ea39ae`); no INTERNET / network / audio; allowBackup=false | CTRL-G00 A1 (build level) |
 | Android lint | `bash android/gradle-local.sh :app:lintDebug` | **No issues found** 2026-10-10 | `8ea39ae` |
-| Android unit tests, Gradle-compiled, **run by direct JUnit** (not a Gradle test task) | `bash android/gradle-local.sh :app:compileDebugUnitTestKotlin` then `bash android/junit-on-gradle-classes.sh` | **OK (64 tests)** 2026-10-10 | `8ea39ae`; Gradle's own `testDebugUnitTest` cannot fork its test JVM on this host and runs in CI instead |
+| Android unit tests, Gradle-compiled, **run by direct JUnit** (not a Gradle test task) | `bash android/gradle-local.sh :app:compileDebugUnitTestKotlin` then `bash android/junit-on-gradle-classes.sh` | **OK (71 tests)** 2026-10-10 | `0be2ccc`; Gradle's own `testDebugUnitTest` cannot fork its test JVM on this host and runs in CI instead |
 
 ### CI (GitHub Actions on PR #1, ubuntu-latest / macos-latest runners)
 
@@ -27,10 +27,19 @@ Windows 11 Pro x64, Python 3.13.15, Temurin JDK 17.0.20.1, kotlinc 2.4.21.
 | `3f77273` | ci | **success**: Python 172 passed; pure Kotlin OK (56); Android assemble + lint + Gradle `testDebugUnitTest` 56 tests, 0 failures; run 38069331278 |
 | `8ea39ae` | swift-core | **success**: 43 tests, 0 failures, 0 skipped, incl. `CaptureBoundaryTests` (5); run 38072195095 |
 | `8ea39ae` | ci | **success**: Python 172 passed; pure Kotlin OK (64); Android assemble + lint + Gradle `testDebugUnitTest` 64 tests, 0 failures, 0 errors, 0 skipped; run 38072195084 |
+| `673f4bc` | swift-core `ios-sdk` | probe ran (Xcode 26.6, iOS SDK 26.5; ScreenCaptureKit absent); iOS compile **failed** on a wrong scheme name |
+| `3d4dec7` | swift-core `ios-sdk` | **success**: Swift core `xcodebuild` for `generic/platform=iOS` (arm64, unsigned) and `generic/platform=iOS Simulator`; probe typecheck correctly fails for ScreenCaptureKit |
+| `3d4dec7` | ci | **success**: Python 172; pure Kotlin 71; Gradle `testDebugUnitTest` 71 incl. the halted-child-JVM store test |
+| `5d67f4b` | swift-core `ios-app` | **success**: XcodeGen 2.46.0; LAB app built unsigned for iOS devices; XCUITest `testTermsGateAndStartRefusedWithoutCaptureCell` passed on iPhone 17 Pro simulator, iOS 26.5 (63 s); run 38074672108 |
+| `0be2ccc` | swift-core (3 jobs) | **success**: `swift test` 57 tests, 0 failures, 0 skipped (incl. `PackStoreTests` 7 with the `_exit` crash child, `LabFlowTests` 7); iOS core compile; LAB app build + UI test; run 38075819185 |
+| `0be2ccc` | ci | **success**: Python 180 passed; pure Kotlin OK (71); Gradle `testDebugUnitTest` 71, 0 failures; run 38075819156 |
+| `d0727fb` | ci + swift-core | **success**: Python, pure Kotlin, Android (ci); `swift test` 60 tests, 0 failures, 0 skipped (incl. `PixelBufferFrameTests` 3); iOS core compile; LAB app build + UI test with the accessibility changes; runs 38076577340 / 38076574765 |
 
 The CI rows are source-level evidence only. `swift-core` compiles the platform-independent
 Swift package; it is not an iOS app build, archive, signing or device test, and the
-ScreenCaptureKit adapter (iOS-only) is not compiled by it.
+ScreenCaptureKit adapter is not compiled anywhere (the framework is absent from the newest
+available iOS SDK, 26.5). The `ios-app` job's simulator UI test and unsigned device build are not
+device, signing, archive or store evidence.
 
 | Android instrumented / device tests | — | **NOT RUN** (no device, B-01) | — |
 | iOS app build / ScreenCaptureKit adapter / device tests | — | **NOT RUN** (no Xcode project, provisioning or iPhone, B-02) | — |
@@ -68,7 +77,11 @@ ScreenCaptureKit adapter (iOS-only) is not compiled by it.
 | (pipeline) | Delivered frames → selector → DAC-CROP/QUAL/DHASH (+mirror) → retrieval → verification → decision, Python = Kotlin | PASS (JVM) | `PipelineGoldenTest` on `golden_pipeline.txt` (12 queries incl. letterbox, pillarbox, PiP, mirror, black feed, static, montage, shared intro, jitter), padded RGBA strides | synthetic frames; no OS capture |
 | (pipeline) | Recognition-mode lifecycle with injected frames | PASS (JVM) | `RecognitionLifecycleTest` (commit with work/edition/episode, cancel mid-verify, late frames, stale worker after lock, deadline overrun, entitlement revoked at commit, DIAGNOSTIC unchanged) | no screen capture; device timing B-01 |
 | (boundary) | Consent denial, unsolicited grants, frame geometry | PASS (JVM, macOS CI) | Kotlin `CaptureBoundaryTest` (8), Swift `CaptureBoundaryTests` (5); APK permission dump | OS refusal of a consent-less mediaProjection FGS, real `ImageReader`/`CVPixelBuffer` layouts and the iOS picker are device checks (B-01, B-02) |
-| IDX-01b | Store recovery after abrupt termination | PASS (desktop) | `test_store.py::test_abrupt_termination_at_every_io_step_recovers` (child killed with `os._exit` before each I/O step) | desktop filesystem only; device storage not tested |
+| (privacy) | Static guard: logging/network/media/Photos APIs, capture-path persistence, permission set, capture-off defaults, iOS usage keys | PASS (static, CI) | `l0/tests/test_privacy_static.py` (7); mutation adding `print`/`Log.d`/`UserDefaults`/`Files.write` fails 3 tests | Source-level only; DATA-L01/L02 device inspection BLOCKED |
+| (UI) | iOS LAB journey: Terms first, decline keeps scanning off, Terms readable, Start refused before any prompt | PASS (simulator, CI) | `LabJourneyUITests` on iPhone 17 Pro simulator iOS 26.5; `LabFlowTests` (7) | Simulator only; no capture path on iOS (B-02) |
+| (UI) | Result wording identical on Android and iOS, reserved outcomes unreachable | PASS (static) | `l0/tests/test_ui_text_parity.py` | en-GB only |
+| SEC-03 | Stale tuple, revoked signer, mixed tuple, corrupt staged update | PASS (dev scope: desktop, JVM, macOS) | Rollback floors and restored-state tests; `revokedSignerBlocksActivationOfAnInstalledPack` (Kotlin) / `testRevokedSignerBlocksActivationOfAnInstalledPack` (Swift); manifest/payload mismatch cases (68); torn-write and halted-process store tests | Development key only; no licensed tuple or release key (B-05, P06-T05) |
+| IDX-01b | Store recovery after abrupt termination | PASS (desktop, JVM, macOS) | Python `test_store.py::test_abrupt_termination_at_every_io_step_recovers` (`os._exit`); Kotlin `PackStoreTest` (child JVM `Runtime.halt`, before and mid-write); Swift `PackStoreTests` (`_exit` crash child, before and mid-write) | desktop/CI filesystems only; Android/iOS device storage not tested |
 | DATA-L00…L03, CAP-A*, CAP-I*, UX-*, OPS-*, REL-* | Device, network, store | BLOCKED | — | B-01, B-02, B-07, B-08 |
 
 ## LAB report index (synthetic, purpose LAB)

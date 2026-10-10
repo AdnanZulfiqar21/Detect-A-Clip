@@ -143,6 +143,17 @@ class PackStoreTest {
         assertThrows(PackLoader.Rejected::class.java) { restored.active("L0-E2E", NOW) }   // old pack now fails closed
     }
 
+    /** SEC-03: a signer revoked after installation stops the installed pack from activating. */
+    @Test fun revokedSignerBlocksActivationOfAnInstalledPack() {
+        val root = tmp()
+        PackStore(root, rights(g)).install("valid_dev_no_expiry")
+        val r = rights(g).also { it.revokedKeyIds += g.pubId }
+        val s = PackStore(root, r)
+        assertThrows(PackLoader.Rejected::class.java) { s.active("L0-E2E", NOW) }
+        val t = rights(g).also { it.trustedKeys.clear() }
+        assertThrows(PackLoader.Rejected::class.java) { PackStore(root, t).active("L0-E2E", NOW) }   // key no longer trusted
+    }
+
     @Test fun corruptOrDanglingStateFailsClosed() {
         val root = tmp()
         PackStore(root, rights(g)).install("valid_dev_no_expiry")

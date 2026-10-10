@@ -31,13 +31,17 @@ Merged manifest verified 2026-10-10: no network or audio permissions. The app ha
 ## iOS research package
 
 Swift standard library and Apple frameworks only (Foundation; ScreenCaptureKit/CoreMedia
-behind `canImport`; CryptoKit for Ed25519/SHA-256). No third-party packages. Compiled only by
-the `swift-core` CI job on a macOS runner; no iOS app build (B-02).
+behind `canImport`; CryptoKit for Ed25519/SHA-256; CoreVideo for pixel buffers). No third-party
+packages. `DACStoreCrashChild` is a test-only executable target (not linked into the app).
+The iOS LAB app (`ios/LabApp`) uses SwiftUI/UIKit and the core package only, with a privacy
+manifest declaring no tracking and no collected data. Compiled by the `swift-core` CI job
+(unsigned device build and simulator); no signed or archived build (B-02).
 
 ## CI (not shipped)
 
 GitHub Actions: actions/checkout, actions/setup-python, actions/setup-java (Temurin 17),
-gradle/actions/setup-gradle (Gradle 9.8.1), actions/upload-artifact; PyPI numpy,
+gradle/actions/setup-gradle (Gradle 9.8.1), actions/upload-artifact; Homebrew xcodegen
+(2.46.0 on 2026-10-10, generates the iOS project); PyPI numpy,
 opencv-python-headless, cryptography, pytest; kotlinc 2.4.21 and JUnit 4.13.2/Hamcrest 1.3
 fetched from GitHub releases and Maven Central at run time.
 

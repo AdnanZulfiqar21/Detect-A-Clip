@@ -12,7 +12,7 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 |---|---|---|
 | Desktop L0 | Synthetic fixtures (v3.1, v4) with challenge cases; descriptors incl. the integer-exact DACDHASH path; index format contract `idx-flat-4` (reads v3) with names, aliases and shared scenes; temporal verification; series/episode-aware decision; result display names; calibration; manifest V1/V2 with fail-closed validity rules; crash-safe pack store; lab leases; LAB runner. 172 tests | Real footage, real devices, release statistics |
 | Android | LAB app builds to a debug APK (AGP 9.4.1, compileSdk 37); lint clean; no INTERNET in the merged manifest; capture off by default; a declined picker never starts the capture service; CAP-A03 `app_only` config compiled. Pure-Kotlin engine: format contract, manifest V2 loader, `RecognitionSession` + `FrameView`, lifecycle DIAGNOSTIC and RECOGNITION modes. 64 unit tests (kotlinc, Gradle-compiled direct JUnit, and Gradle `testDebugUnitTest` in CI) | Any device run (B-01); RECOGNITION mode is not wired to real capture (ED-25) |
-| iOS | Swift core package (CI: `swift build` + `swift test`) mirrors the Kotlin engine (format v4, manifest V2 via CryptoKit, session, lifecycle with background-task guard, consent/eligibility) with XCTests on the shared golden files; ScreenCaptureKit adapter skeleton | Swift core compiled and tested by the macOS CI job (first pass `3f77273`); iOS app, signing, ScreenCaptureKit adapter and devices (B-02) |
+| iOS | Swift core package (CI: `swift build` + `swift test`) mirrors the Kotlin engine (format v4, manifest V2 via CryptoKit, session, lifecycle with background-task guard, consent/eligibility) with XCTests on the shared golden files; ScreenCaptureKit adapter skeleton | Swift core compiled and tested on macOS and built for iOS device/simulator in CI; LAB app shell built unsigned and UI-tested on a simulator; ScreenCaptureKit adapter (SDK absent), signing and devices (B-02) |
 
 ## Unfinished implementation vs external verification
 
@@ -37,14 +37,15 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | P00-T09 | PASS (document level) | TRACE-01 |
 | P01-T01 | IN_PROGRESS (build items PASS) | Debug APK builds (AGP 9.4.1, compileSdk 37); merged manifest without INTERNET; lint clean; capture disabled by default. Device, network isolation and witness items of Part A BLOCKED (B-01) |
 | P01-T02…T08 | BLOCKED | B-01 (device). Lifecycle races covered on JVM only; CAP-A03 `app_only` source configuration compiled (API 37 guard) |
-| P02-T01 | UNVERIFIED | documentary symbol review in SDK_MATRIX; headers need Mac (B-02) |
-| P02-T02…T06 | BLOCKED | B-02; Swift sources prepared |
+| P02-T01 | IN_PROGRESS (installed-header scope) | `ios/scripts/sdk_probe.sh` in CI pins Xcode 26.6 / iOS SDK 26.5: ScreenCaptureKit framework **absent** for iOS; ReplayKit picker/sample handler present without deprecation attributes (SDK_MATRIX). The iOS 27 ScreenCaptureKit symbols need Xcode 27 (B-02) |
+| P02-T02 | IN_PROGRESS | a. LAB app shell (`ios/LabApp`, SwiftUI over tested `LabFlow`): Terms gate, eligibility before any prompt, disclosure, Stop/Cancel, Discard, result-on-return; capture disabled; builds unsigned for iOS devices, journey UI test on a simulator (CI). b. finite background-task guard compiled. Picker/stream and DATA-L00 Part A need the ScreenCaptureKit SDK and a device (B-02) |
+| P02-T03…T06 | BLOCKED | B-02 (device, provisioning, iOS 27 SDK) |
 | P03-T01 | IMPLEMENTED_NOT_VERIFIED | work/edition/series/episode IDs, names, aliases and shared scenes in `idx-flat-4` (v3 migrates); same contract in Python/Kotlin/Swift (49 cases). Real catalogue metadata needs B-05 |
 | P03-T02 | BLOCKED | B-05 (L0 self-grant manifest exists) |
 | P03-T03 | PASS (desktop) | reproducible builder, bytes/hour per descriptor |
 | P03-T04 | PASS (L0 dev scope) | signed manifests V1/V2, fail-closed loader (ED-21, ED-24), SEC-01; 68 manifest cases Python = Kotlin; Swift via CI |
 | P03-T05 | BLOCKED | B-05 |
-| P03-T06 | IMPLEMENTED_NOT_VERIFIED (dev fixtures) | immutable slots, single commit point, floors, recovery proven by `os._exit` at every I/O step (ED-23); device storage and licensed/final-tuple part BLOCKED (B-01, B-05) |
+| P03-T06 | IMPLEMENTED_NOT_VERIFIED (dev fixtures) | Python, Kotlin (`PackStore.kt`) and Swift (`PackStore.swift`) stores: immutable slots, single commit point, floors, fail-closed recovery; recovery after abrupt termination proven in all three (Python `os._exit`, Kotlin halted child JVM, Swift `_exit` child process) at every I/O step (ED-23). Not wired into the LAB apps (ED-25); device storage semantics and licensed packs BLOCKED (B-01, B-02, B-05) |
 | P03-T07 | BLOCKED | B-05 |
 | P04-T01 | IMPLEMENTED_NOT_VERIFIED | quality flags, uniform-border crop; device frames BLOCKED |
 | P04-T02 | PASS (LAB) | 4 descriptors; sampling study (DEV) in `evidence/studies/` |
@@ -53,19 +54,19 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | P04-T05 | PASS (L0 synthetic calibration) | v3.1 (CALIBRATION) and v4 (CAL4) frozen per descriptor; LAB-only status |
 | P04-T06 | PASS (LAB) | all kinds incl. leakage audit; sealed FINAL (v3.1) and FINAL4 (v4) each run once; failures kept in reports |
 | P04-T07 | BLOCKED | independent evaluator (B-06) |
-| P04-T08 | BLOCKED (device) · prep IMPLEMENTED | recognition path (selector → FrameView → DAC-CROP/QUAL/DHASH → retrieval → verification → decision → memory-only commit) = Python on 12 pipeline queries; injected-frame lifecycle tests (ED-25). Device budgets need B-01/B-02/B-07 |
+| P04-T08 | BLOCKED (device) · prep IMPLEMENTED | recognition path (selector → FrameView → DAC-CROP/QUAL/DHASH → retrieval → verification → decision → memory-only commit) = Python on 12 pipeline queries; injected-frame lifecycle tests (ED-25); iOS CVPixelBuffer → luma copy tested on macOS CoreVideo. Device budgets need B-01/B-02/B-07 |
 | P05-T01 | IMPLEMENTED_NOT_VERIFIED | `docs/legal/*` DRAFT_FOR_COUNSEL; legal review required |
 | P05-T02 | IMPLEMENTED_NOT_VERIFIED | `ConsentRecords` (JVM-tested); Android UI compiled; no device run (B-01) |
-| P05-T03 | IMPLEMENTED_NOT_VERIFIED | native picker from user action; `EligibilityGate` (JVM-tested) |
-| P05-T04 | IMPLEMENTED_NOT_VERIFIED | canonical states, uncertain-result wording, memory-only result |
+| P05-T03 | IMPLEMENTED_NOT_VERIFIED | native picker from user action only; denied/empty picker result fails closed (ED-28); `EligibilityGate` denies unsupported cell/pack before any prompt (JVM, Swift, iOS UI test) |
+| P05-T04 | IMPLEMENTED_NOT_VERIFIED | canonical states; honest outcome-specific text identical on Android and iOS (parity test); SYNTHETIC label on every named candidate; memory-only result with 15-minute expiry on return |
 | P05-T05 | IMPLEMENTED_NOT_VERIFIED | in-app Stop/Cancel, notification Stop→Cancel switch; UX-02 device runs BLOCKED |
 | P05-T06 | IMPLEMENTED_NOT_VERIFIED | decline/changed-terms/late-callback logic tested on JVM |
 | P05-T07 | BLOCKED | accessibility review needs device; study needs D04 |
 | P06-T01 | IN_PROGRESS | threat model draft; actual API path evidence BLOCKED |
 | P06-T02 | PASS (harness) | lease/generation/race tests (Python + Kotlin + Swift); capture-boundary regressions (consent denial, unsolicited grants, frame geometry) |
-| P06-T03 | IMPLEMENTED_NOT_VERIFIED | no logs/SDKs/backups in source; DATA-L02 device inspection BLOCKED |
+| P06-T03 | IMPLEMENTED_NOT_VERIFIED | static guard (`test_privacy_static.py`): no logging/network/media/Photos APIs in shipped sources, no persistence in capture-path files, exact Android permission set, capture disabled by default, no sensitive iOS usage keys; DATA-L02 device inspection BLOCKED |
 | P06-T04 | BLOCKED | device soak |
-| P06-T05 | IN_PROGRESS | SBOM; bounded parsers; release signing not designed |
+| P06-T05 | IN_PROGRESS | a. SBOM (incl. CI tools); b. bounded strict parsers and signed manifests in three languages; c. key/rollback handling tested for the development key (SEC-03 dev scope: revoked signer, rollback floors, torn staged updates). Release signing keys, rotation and the final licensed tuple are not designed: they need an owner decision and licensed packs (B-04, B-05) |
 | P06-T06 | IMPLEMENTED_NOT_VERIFIED | cell/pack expiry, parsed instants with offsets, untrusted-time denial (JVM + Python, ED-21/ED-26) |
 | P06-T07 | IMPLEMENTED_NOT_VERIFIED | data inventory in THREAT_MODEL/privacy draft; counsel BLOCKED |
 | P06-T08 | BLOCKED | independent reviewer |

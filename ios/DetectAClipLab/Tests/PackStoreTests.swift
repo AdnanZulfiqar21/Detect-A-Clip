@@ -121,6 +121,16 @@ final class PackStoreTests: XCTestCase {
         XCTAssertThrowsError(try restored.active("L0-E2E", now: now))
     }
 
+    /// SEC-03: a signer revoked after installation stops the installed pack from activating.
+    func testRevokedSignerBlocksActivationOfAnInstalledPack() throws {
+        let root = try tmp()
+        try install(PackStore(root: root, rights: rights()), "valid_dev_no_expiry")
+        let r = rights(); r.revokedKeyIds.insert(pubId)
+        XCTAssertThrowsError(try PackStore(root: root, rights: r).active("L0-E2E", now: now))
+        let t = rights(); t.trustedKeys = [:]
+        XCTAssertThrowsError(try PackStore(root: root, rights: t).active("L0-E2E", now: now))
+    }
+
     func testCorruptOrDanglingStateFailsClosed() throws {
         let root = try tmp()
         try install(PackStore(root: root, rights: rights()), "valid_dev_no_expiry")
