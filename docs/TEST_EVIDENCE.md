@@ -60,6 +60,7 @@ device, signing, archive or store evidence.
 | Prompt → share one app (Clock) within 29 s | State CANCELLED, "Cancelled. No result was kept.", Details IN_APP_CANCEL; no media projection created (capture disabled) | PASS |
 | Grant later than the 60 s permission budget | State FAILED, PERMISSION_TIMEOUT (fail closed) | PASS |
 | Force-stop and reopen | IDLE, no result (memory-only), Terms acceptance kept | PASS |
+| CAP-A03 `app_only` build (`-Pdac.sourceMode=app_only`, `SOURCE_MODE = "app_only"`, API 37 path compiled) | The system picker still listed **"Share entire screen"**, it was selectable and enabled **"Share screen"**. The system log did not show which projection config the picker received, so this run cannot tell "config not honoured" from "config not delivered" | **NOT ENFORCED on this emulator**; CAP-A03 stays a device test; D01 consumer scope must not rely on the app-only request |
 | App-private files | only `shared_prefs/consent.xml` with key `terms.receipt`; no INTERNET/network permission | PASS |
 
 Not covered by the emulator: frames, OEM behaviour, real lock/chip/notification timing, energy, and

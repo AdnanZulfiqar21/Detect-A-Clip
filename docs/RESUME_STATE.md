@@ -16,6 +16,11 @@ first, then resume here.
 - **Android build:** `DAC_GRADLE_TMP=<dir without spaces> bash android/gradle-local.sh :app:assembleDebug :app:lintDebug :app:compileDebugUnitTestKotlin`,
   then `bash android/junit-on-gradle-classes.sh` (direct JUnit on Gradle-compiled classes; Gradle's
   own test task cannot fork here and runs in CI instead).
+- **Android emulator (local, git-ignored):** `tools/android-sdk/emulator` 37.2.12 and
+  `system-images;android-37.0;google_apis;x86_64` (under the accepted `android-sdk-license`; no other
+  licence), AVD `dac37` in `tools/avd` (Pixel 7, 2 GB data). Boot headless with
+  `ANDROID_AVD_HOME=<repo>/tools/avd tools/android-sdk/emulator/emulator.exe -avd dac37 -no-window -no-audio -no-snapshot -gpu swiftshader_indirect`,
+  then `adb install -r android/app/build/outputs/apk/debug/app-debug.apk`. Emulator results are not device evidence.
 - **Verified:** locally Python 180, pure-Kotlin 71, Android assemble + lint (no issues), direct JUnit 71.
   CI (see TEST_EVIDENCE): ci.yml (Python, pure Kotlin, Android incl. Gradle `testDebugUnitTest`) and
   swift-core.yml (`swift test` on macOS, Swift core compile for iOS device/simulator, iOS LAB app unsigned
