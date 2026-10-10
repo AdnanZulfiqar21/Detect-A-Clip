@@ -57,7 +57,9 @@ class PackLoader(private val state: DeviceRightsState) {
         fun parseInstant(v: Any?, what: String): OffsetDateTime {
             val s = v as? String ?: throw Rejected("$what malformed or missing")
             if (!INSTANT.matches(s)) throw Rejected("$what malformed or missing")
-            return try { OffsetDateTime.parse(s) } catch (e: DateTimeParseException) { throw Rejected("$what malformed or missing") }
+            val t = try { OffsetDateTime.parse(s) } catch (e: DateTimeParseException) { throw Rejected("$what malformed or missing") }
+            if (t.year < 1) throw Rejected("$what malformed (year 0000)")   // Python datetime starts at year 1
+            return t
         }
 
         fun parseVersion(v: Any?, what: String): Triple<Long, Long, Long> {

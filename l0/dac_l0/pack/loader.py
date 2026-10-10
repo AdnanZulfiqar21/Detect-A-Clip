@@ -29,7 +29,7 @@ import json
 import math
 import re
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Optional, Set, Tuple, Union
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
@@ -54,8 +54,10 @@ REQUIRED_KEYS_V2 = REQUIRED_KEYS - {"signature"}
 CALIBRATION_STATUSES = {"UNCALIBRATED", "CALIBRATED_L0_SYNTHETIC", "CALIBRATED"}
 SUPPORTED_INDEX_FORMATS = set(SUPPORTED_FORMATS)
 _PACK_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$")
-_VERSION = re.compile(r"^(0|[1-9]\d{0,8})\.(0|[1-9]\d{0,8})\.(0|[1-9]\d{0,8})$")
-_INSTANT = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?(Z|[+-]\d{2}:\d{2})$")
+# ASCII digits only: Python's \d also matches other scripts' digits, which Kotlin/Swift refuse.
+_VERSION = re.compile(r"^(0|[1-9][0-9]{0,8})\.(0|[1-9][0-9]{0,8})\.(0|[1-9][0-9]{0,8})$")
+_INSTANT = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,6})?(Z|[+-][0-9]{2}:[0-9]{2})$")
+_MAX_OFFSET = timedelta(hours=18)   # java.time.ZoneOffset range; Python alone would allow < 24 h
 
 Version = Tuple[int, int, int]
 
@@ -92,12 +94,16 @@ def parse_instant(value, what: str) -> datetime:
     """ISO-8601 instant with an explicit offset (Z or +HH:MM). Naive or malformed -> reject."""
     if not isinstance(value, str) or not _INSTANT.fullmatch(value):
         raise PackRejected(f"{what} malformed or missing (explicit UTC offset required)")
+    if value[-1] != "Z" and int(value[-2:]) > 59:   # fromisoformat would read +05:60 as 06:00
+        raise PackRejected(f"{what} malformed (offset minutes > 59)")
     try:
         t = datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError:
         raise PackRejected(f"{what} malformed or missing (not a calendar instant)")
     if t.tzinfo is None or t.utcoffset() is None:
         raise PackRejected(f"{what} malformed or missing (explicit UTC offset required)")
+    if abs(t.utcoffset()) > _MAX_OFFSET:
+        raise PackRejected(f"{what} malformed (UTC offset beyond +/-18:00)")
     return t
 
 
