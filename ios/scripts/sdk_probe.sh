@@ -63,13 +63,12 @@ func probeSCK() {
     _ = SCContentSharingPicker.shared
     let _: SCStreamOutputType = .screen
 }
-let sckImportable = true
 #else
-let sckImportable = false
+#error("ScreenCaptureKit is not importable for this iOS SDK")
 #endif
 EOF
 if xcrun --sdk iphoneos swiftc -typecheck -target "arm64-apple-ios${IOS_VER}" "$TMP/probe.swift" 2> "$TMP/err.txt"; then
-  echo "swiftc typecheck: OK (ScreenCaptureKit symbols above resolve for arm64-apple-ios${IOS_VER})"
+  echo "swiftc typecheck: OK (ScreenCaptureKit importable; SCStreamConfiguration, SCContentSharingPicker.shared, SCStreamOutputType.screen resolve for arm64-apple-ios${IOS_VER})"
 else
   echo "swiftc typecheck: FAILED; diagnostics:"; sed 's/^/    /' "$TMP/err.txt" | head -40
 fi
