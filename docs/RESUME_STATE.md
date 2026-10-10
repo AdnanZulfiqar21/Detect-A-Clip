@@ -21,6 +21,9 @@ first, then resume here.
   licence), AVD `dac37` in `tools/avd` (Pixel 7, 2 GB data). Boot headless with
   `ANDROID_AVD_HOME=<repo>/tools/avd tools/android-sdk/emulator/emulator.exe -avd dac37 -no-window -no-audio -no-snapshot -gpu swiftshader_indirect`,
   then `adb install -r android/app/build/outputs/apk/debug/app-debug.apk`. Emulator results are not device evidence.
+  Instrumented suite: `:app:assembleDebugAndroidTest`, install `app-debug-androidTest.apk`, then
+  `adb shell am instrument -w -r ai.detectaclip.lab.test/androidx.test.runner.AndroidJUnitRunner`. With ~2 GB
+  free host RAM the emulator's System UI can freeze (tap Wait); CI job `android-emulator.yml` runs the same suite.
 - **Verified:** locally Python 180, pure-Kotlin 71, Android assemble + lint (no issues), direct JUnit 71.
   CI (see TEST_EVIDENCE): ci.yml (Python, pure Kotlin, Android incl. Gradle `testDebugUnitTest`) and
   swift-core.yml (`swift test` on macOS, Swift core compile for iOS device/simulator, iOS LAB app unsigned

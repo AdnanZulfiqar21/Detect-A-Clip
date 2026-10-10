@@ -36,7 +36,7 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | P00-T08 | PASS (L0 exploratory protocol) | EVAL_PROTOCOL, preregistered scoring/calibration, sealed FINAL; independent AI-06 setup review missing |
 | P00-T09 | PASS (document level) | TRACE-01 |
 | P01-T01 | IN_PROGRESS (build items PASS) | Debug APK builds (AGP 9.4.1, compileSdk 37); merged manifest without INTERNET; lint clean; capture disabled by default; installed and exercised on an Android 17 emulator (picker, deny, grant-with-capture-off, timeout, process death, file inventory; TEST_EVIDENCE). Device, network isolation and witness items of Part A BLOCKED (B-01) |
-| P01-T02…T08 | BLOCKED | B-01 (device). Lifecycle races covered on JVM only; CAP-A03 `app_only` source configuration compiled (API 37 guard) |
+| P01-T02…T08 | BLOCKED (device) · emulator partial | B-01 (device, G00). Emulator (Android 17, capture disabled): picker deny/grant, rotation, process kill and screen off mid-prompt, permission timeout, memory-only result, backup refusal, and CAP-A03 `app_only` not enforced by the emulator picker (TEST_EVIDENCE). Lifecycle races also covered on the JVM |
 | P02-T01 | IN_PROGRESS (installed-header scope) | `ios/scripts/sdk_probe.sh` in CI pins Xcode 26.6 / iOS SDK 26.5: ScreenCaptureKit framework **absent** for iOS; ReplayKit picker/sample handler present without deprecation attributes (SDK_MATRIX). The iOS 27 ScreenCaptureKit symbols need Xcode 27 (B-02) |
 | P02-T02 | IN_PROGRESS | a. LAB app shell (`ios/LabApp`, SwiftUI over tested `LabFlow`): Terms gate, eligibility before any prompt, disclosure, Stop/Cancel, Discard, result-on-return; capture disabled; builds unsigned for iOS devices, journey UI test on a simulator (CI). b. finite background-task guard compiled. Picker/stream and DATA-L00 Part A need the ScreenCaptureKit SDK and a device (B-02) |
 | P02-T03…T06 | BLOCKED | B-02 (device, provisioning, iOS 27 SDK) |
@@ -61,7 +61,7 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | P05-T04 | IMPLEMENTED_NOT_VERIFIED | canonical states; honest outcome-specific text identical on Android and iOS (parity test); SYNTHETIC label on every named candidate; memory-only result with 15-minute expiry on return |
 | P05-T05 | IMPLEMENTED_NOT_VERIFIED | in-app Stop/Cancel, notification Stop→Cancel switch; UX-02 device runs BLOCKED |
 | P05-T06 | IMPLEMENTED_NOT_VERIFIED | decline/changed-terms/late-callback logic tested on JVM |
-| P05-T07 | BLOCKED | accessibility review needs device; study needs D04 |
+| P05-T07 | BLOCKED (study) · a. partial | a. live regions for status on Android and iOS; every control reachable at font scale 2.0 (emulator instrumented test); screen-reader walkthrough on devices not done; b. en-GB only; c. study needs D04 |
 | P06-T01 | IN_PROGRESS | threat model draft; actual API path evidence BLOCKED |
 | P06-T02 | PASS (harness) | lease/generation/race tests (Python + Kotlin + Swift); capture-boundary regressions (consent denial, unsolicited grants, frame geometry) |
 | P06-T03 | IMPLEMENTED_NOT_VERIFIED | static guard (`test_privacy_static.py`): no logging/network/media/Photos APIs in shipped sources, no persistence in capture-path files, exact Android permission set, capture disabled by default, no sensitive iOS usage keys; DATA-L02 device inspection BLOCKED |

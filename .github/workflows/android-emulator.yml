@@ -45,9 +45,13 @@ jobs:
         working-directory: android
         run: gradle --no-daemon :app:assembleDebug :app:assembleDebugAndroidTest
       - name: Create AVD and boot headless
+        env:
+          ANDROID_AVD_HOME: ${{ runner.temp }}/avd
         run: |
+          mkdir -p "$ANDROID_AVD_HOME"
           echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n ci37 -k "system-images;android-37.0;google_apis;x86_64" -d pixel_7 --force
-          sed -i 's/^hw.ramSize *=.*/hw.ramSize = 4G/' ~/.android/avd/ci37.avd/config.ini
+          sed -i 's/^hw.ramSize *=.*/hw.ramSize = 4G/' "$ANDROID_AVD_HOME/ci37.avd/config.ini"
+          grep -E "hw.ramSize|image.sysdir" "$ANDROID_AVD_HOME/ci37.avd/config.ini"
           nohup "$ANDROID_HOME/emulator/emulator" -avd ci37 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect -accel on > emulator.log 2>&1 &
           ADB="$ANDROID_HOME/platform-tools/adb"
           "$ADB" wait-for-device
