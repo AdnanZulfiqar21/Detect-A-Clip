@@ -1,4 +1,7 @@
-# Instrumented LAB journey (LabJourneyTest) on an Android 17 (API 37) emulator with KVM.
+# Instrumented LAB journey (LabJourneyTest) on an Android 16 (API 36) emulator with KVM.
+# API 37 images crash surfaceflinger on headless Linux runners (goldfish mapper assertion
+# !hasReadColorBufferDma with swiftshader, swangle and guest GPU modes); the API 37 suite is run
+# on the Windows authoring host instead (docs/TEST_EVIDENCE.md).
 # Emulator evidence only; physical-device tests stay B-01. Capture stays disabled in this build.
 # No licence is accepted here: sdkmanager installs only packages already covered by the runner
 # image's accepted licences, and stdin is closed so any new licence prompt fails the job.
@@ -21,7 +24,7 @@ concurrency:
 
 jobs:
   instrumented:
-    name: LabJourneyTest on API 37 emulator
+    name: LabJourneyTest on API 36 emulator
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -40,7 +43,7 @@ jobs:
       - name: SDK packages (no licence prompt is answered)
         run: |
           SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          "$SDKM" --install "platforms;android-37.0" "build-tools;37.0.0" "emulator" "system-images;android-37.0;google_apis;x86_64" < /dev/null
+          "$SDKM" --install "platforms;android-37.0" "build-tools;37.0.0" "emulator" "system-images;android-36;google_apis;x86_64" < /dev/null
       - name: Build app and instrumented-test APKs
         working-directory: android
         run: gradle --no-daemon :app:assembleDebug :app:assembleDebugAndroidTest
@@ -49,15 +52,16 @@ jobs:
           ANDROID_AVD_HOME: ${{ runner.temp }}/avd
         run: |
           mkdir -p "$ANDROID_AVD_HOME"
-          echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n ci37 -k "system-images;android-37.0;google_apis;x86_64" -d pixel_7 --force
-          CFG="$ANDROID_AVD_HOME/ci37.avd/config.ini"
+          echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n ci36 -k "system-images;android-36;google_apis;x86_64" -d pixel_7 --force
+          CFG="$ANDROID_AVD_HOME/ci36.avd/config.ini"
           sed -i 's/^hw.ramSize *=.*/hw.ramSize = 4G/; s/^disk.dataPartition.size *=.*/disk.dataPartition.size = 6G/' "$CFG"
           grep -q "^disk.dataPartition.size" "$CFG" || echo "disk.dataPartition.size = 6G" >> "$CFG"
           grep -E "hw.ramSize|disk.dataPartition|image.sysdir" "$CFG"
-          nohup "$ANDROID_HOME/emulator/emulator" -avd ci37 -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -gpu guest -accel on > emulator.log 2>&1 &
+          nohup "$ANDROID_HOME/emulator/emulator" -avd ci36 -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -gpu swiftshader_indirect -accel on > emulator.log 2>&1 &
           ADB="$ANDROID_HOME/platform-tools/adb"
           "$ADB" wait-for-device
           for i in $(seq 1 120); do [ "$("$ADB" shell getprop sys.boot_completed | tr -d '\r')" = "1" ] && break; sleep 5; done
+          for i in $(seq 1 60); do [ "$("$ADB" shell getprop sys.user.0.ce_available | tr -d '\r')" = "true" ] && break; sleep 5; done
           "$ADB" shell getprop ro.build.fingerprint
           sleep 30
           for s in window_animation_scale transition_animation_scale animator_duration_scale; do "$ADB" shell settings put global $s 0; done
@@ -75,6 +79,7 @@ jobs:
               echo "Emulator system_server crashed (not a test assertion); waiting for reboot and retrying once."
               "$ADB" wait-for-device
               for i in $(seq 1 120); do [ "$("$ADB" shell getprop sys.boot_completed | tr -d '\r')" = "1" ] && break; sleep 5; done
+              for i in $(seq 1 60); do [ "$("$ADB" shell getprop sys.user.0.ce_available | tr -d '\r')" = "true" ] && break; sleep 5; done
               sleep 30; "$ADB" shell input keyevent 82
               run_suite
             else
