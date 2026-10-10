@@ -28,14 +28,13 @@ final class EndToEndGoldenTests: XCTestCase {
                 let f = lines[i].split(separator: " ").map(String.init); i += 1
                 var frame = DacDhash.contentFrame(seed: UInt32(f[2])!, w: 64, h: 36)
                 let b = Int(f[3])!
-                if b != 0 { frame = frame.map { UInt8(min(255, max(0, Int($0) + b))) } }
+                if b != 0 { frame = frame.map { DacDhash.clampByte(Int($0) + b) } }
                 pf.append((Int(f[1])!, pack.search(DacDhash.hash(frame, width: 64, height: 36), topK: topK, maxDistance: th.radius)))
             }
             let expected = lines[i]; i += 1
             let hyps = Recognition.verify(pf, samplingIntervalMs: Int(pack.samplingIntervalS * 1000))
             let r = Recognition.decide(hyps, frames: .init(selected: n, qualified: n, unusable: 0), works: pack.works, th: th)
-            let segs = r.segments.isEmpty ? "-" : r.segments.map { "\($0.workId)@\($0.editionId ?? "-")@\($0.queryStartMs)@\($0.queryEndMs)@\($0.referenceOffsetMs.map(String.init) ?? "-")@\($0.supportingFrames)" }.joined(separator: "|")
-            XCTAssertEqual("R \(r.state.rawValue) \(r.workId ?? "-") \(r.editionId ?? "-") \(r.episodeId ?? "-") \(r.flags.isEmpty ? "-" : r.flags.joined(separator: ",")) \(segs)", expected, q[1])
+            XCTAssertEqual(DecisionLine.format(r), expected, q[1])
             queries += 1
         }
         XCTAssertEqual(queries, 6)

@@ -3,10 +3,12 @@
 
 extension DacDhash {
     public static func luma(_ rgb: [UInt8], width: Int, height: Int, stride: Int = 3) -> [Int] {
-        (0..<(width * height)).map { k in
+        var out = [Int](repeating: 0, count: width * height)
+        for k in 0..<(width * height) {
             let p = k * stride
-            return (77 * Int(rgb[p]) + 150 * Int(rgb[p + 1]) + 29 * Int(rgb[p + 2]) + 128) >> 8
+            out[k] = lumaOf(rgb[p], rgb[p + 1], rgb[p + 2])
         }
+        return out
     }
 
     private static func trim(_ f: [Bool]) -> (Int, Int) {

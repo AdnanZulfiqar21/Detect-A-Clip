@@ -4,6 +4,18 @@
 public enum DacDhash {
     public static let spec = "DAC-DHASH-v1"
 
+    /// Integer BT.601 luma, (77 R + 150 G + 29 B + 128) >> 8. Split into typed steps so the
+    /// type checker stays fast.
+    @inline(__always) public static func lumaOf(_ r: UInt8, _ g: UInt8, _ b: UInt8) -> Int {
+        let rr: Int = 77 * Int(r)
+        let gg: Int = 150 * Int(g)
+        let bb: Int = 29 * Int(b)
+        let sum: Int = rr + gg + bb + 128
+        return sum >> 8
+    }
+
+    @inline(__always) static func clampByte(_ v: Int) -> UInt8 { UInt8(Swift.min(255, Swift.max(0, v))) }
+
     public static func hash(_ rgb: [UInt8], width: Int, height: Int, stride: Int = 3) -> UInt64 {
         precondition(width >= 9 && height >= 8 && rgb.count >= width * height * stride)
         var means = [[Int64]](repeating: [Int64](repeating: 0, count: 9), count: 8)
@@ -15,7 +27,7 @@ public enum DacDhash {
                 for y in y0..<y1 {
                     var p = (y * width + x0) * stride
                     for _ in x0..<x1 {
-                        sum += Int64((77 * Int(rgb[p]) + 150 * Int(rgb[p + 1]) + 29 * Int(rgb[p + 2]) + 128) >> 8)
+                        sum += Int64(lumaOf(rgb[p], rgb[p + 1], rgb[p + 2]))
                         p += stride
                     }
                 }
@@ -43,9 +55,11 @@ public enum DacDhash {
             for x in 0..<w {
                 let inside = x >= rx && x < rx + rw && y >= ry && y < ry + rh
                 for ch in 0..<3 {
-                    let base = inside ? col[ch] : (((x * 255) / max(1, w - 1) + (y * 255) / max(1, h - 1) * (ch + 1)) & 255)
-                    let noise = Int(rng.next() >> 28) - 8
-                    out[(y * w + x) * 3 + ch] = UInt8(min(255, max(0, base + noise)))
+                    let gx: Int = (x * 255) / Swift.max(1, w - 1)
+                    let gy: Int = (y * 255) / Swift.max(1, h - 1) * (ch + 1)
+                    let base: Int = inside ? col[ch] : ((gx + gy) & 255)
+                    let noise: Int = Int(rng.next() >> 28) - 8
+                    out[(y * w + x) * 3 + ch] = clampByte(base + noise)
                 }
             }
         }

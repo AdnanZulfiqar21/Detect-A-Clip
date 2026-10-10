@@ -73,7 +73,7 @@ enum Compose {
             place(&out, w, scaleNearest(c, w, h, 40, 22), 40, 22, 12, 9)
         default: fatalError(variant)
         }
-        if bright != 0 { out = out.map { UInt8(min(255, max(0, Int($0) + bright))) } }
+        if bright != 0 { out = out.map { DacDhash.clampByte(Int($0) + bright) } }
         return out
     }
 
@@ -90,5 +90,24 @@ enum Compose {
 
     static func luma(_ plane: (bytes: [UInt8], rowStride: Int), _ w: Int, _ h: Int) throws -> [Int] {
         try plane.bytes.withUnsafeBytes { try FrameView(base: $0, width: w, height: h, rowStride: plane.rowStride, pixelStride: 4).toLuma() }
+    }
+}
+
+/// "R <state> <work> <edition> <episode> <flags> <segments>" exactly as the Python generators
+/// write it. Built in explicit steps to keep the type checker fast.
+enum DecisionLine {
+    static func opt(_ s: String?) -> String { s ?? "-" }
+
+    static func segment(_ g: Recognition.Segment) -> String {
+        let off: String = g.referenceOffsetMs.map { String($0) } ?? "-"
+        let parts: [String] = [g.workId, opt(g.editionId), String(g.queryStartMs), String(g.queryEndMs), off, String(g.supportingFrames)]
+        return parts.joined(separator: "@")
+    }
+
+    static func format(_ d: Recognition.Decision) -> String {
+        let segs: String = d.segments.isEmpty ? "-" : d.segments.map(segment).joined(separator: "|")
+        let flags: String = d.flags.isEmpty ? "-" : d.flags.joined(separator: ",")
+        let parts: [String] = ["R", d.state.rawValue, opt(d.workId), opt(d.editionId), opt(d.episodeId), flags, segs]
+        return parts.joined(separator: " ")
     }
 }

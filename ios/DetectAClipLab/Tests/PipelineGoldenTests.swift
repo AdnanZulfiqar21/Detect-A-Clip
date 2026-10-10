@@ -35,10 +35,7 @@ final class PipelineGoldenTests: XCTestCase {
             let s = lines[i]; i += 1
             let expectedR = lines[i]; i += 1
             let d = session.finish { false }!
-            let segs = d.segments.isEmpty ? "-" : d.segments.map {
-                "\($0.workId)@\($0.editionId ?? "-")@\($0.queryStartMs)@\($0.queryEndMs)@\($0.referenceOffsetMs.map(String.init) ?? "-")@\($0.supportingFrames)"
-            }.joined(separator: "|")
-            let gotR = "R \(d.state.rawValue) \(d.workId ?? "-") \(d.editionId ?? "-") \(d.episodeId ?? "-") \(d.flags.isEmpty ? "-" : d.flags.joined(separator: ",")) \(segs)"
+            let gotR = DecisionLine.format(d)
             let gotS = "S \(offered) \(session.selected) \(session.qualified) \(session.unusable)"
             if gotS != s { mismatches.append("\(q[1]) summary: \(gotS) vs \(s)") }
             if gotR != expectedR { mismatches.append("\(q[1]): \(gotR) vs \(expectedR)") }

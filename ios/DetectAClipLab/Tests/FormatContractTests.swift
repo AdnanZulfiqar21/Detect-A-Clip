@@ -5,10 +5,12 @@ import XCTest
 
 final class FormatContractTests: XCTestCase {
     private func cases() throws -> [(name: String, accept: Bool, payload: [UInt8])] {
-        try Golden.lines("golden_format_cases.txt").filter { $0.hasPrefix("CASE ") }.map {
-            let p = $0.split(separator: " ")
-            return (String(p[1]), p[2] == "ACCEPT", Golden.hex(p[3]))
+        var out: [(name: String, accept: Bool, payload: [UInt8])] = []
+        for line in try Golden.lines("golden_format_cases.txt") where line.hasPrefix("CASE ") {
+            let p = line.split(separator: " ")
+            out.append((name: String(p[1]), accept: p[2] == "ACCEPT", payload: Golden.hex(p[3])))
         }
+        return out
     }
 
     func testSwiftVerdictsMatchThePythonContract() throws {

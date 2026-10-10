@@ -32,9 +32,13 @@ final class RecognitionGoldenTests: XCTestCase {
             var pf: [(Int, [Recognition.Candidate])] = []
             while peek().hasPrefix("PF ") {
                 let p = next().split(separator: " ").map(String.init)
-                let cs: [Recognition.Candidate] = p[2] == "-" ? [] : p[2].split(separator: ";").map { c in
-                    let q = c.split(separator: ":").map(String.init)
-                    return .init(locator: .init(work: Int(q[0])!, edition: Int(q[1])!, tMs: Int(q[2])!), distance: Double(q[3])!)
+                var cs: [Recognition.Candidate] = []
+                if p[2] != "-" {
+                    for c in p[2].split(separator: ";") {
+                        let q = c.split(separator: ":").map(String.init)
+                        let loc = Recognition.Locator(work: Int(q[0])!, edition: Int(q[1])!, tMs: Int(q[2])!)
+                        cs.append(Recognition.Candidate(locator: loc, distance: Double(q[3])!))
+                    }
                 }
                 pf.append((Int(p[1])!, cs))
             }
@@ -47,11 +51,11 @@ final class RecognitionGoldenTests: XCTestCase {
             for (h, e) in zip(hyps, expH) {
                 XCTAssertEqual([String(h.work), String(h.edition ?? -1), String(h.offsetMs), String(h.support)], Array(e[1...4]), header)
                 XCTAssertEqual(h.meanDistance, Double(e[5])!, header)
-                XCTAssertEqual([String(h.queryStartMs), String(h.queryEndMs), h.ambiguousEditions.isEmpty ? "-" : h.ambiguousEditions.map(String.init).joined(separator: ",")], Array(e[6...8]), header)
+                let amb: String = h.ambiguousEditions.isEmpty ? "-" : h.ambiguousEditions.map { String($0) }.joined(separator: ",")
+                XCTAssertEqual([String(h.queryStartMs), String(h.queryEndMs), amb], Array(e[6...8]), header)
             }
             let r = Recognition.decide(hyps, frames: frames, works: works, th: th)
-            let segs = r.segments.isEmpty ? "-" : r.segments.map { "\($0.workId)@\($0.editionId ?? "-")@\($0.queryStartMs)@\($0.queryEndMs)@\($0.referenceOffsetMs.map(String.init) ?? "-")@\($0.supportingFrames)" }.joined(separator: "|")
-            let got = "R \(r.state.rawValue) \(r.workId ?? "-") \(r.editionId ?? "-") \(r.episodeId ?? "-") \(r.flags.isEmpty ? "-" : r.flags.joined(separator: ",")) \(segs)"
+            let got = DecisionLine.format(r)
             XCTAssertEqual(got, expR, header)
             cases += 1
         }

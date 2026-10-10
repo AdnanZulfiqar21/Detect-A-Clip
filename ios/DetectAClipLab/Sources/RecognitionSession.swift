@@ -29,8 +29,7 @@ public struct FrameView {
             var p = r * rowStride
             let o = r * width
             for c in 0..<width {
-                let rr = Int(base[p + ri]), gg = Int(base[p + 1]), bb = Int(base[p + bi])
-                y[o + c] = (77 * rr + 150 * gg + 29 * bb + 128) >> 8
+                y[o + c] = DacDhash.lumaOf(base[p + ri], base[p + 1], base[p + bi])
                 p += pixelStride
             }
         }

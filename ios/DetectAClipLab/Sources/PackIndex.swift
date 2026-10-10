@@ -245,7 +245,10 @@ extension DacDhash {
             let cy = min(by - 1, y / bh)
             for x in 0..<w {
                 let cx = min(bx - 1, x / bw)
-                for ch in 0..<3 { out[(y * w + x) * 3 + ch] = UInt8(min(255, max(0, cols[cy][cx][ch] + Int(rng.next() >> 28) - 8))) }
+                for ch in 0..<3 {
+                    let noise: Int = Int(rng.next() >> 28) - 8
+                    out[(y * w + x) * 3 + ch] = clampByte(cols[cy][cx][ch] + noise)
+                }
             }
         }
         return out
