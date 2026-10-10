@@ -14,7 +14,7 @@ pass at `3f77273` (macOS 26.6.2, Xcode 26.6, Swift 6.3.3); results in `docs/TEST
 | `Sources/FrameSelector.swift` | ≤2 fps, ≤3 owned frames, monotonic timestamps |
 | `Sources/CaptureLifecycle.swift`, `Tests/CaptureLifecycleTests.swift`, `Tests/RecognitionLifecycleTests.swift`, `Tests/CaptureBoundaryTests.swift` | Port of the Kotlin lifecycle: DIAGNOSTIC and RECOGNITION modes, background-task guard, injected-frame races, picker denial and frame-geometry refusal |
 | `Sources/ConsentAndEligibility.swift`, `Tests/ConsentAndEligibilityTests.swift` | Terms receipt (translation-only change re-prompts) and pre-scan eligibility gate |
-| `Sources/MiniJson.swift`, `Sources/PackIndex.swift`, `Tests/FormatContractTests.swift` | Strict JSON and the `idx-flat-4` format contract (49 shared cases, result display names) |
+| `Sources/MiniJson.swift`, `Sources/PackIndex.swift`, `Tests/FormatContractTests.swift` | Strict JSON and the `idx-flat-5` format contract (60 shared cases + 15 display rows) |
 | `Sources/PackLoader.swift`, `Tests/ManifestContractTests.swift` | Manifest V2 loader (CryptoKit Ed25519/SHA-256); 68 shared cases |
 | `Sources/RecognitionSession.swift`, `Tests/PipelineGoldenTests.swift` | FrameView (RGB/BGR, strides) + session; 12 shared pipeline queries |
 | `Sources/Recognition.swift`, `DacDhash.swift`, `DacExact.swift` and their golden tests | Verification/decision, DAC-DHASH-v1, DAC-CROP-v1/DAC-QUAL-v1 |

@@ -1,4 +1,4 @@
-"""Index payload format contract: idx-flat-4 (writer) with idx-flat-3 migration (reader).
+"""Index payload format contract: idx-flat-5 (writer) with idx-flat-3/4 migration (reader).
 
 One contract for Python, Kotlin and Swift. docs/PACK_FORMAT.md is the prose version; the
 cross-language cases in android/app/src/test/resources/golden_format_cases.txt are generated
@@ -12,10 +12,13 @@ Binary layout (little endian):
   locator  u32 work_index | u16 edition_index | u32 t_ms | u16 segment (=0) | u32 reserved (=0)
 
 Metadata (exact key sets):
-  index_format_version  "idx-flat-3" | "idx-flat-4"
+  index_format_version  "idx-flat-3" | "idx-flat-4" | "idx-flat-5"
   generator_version, preprocessing_version, family     non-empty strings; family matches bytes
   works                 list, works[i].work_index == i
-  shared_scenes         idx-flat-4 only (v3 migrates to [])
+  shared_scenes         idx-flat-4+ (v3 migrates to [])
+  series                idx-flat-5 only: list of {series_id, names}; exactly the series referenced
+                        by works, each once, no series_id equal to a work_id (v3/v4 migrate to
+                        the referenced series with empty names)
 Work entry keys: work_index, work_id, synthetic_title, editions, durations_s, series_id,
   episode_id, names, and (idx-flat-4) aliases.
   - work_id unique, ^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$; series_id null or the same pattern
@@ -42,7 +45,8 @@ import numpy as np
 
 FORMAT_V3 = "idx-flat-3"
 FORMAT_V4 = "idx-flat-4"
-SUPPORTED_FORMATS = (FORMAT_V3, FORMAT_V4)
+FORMAT_V5 = "idx-flat-5"
+SUPPORTED_FORMATS = (FORMAT_V3, FORMAT_V4, FORMAT_V5)
 
 _ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$")
 _EPISODE = re.compile(r"^[A-Za-z0-9_.-]{1,64}$")
@@ -59,6 +63,7 @@ WORK_KEYS_V3 = {"work_index", "work_id", "synthetic_title", "editions", "duratio
 WORK_KEYS_V4 = WORK_KEYS_V3 | {"aliases"}
 META_KEYS_V3 = {"index_format_version", "generator_version", "preprocessing_version", "family", "works"}
 META_KEYS_V4 = META_KEYS_V3 | {"shared_scenes"}
+META_KEYS_V5 = META_KEYS_V4 | {"series"}
 
 
 @dataclass
@@ -124,20 +129,22 @@ def check_aliases(aliases) -> List[str]:
 
 
 def validate_metadata(meta, work_count: int):
-    """Returns (format_version, works_as_dicts, shared_scenes). Raises ValueError."""
+    """Returns (format_version, works_as_dicts, shared_scenes, series_names). Raises ValueError.
+    series_names maps every referenced series_id to its {locale: name} table (empty for v3/v4)."""
     if not isinstance(meta, dict):
         raise ValueError("metadata not an object")
     fmt = meta.get("index_format_version")
     if fmt not in SUPPORTED_FORMATS:
         raise ValueError("incompatible index format version")
-    if set(meta) != (META_KEYS_V4 if fmt == FORMAT_V4 else META_KEYS_V3):
+    expected_keys = {FORMAT_V3: META_KEYS_V3, FORMAT_V4: META_KEYS_V4, FORMAT_V5: META_KEYS_V5}[fmt]
+    if set(meta) != expected_keys:
         raise ValueError("metadata keys mismatch")
     for k in ("generator_version", "preprocessing_version", "family"):
         _text(meta[k], k)
     works_raw = meta["works"]
     if not isinstance(works_raw, list) or len(works_raw) != work_count:
         raise ValueError("work table mismatch")
-    keys = WORK_KEYS_V4 if fmt == FORMAT_V4 else WORK_KEYS_V3
+    keys = WORK_KEYS_V3 if fmt == FORMAT_V3 else WORK_KEYS_V4
     works = []
     seen_ids, seen_eps = set(), set()
     for i, w in enumerate(works_raw):
@@ -174,10 +181,16 @@ def validate_metadata(meta, work_count: int):
                 raise ValueError("duplicate episode")
             seen_eps.add((sid, eid))
         check_names(w["names"])
-        aliases = check_aliases(w["aliases"]) if fmt == FORMAT_V4 else []
+        aliases = check_aliases(w["aliases"]) if fmt != FORMAT_V3 else []
         works.append({**{k: w[k] for k in WORK_KEYS_V3}, "aliases": aliases})
+    referenced = []
+    for w in works:
+        if w["series_id"] is not None and w["series_id"] not in referenced:
+            referenced.append(w["series_id"])
+    if any(s in seen_ids for s in referenced):
+        raise ValueError("series_id equals a work_id")
     scenes: List[SharedScene] = []
-    if fmt == FORMAT_V4:
+    if fmt != FORMAT_V3:
         raw = meta["shared_scenes"]
         if not isinstance(raw, list) or len(raw) > MAX_SHARED_SCENES:
             raise ValueError("bad shared_scenes")
@@ -204,7 +217,21 @@ def validate_metadata(meta, work_count: int):
                     raise ValueError("shared scene interval out of range")
                 members.append(SharedSceneMember(wi, ei, s, e))
             scenes.append(SharedScene(gid, members))
-    return fmt, works, scenes
+    series_names: Dict[str, Dict[str, str]] = {s: {} for s in referenced}
+    if fmt == FORMAT_V5:
+        raw = meta["series"]
+        if not isinstance(raw, list) or len(raw) != len(referenced):
+            raise ValueError("series table must list exactly the referenced series")
+        seen_series = set()
+        for entry in raw:
+            if not isinstance(entry, dict) or set(entry) != {"series_id", "names"}:
+                raise ValueError("bad series entry")
+            sid = entry["series_id"]
+            if not isinstance(sid, str) or not _ID.fullmatch(sid) or sid in seen_series or sid not in referenced:
+                raise ValueError("series table must list exactly the referenced series")
+            seen_series.add(sid)
+            series_names[sid] = check_names(entry["names"])
+    return fmt, works, scenes, series_names
 
 
 def validate_locators(locs: np.ndarray, works: List[dict]) -> None:

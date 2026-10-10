@@ -21,7 +21,7 @@ from ..index.builder import HEADER_FMT, IndexBundle, MAGIC
 DESC_BYTES = 8
 
 
-def base_meta(fmt: str = "idx-flat-4") -> Dict:
+def base_meta(fmt: str = "idx-flat-5") -> Dict:
     works = [
         {"work_index": 0, "work_id": "SW000", "synthetic_title": "SYNTHETIC WORK 000", "editions": ["E0_THEATRICAL", "E1_EXTENDED"],
          "durations_s": [60.0, 66.0], "series_id": None, "episode_id": None, "names": {"en": "Synthetic Work 000", "ur-Latn": "Masnooi Kaam 000"}},
@@ -32,7 +32,9 @@ def base_meta(fmt: str = "idx-flat-4") -> Dict:
     ]
     meta = {"index_format_version": fmt, "generator_version": GENERATOR_VERSION, "preprocessing_version": EXACT_PREPROCESSING_VERSION,
             "family": "DACDHASH", "works": works}
-    if fmt == "idx-flat-4":
+    if fmt == "idx-flat-5":
+        meta["series"] = [{"series_id": "S-X", "names": {"en": "Synthetic Series X", "ur-Latn": "Masnooi Series X"}}]
+    if fmt in ("idx-flat-4", "idx-flat-5"):
         works[0]["aliases"] = ["Synthetic Work Zero"]
         works[1]["aliases"] = []
         works[2]["aliases"] = []
@@ -71,13 +73,26 @@ def cases() -> List[Case]:
     out: List[Case] = []
     M, L = base_meta, base_locators
 
-    def mut(fn: Callable[[Dict], None], fmt="idx-flat-4") -> Dict:
+    def mut(fn: Callable[[Dict], None], fmt="idx-flat-5") -> Dict:
         m = copy.deepcopy(M(fmt))
         fn(m)
         return m
 
     # ---- valid
-    out.append(("valid_v4_aliases_series_shared_scene", True, pack(M(), L())))
+    out.append(("valid_v5_series_names_aliases_shared_scene", True, pack(M(), L())))
+    out.append(("valid_v4_migration_no_series", True, pack(M("idx-flat-4"), L())))
+    out.append(("valid_v5_series_without_names", True, pack(mut(lambda m: m["series"][0].__setitem__("names", {})), L())))
+    # ---- series table (idx-flat-5)
+    out.append(("v4_with_series_key", False, pack(mut(lambda m: m.__setitem__("series", []), "idx-flat-4"), L())))
+    out.append(("v5_series_table_missing", False, pack(mut(lambda m: m.pop("series")), L())))
+    out.append(("v5_series_table_empty", False, pack(mut(lambda m: m.__setitem__("series", [])), L())))
+    out.append(("v5_series_unreferenced_entry", False, pack(mut(lambda m: m["series"].append({"series_id": "S-Z", "names": {}})), L())))
+    out.append(("v5_series_duplicate_entry", False, pack(mut(lambda m: m["series"].append({"series_id": "S-X", "names": {}})), L())))
+    out.append(("v5_series_entry_extra_key", False, pack(mut(lambda m: m["series"][0].__setitem__("aliases", [])), L())))
+    out.append(("v5_series_bad_locale", False, pack(mut(lambda m: m["series"][0]["names"].__setitem__("English", "x")), L())))
+    out.append(("v5_series_name_too_long", False, pack(mut(lambda m: m["series"][0]["names"].__setitem__("en", "x" * 201)), L())))
+    out.append(("v5_series_id_equals_work_id", False, pack(mut(lambda m: (m["works"][1].__setitem__("series_id", "SW000"), m["works"][2].__setitem__("series_id", "SW000"),
+                                                                            m["series"][0].__setitem__("series_id", "SW000"))), L())))
     out.append(("valid_v3_migration_no_aliases", True, pack(M("idx-flat-3"), L())))
     out.append(("valid_only_non_first_edition_E2", True, pack(M(), L())))  # work 2 has only E2_BROADCAST at index 0
     out.append(("valid_reordered_editions", True, pack(mut(lambda m: (m["works"][0].__setitem__("editions", ["E1_EXTENDED", "E0_THEATRICAL"]),
@@ -140,6 +155,7 @@ DISPLAY_QUERIES = [
     ("SW000", None, ["ur-PK"]), ("SW000", None, ["ur-Latn", "en"]), ("SW000", None, ["ko"]), ("SW000", None, []),
     ("SW000", None, ["fr-CA", "ur"]), ("S-X", "E02", ["en"]), ("S-X", "E01", ["de"]), ("S-X", None, ["en"]),
     ("SW100", None, ["en"]), ("SW999", None, ["en"]), (None, None, ["en"]),
+    ("S-X", None, ["ur-PK"]), ("S-X", None, ["ko"]), ("S-Y", None, ["en"]), ("S-X", "E09", ["en"]),
 ]
 
 
@@ -155,10 +171,10 @@ def write(out: Path) -> None:
             raise AssertionError(f"Python parser disagrees with the contract on {name}: expected {ok}, got {got}")
         lines.append(f"CASE {name} {'ACCEPT' if ok else 'REJECT'} {data.hex()}")
     # Result display (P04-T04): DISPLAY <work|-> <episode|-> <prefs,comma|-> <expected UTF-8 hex|->
-    # against the accepted valid_v4_aliases_series_shared_scene pack.
+    # against the accepted valid_v5_series_names_aliases_shared_scene pack.
     from ..index.builder import result_display_name
-    v4 = IndexBundle.from_bytes(dict((n, d) for n, _, d in cases())["valid_v4_aliases_series_shared_scene"])
-    lines.append("# DISPLAY cases use the valid_v4_aliases_series_shared_scene pack")
+    v4 = IndexBundle.from_bytes(dict((n, d) for n, _, d in cases())["valid_v5_series_names_aliases_shared_scene"])
+    lines.append("# DISPLAY cases use the valid_v5_series_names_aliases_shared_scene pack")
     for wid, ep, prefs in DISPLAY_QUERIES:
         got = result_display_name(v4, wid, ep, prefs)
         lines.append(" ".join(["DISPLAY", wid or "-", ep or "-", ",".join(prefs) or "-",

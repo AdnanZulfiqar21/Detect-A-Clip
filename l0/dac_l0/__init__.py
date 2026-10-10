@@ -12,7 +12,7 @@ __version__ = "0.1.0"
 # previously built packs; the pack loader checks compatibility against them.
 GENERATOR_VERSION = "synth-gen-3"
 PREPROCESSING_VERSION = "prep-640x360-gray-uniformcrop-3"
-INDEX_FORMAT_VERSION = "idx-flat-4"  # writer; readers also accept idx-flat-3 (migration)
+INDEX_FORMAT_VERSION = "idx-flat-5"  # writer; readers also accept idx-flat-3/4 (migration)
 # Preprocessing identifier of the integer-exact device path (ED-17).
 EXACT_PREPROCESSING_VERSION = "dac-crop-v1+dac-qual-v1+dac-dhash-v1"
 CALIBRATION_STATUS_DEFAULT = "UNCALIBRATED"  # until P04-T05 freezes thresholds

@@ -24,10 +24,13 @@ final class FormatContractTests: XCTestCase {
         XCTAssertEqual(mismatches, [])
     }
 
-    func testAcceptedV4CaseExposesNamesAliasesAndSharedScenes() throws {
-        let c = try cases().first { $0.name == "valid_v4_aliases_series_shared_scene" }!
+    func testAcceptedV5CaseExposesNamesAliasesScenesAndSeriesNames() throws {
+        let c = try cases().first { $0.name == "valid_v5_series_names_aliases_shared_scene" }!
         let p = try PackIndex.parse(c.payload)
-        XCTAssertEqual(p.formatVersion, "idx-flat-4")
+        XCTAssertEqual(p.formatVersion, "idx-flat-5")
+        XCTAssertEqual(p.resultDisplayName(workId: "S-X", episodeId: nil, preferences: ["en"]), "Synthetic Series X")
+        XCTAssertEqual(p.resultDisplayName(workId: "S-X", episodeId: nil, preferences: ["ur-PK"]), "Masnooi Series X")
+        XCTAssertEqual(p.resultDisplayName(workId: "S-Y", episodeId: nil, preferences: ["en"]), "S-Y")
         XCTAssertEqual(p.aliases[0], ["Synthetic Work Zero"])
         XCTAssertEqual(p.sharedScenes.count, 1)
         XCTAssertEqual(p.sharedScenes[0].groupId, "intro-S-X")
@@ -40,7 +43,7 @@ final class FormatContractTests: XCTestCase {
 
     func testResultDisplayNamesMatchPython() throws {
         let lines = try Golden.lines("golden_format_cases.txt")
-        let v4 = try cases().first { $0.name == "valid_v4_aliases_series_shared_scene" }!
+        let v4 = try cases().first { $0.name == "valid_v5_series_names_aliases_shared_scene" }!
         let p = try PackIndex.parse(v4.payload)
         let rows = lines.filter { $0.hasPrefix("DISPLAY ") }.map { $0.split(separator: " ").map(String.init) }
         XCTAssertGreaterThanOrEqual(rows.count, 10)
@@ -52,12 +55,18 @@ final class FormatContractTests: XCTestCase {
         }
     }
 
-    func testV3PayloadMigratesWithEmptyAliasesAndScenes() throws {
-        let c = try cases().first { $0.name == "valid_v3_migration_no_aliases" }!
-        let p = try PackIndex.parse(c.payload)
+    func testV3AndV4PayloadsMigrateWithEmptyAliasesScenesAndSeriesNames() throws {
+        let all = try cases()
+        let p = try PackIndex.parse(all.first { $0.name == "valid_v3_migration_no_aliases" }!.payload)
         XCTAssertEqual(p.formatVersion, "idx-flat-3")
         XCTAssertTrue(p.aliases.allSatisfy { $0.isEmpty })
         XCTAssertTrue(p.sharedScenes.isEmpty)
+        XCTAssertEqual(p.seriesNames, ["S-X": [:]])
+        XCTAssertEqual(p.resultDisplayName(workId: "S-X", episodeId: nil, preferences: ["en"]), "S-X")
+        let v4 = try PackIndex.parse(all.first { $0.name == "valid_v4_migration_no_series" }!.payload)
+        XCTAssertEqual(v4.formatVersion, "idx-flat-4")
+        XCTAssertEqual(v4.aliases[0], ["Synthetic Work Zero"])
+        XCTAssertEqual(v4.seriesNames, ["S-X": [:]])
     }
 
     func testStrictJsonRejectsDuplicatesNaNAndTrailingData() {

@@ -20,7 +20,7 @@ from .. import EXACT_PREPROCESSING_VERSION, GENERATOR_VERSION, INDEX_FORMAT_VERS
 from ..quality import normalize
 from ..synth.generator import Edition, EditionKind
 from .descriptors import LOCATOR_BYTES, DescriptorFamily, Locator, describe
-from .format import FORMAT_V4, SharedScene, SharedSceneMember, check_names, strict_json_loads, validate_locators, validate_metadata
+from .format import FORMAT_V5, SharedScene, SharedSceneMember, check_names, strict_json_loads, validate_locators, validate_metadata
 
 MAGIC = b"DACL0IDX"
 HEADER_FMT = "<8sHHIId"  # magic, version, descriptor_bytes, vector_count, work_count, sampling_interval
@@ -50,7 +50,8 @@ class IndexBundle:
     locators: np.ndarray     # (N, 16) uint8
     works: List[WorkEntry]
     shared_scenes: List[SharedScene] = field(default_factory=list)   # idx-flat-4 metadata only
-    source_format: str = FORMAT_V4                                     # format the payload was read from
+    series_names: Dict[str, Dict[str, str]] = field(default_factory=dict)  # idx-flat-5: series_id -> {locale: name}
+    source_format: str = FORMAT_V5                                     # format the payload was read from
     build_seconds: float = 0.0
     indexed_hours: float = 0.0
     stats: Dict[str, float] = field(default_factory=dict)
@@ -75,8 +76,13 @@ class IndexBundle:
             "family": self.family.value,
             "works": [dict(w.__dict__) for w in self.works],
             "shared_scenes": [{"group_id": g.group_id, "members": [m.__dict__ for m in g.members]} for g in self.shared_scenes],
+            # Exactly the series the works reference (contract); names default to empty.
+            "series": [{"series_id": s, "names": dict(self.series_names.get(s, {}))} for s in self.referenced_series()],
         }
         return json.dumps(meta, sort_keys=True, separators=(",", ":")).encode()
+
+    def referenced_series(self) -> List[str]:
+        return sorted({w.series_id for w in self.works if w.series_id is not None})
 
     def hash_u64(self) -> np.ndarray:
         if not self.family.is_hash:
@@ -121,7 +127,7 @@ class IndexBundle:
             meta = strict_json_loads(meta_raw)
         except (UnicodeDecodeError, ValueError) as e:
             raise ValueError(f"metadata not valid JSON: {e}") from e
-        fmt, works_raw, scenes = validate_metadata(meta, nworks)
+        fmt, works_raw, scenes, series_names = validate_metadata(meta, nworks)
         try:
             family = DescriptorFamily(meta["family"])
         except ValueError:
@@ -139,7 +145,7 @@ class IndexBundle:
         desc = np.ascontiguousarray(arr[:, :dbytes])
         locs = np.ascontiguousarray(arr[:, dbytes:])
         validate_locators(locs, works_raw)
-        b = cls(family, float(interval), desc, locs, works, scenes, fmt)
+        b = cls(family, float(interval), desc, locs, works, scenes, series_names, fmt)
         b.indexed_hours = n * interval / 3600.0
         return b
 
@@ -172,9 +178,10 @@ def resolve_display_name(names: Dict[str, str], preferences: Sequence[str], fall
 
 def result_display_name(bundle: "IndexBundle", work_id: Optional[str], episode_id: Optional[str],
                         preferences: Sequence[str]) -> Optional[str]:
-    """Name to show for a committed result. A series-level result (episode not unique) or an ID
-    absent from the pack shows the ID itself: the format has no series-name table, and a
-    result never borrows another work's name. No candidate -> None."""
+    """Name to show for a committed result: the episode's name, a plain work's name, or (series
+    level, episode not unique) the series' own name from the idx-flat-5 series table. An ID
+    absent from the pack, or a series without names, shows the ID itself; a result never
+    borrows another work's name. No candidate -> None."""
     if work_id is None:
         return None
     for w in bundle.works:
@@ -184,16 +191,21 @@ def result_display_name(bundle: "IndexBundle", work_id: Optional[str], episode_i
             hit = w.work_id == work_id and w.series_id is None
         if hit:
             return resolve_display_name(w.names, preferences, w.work_id)
+    if episode_id is None and work_id in bundle.series_names:
+        return resolve_display_name(bundle.series_names[work_id], preferences, work_id)
     return work_id
 
 
 def build_index(editions: Sequence[Edition], family: DescriptorFamily, sampling_interval_s: float = 2.0,
-                shared_scenes: Optional[Sequence[Tuple[str, Sequence[Tuple[str, str, int, int]]]]] = None) -> IndexBundle:
+                shared_scenes: Optional[Sequence[Tuple[str, Sequence[Tuple[str, str, int, int]]]]] = None,
+                series_names: Optional[Dict[str, Dict[str, str]]] = None) -> IndexBundle:
     """Build a flat index from authorised gallery editions.
 
     Sampling: one reference descriptor every `sampling_interval_s` seconds of each edition.
     Locator edition indices are positions in *that work's own* edition list (format contract).
     shared_scenes: optional declarations (group_id, [(work_id, edition_id, start_ms, end_ms), ...]).
+    series_names: optional {series_id: {locale: name}}; a referenced series without an entry gets
+    the work's `series_names` attribute or the synthetic default {"en": "SYNTHETIC SERIES <id>"}.
     """
     if not (0.1 <= sampling_interval_s <= 60.0):
         raise ValueError("sampling interval out of bounds")
@@ -232,7 +244,12 @@ def build_index(editions: Sequence[Edition], family: DescriptorFamily, sampling_
             we = works[wid]
             ms.append(SharedSceneMember(we.work_index, we.editions.index(eid), int(s_ms), int(e_ms)))
         scenes.append(SharedScene(gid, ms))
-    bundle = IndexBundle(family, sampling_interval_s, desc.copy(), locs.copy(), list(works.values()), scenes)
+    names_by_series: Dict[str, Dict[str, str]] = dict(series_names or {})
+    for ed in editions:
+        sid = getattr(ed.work, "series_id", None)
+        if sid is not None and sid not in names_by_series:
+            names_by_series[sid] = dict(getattr(ed.work, "series_names", None) or {"en": f"SYNTHETIC SERIES {sid}"})
+    bundle = IndexBundle(family, sampling_interval_s, desc.copy(), locs.copy(), list(works.values()), scenes, names_by_series)
     bundle.build_seconds = time.perf_counter() - t0
     bundle.indexed_hours = total_s / 3600.0
     bundle.stats = {

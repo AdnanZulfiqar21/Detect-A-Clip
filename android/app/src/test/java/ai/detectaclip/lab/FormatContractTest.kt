@@ -27,10 +27,13 @@ class FormatContractTest {
         assertEquals(emptyList<String>(), mismatches)
     }
 
-    @Test fun acceptedV4CaseExposesNamesAliasesAndSharedScenes() {
-        val line = file("golden_format_cases.txt").readLines().first { it.startsWith("CASE valid_v4_aliases_series_shared_scene ") }
+    @Test fun acceptedV5CaseExposesNamesAliasesScenesAndSeriesNames() {
+        val line = file("golden_format_cases.txt").readLines().first { it.startsWith("CASE valid_v5_series_names_aliases_shared_scene ") }
         val p = PackIndex.parse(hex(line.split(" ")[3]))
-        assertEquals("idx-flat-4", p.formatVersion)
+        assertEquals("idx-flat-5", p.formatVersion)
+        assertEquals("Synthetic Series X", p.resultDisplayName("S-X", null, listOf("en")))
+        assertEquals("Masnooi Series X", p.resultDisplayName("S-X", null, listOf("ur-PK")))
+        assertEquals("S-Y", p.resultDisplayName("S-Y", null, listOf("en")))
         assertEquals(listOf("Synthetic Work Zero"), p.aliases[0])
         assertEquals("intro-S-X", p.sharedScenes.single().groupId)
         assertEquals(listOf("E2_BROADCAST"), p.works[2].editions)
@@ -42,7 +45,7 @@ class FormatContractTest {
 
     @Test fun resultDisplayNamesMatchPython() {
         val lines = file("golden_format_cases.txt").readLines()
-        val p = PackIndex.parse(hex(lines.first { it.startsWith("CASE valid_v4_aliases_series_shared_scene ") }.split(" ")[3]))
+        val p = PackIndex.parse(hex(lines.first { it.startsWith("CASE valid_v5_series_names_aliases_shared_scene ") }.split(" ")[3]))
         val cases = lines.filter { it.startsWith("DISPLAY ") }.map { it.split(" ") }
         assertTrue(cases.size >= 10)
         for (c in cases) {
@@ -53,10 +56,16 @@ class FormatContractTest {
         }
     }
 
-    @Test fun v3PayloadMigratesWithEmptyAliasesAndScenes() {
-        val line = file("golden_format_cases.txt").readLines().first { it.startsWith("CASE valid_v3_migration_no_aliases ") }
-        val p = PackIndex.parse(hex(line.split(" ")[3]))
-        assertEquals("idx-flat-3", p.formatVersion)
-        assertTrue(p.aliases.all { it.isEmpty() } && p.sharedScenes.isEmpty())
+    @Test fun v3AndV4PayloadsMigrateWithEmptyAliasesScenesAndSeriesNames() {
+        val lines = file("golden_format_cases.txt").readLines()
+        val v3 = PackIndex.parse(hex(lines.first { it.startsWith("CASE valid_v3_migration_no_aliases ") }.split(" ")[3]))
+        assertEquals("idx-flat-3", v3.formatVersion)
+        assertTrue(v3.aliases.all { it.isEmpty() } && v3.sharedScenes.isEmpty())
+        assertEquals(mapOf("S-X" to emptyMap<String, String>()), v3.seriesNames)
+        assertEquals("S-X", v3.resultDisplayName("S-X", null, listOf("en")))     // no names: the ID itself
+        val v4 = PackIndex.parse(hex(lines.first { it.startsWith("CASE valid_v4_migration_no_series ") }.split(" ")[3]))
+        assertEquals("idx-flat-4", v4.formatVersion)
+        assertEquals(listOf("Synthetic Work Zero"), v4.aliases[0])
+        assertEquals(mapOf("S-X" to emptyMap<String, String>()), v4.seriesNames)
     }
 }

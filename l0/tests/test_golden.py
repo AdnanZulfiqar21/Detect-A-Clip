@@ -66,8 +66,13 @@ def test_result_display_name_rules():
     from dac_l0.eval.format_golden import cases
     from dac_l0.index.builder import IndexBundle, result_display_name
 
-    b = IndexBundle.from_bytes(dict((n, d) for n, _, d in cases())["valid_v4_aliases_series_shared_scene"])
+    b = IndexBundle.from_bytes(dict((n, d) for n, _, d in cases())["valid_v5_series_names_aliases_shared_scene"])
     assert result_display_name(b, "SW000", None, ["ur-PK"]) == "Masnooi Kaam 000"
     assert result_display_name(b, "S-X", "E02", ["en"]) == "Synthetic Series X, Episode 2"
-    assert result_display_name(b, "S-X", None, ["en"]) == "S-X"        # series level: no borrowed episode name
+    assert result_display_name(b, "S-X", None, ["en"]) == "Synthetic Series X"   # series level: the series' own name
+    assert result_display_name(b, "S-X", None, ["ur-PK"]) == "Masnooi Series X"
+    assert result_display_name(b, "S-X", "E09", ["en"]) == "S-X"                 # unknown episode: never a borrowed name
     assert result_display_name(b, None, None, ["en"]) is None
+    v3 = IndexBundle.from_bytes(dict((n, d) for n, _, d in cases())["valid_v3_migration_no_aliases"])
+    assert v3.series_names == {"S-X": {}}
+    assert result_display_name(v3, "S-X", None, ["en"]) == "S-X"                 # migrated pack: no series names

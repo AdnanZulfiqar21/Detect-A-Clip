@@ -134,7 +134,7 @@ class PackLoader(private val state: DeviceRightsState) {
         if (!verifyEd25519(pub, manifestBytes, signature)) throw Rejected("bad signature")
 
         // 3. compatibility (this engine: DACDHASH only)
-        if (m["index_format_version"] != PackIndex.FORMAT_V3 && m["index_format_version"] != PackIndex.FORMAT_V4) throw Rejected("incompatible index format version")
+        if (m["index_format_version"] !in setOf(PackIndex.FORMAT_V3, PackIndex.FORMAT_V4, PackIndex.FORMAT_V5)) throw Rejected("incompatible index format version")
         if (m["descriptor_family"] != "DACDHASH") throw Rejected("this engine only accepts DACDHASH packs")
         if (m["descriptor_bytes"] != 8L) throw Rejected("descriptor family/bytes mismatch")
         if (m["preprocessing_version"] != PackIndex.EXACT_PREPROCESSING) throw Rejected("incompatible preprocessing")

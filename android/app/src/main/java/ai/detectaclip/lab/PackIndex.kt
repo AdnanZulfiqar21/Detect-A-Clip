@@ -5,8 +5,9 @@ import java.nio.ByteOrder
 
 /**
  * Bounded, untrusted parser for the index payload, implementing the format contract in
- * docs/PACK_FORMAT.md / l0/dac_l0/index/format.py: writer idx-flat-4, reader idx-flat-3 and
- * idx-flat-4. Every verdict must match Python on golden_format_cases.txt.
+ * docs/PACK_FORMAT.md / l0/dac_l0/index/format.py: writer idx-flat-5, reader idx-flat-3, -4
+ * and -5 (older payloads migrate to empty aliases/scenes/series names). Every verdict must
+ * match Python on golden_format_cases.txt.
  *
  * This engine accepts only DACDHASH payloads (DAC-CROP-v1 + DAC-QUAL-v1 + DAC-DHASH-v1).
  * Signature/manifest checks happen in [PackLoader] before this parser runs.
@@ -21,6 +22,8 @@ class PackIndex private constructor(
     val names: List<Map<String, String>>,
     val aliases: List<List<String>>,
     val sharedScenes: List<SharedScene>,
+    /** idx-flat-5: series_id -> {locale: name}; every referenced series has an entry (maybe empty). */
+    val seriesNames: Map<String, Map<String, String>>,
 ) {
     data class SharedSceneMember(val workIndex: Int, val editionIndex: Int, val startMs: Long, val endMs: Long)
     data class SharedScene(val groupId: String, val members: List<SharedSceneMember>)
@@ -46,21 +49,25 @@ class PackIndex private constructor(
     fun displayName(workIndex: Int, preferences: List<String>): String =
         resolveDisplayName(names[workIndex], preferences, works[workIndex].workId)
 
-    /** Same as Python result_display_name: an episode result shows that episode's name; a
-     *  series-level result or an unknown ID shows the ID itself (no series-name table exists,
-     *  and a result never borrows another work's name); no candidate -> null. */
+    /** Same as Python result_display_name: an episode result shows that episode's name, a plain
+     *  work its name, a series-level result the series' own name from the series table; an
+     *  unknown ID (or a series without names) shows the ID itself, and a result never borrows
+     *  another work's name; no candidate -> null. */
     fun resultDisplayName(workId: String?, episodeId: String?, preferences: List<String>): String? {
         if (workId == null) return null
         val idx = works.indexOfFirst { w ->
             if (episodeId != null) w.seriesId == workId && w.episodeId == episodeId else w.workId == workId && w.seriesId == null
         }
-        return if (idx >= 0) displayName(idx, preferences) else workId
+        if (idx >= 0) return displayName(idx, preferences)
+        if (episodeId == null) seriesNames[workId]?.let { return resolveDisplayName(it, preferences, workId) }
+        return workId
     }
 
     companion object {
         private val MAGIC = "DACL0IDX".toByteArray(Charsets.US_ASCII)
         const val FORMAT_V3 = "idx-flat-3"
         const val FORMAT_V4 = "idx-flat-4"
+        const val FORMAT_V5 = "idx-flat-5"
         const val EXACT_PREPROCESSING = "dac-crop-v1+dac-qual-v1+dac-dhash-v1"
         private const val HEADER = 8 + 2 + 2 + 4 + 4 + 8
         private const val MAX_VECTORS = 20_000_000
@@ -121,9 +128,11 @@ class PackIndex private constructor(
             val meta = MiniJson.parse(metaText) as? Map<*, *> ?: fail("metadata not an object")
 
             val fmt = meta["index_format_version"] as? String
-            if (fmt != FORMAT_V3 && fmt != FORMAT_V4) fail("incompatible index format version")
-            val v4 = fmt == FORMAT_V4
-            if (meta.keys != (if (v4) META_KEYS_V3 + "shared_scenes" else META_KEYS_V3)) fail("metadata keys mismatch")
+            if (fmt != FORMAT_V3 && fmt != FORMAT_V4 && fmt != FORMAT_V5) fail("incompatible index format version")
+            val v4 = fmt != FORMAT_V3          // aliases + shared scenes (idx-flat-4 and later)
+            val v5 = fmt == FORMAT_V5          // series table
+            val expectedKeys = when (fmt) { FORMAT_V3 -> META_KEYS_V3; FORMAT_V4 -> META_KEYS_V3 + "shared_scenes"; else -> META_KEYS_V3 + "shared_scenes" + "series" }
+            if (meta.keys != expectedKeys) fail("metadata keys mismatch")
             for (k in listOf("generator_version", "preprocessing_version", "family")) text(meta[k], k)
             if (meta["family"] != "DACDHASH") fail("this engine only accepts DACDHASH packs")
             if (meta["preprocessing_version"] != EXACT_PREPROCESSING) fail("preprocessing version does not match the descriptor family")
@@ -182,6 +191,31 @@ class PackIndex private constructor(
                 works += Recognition.WorkEntry(i, wid, sid, eid, edIds)
                 names += nameMap; aliases += al; durations += d
             }
+            val referenced = LinkedHashSet<String>()
+            for (w in works) w.seriesId?.let { referenced += it }
+            if (referenced.any { it in seenIds }) fail("series_id equals a work_id")
+            val seriesNames = LinkedHashMap<String, Map<String, String>>()
+            for (s in referenced) seriesNames[s] = emptyMap()
+            if (v5) {
+                val raw = meta["series"] as? List<*> ?: fail("series table must list exactly the referenced series")
+                if (raw.size != referenced.size) fail("series table must list exactly the referenced series")
+                val seenSeries = HashSet<String>()
+                for (e in raw) {
+                    val em = e as? Map<*, *> ?: fail("bad series entry")
+                    if (em.keys != setOf("series_id", "names")) fail("bad series entry")
+                    val sid = em["series_id"] as? String ?: fail("series table must list exactly the referenced series")
+                    if (!ID.matches(sid) || sid !in referenced || !seenSeries.add(sid)) fail("series table must list exactly the referenced series")
+                    val nm = em["names"] as? Map<*, *> ?: fail("bad names table")
+                    if (nm.size > 16) fail("bad names table")
+                    val nameMap = LinkedHashMap<String, String>()
+                    for ((k, v) in nm) {
+                        val key = k as? String ?: fail("bad locale tag")
+                        if (!LOCALE.matches(key)) fail("bad locale tag")
+                        nameMap[key] = text(v, "display name")
+                    }
+                    seriesNames[sid] = nameMap
+                }
+            }
 
             val scenes = ArrayList<SharedScene>()
             if (v4) {
@@ -228,7 +262,7 @@ class PackIndex private constructor(
                 if (!seen.add((work shl 40) or (edition.toLong() shl 32) or tMs)) fail("duplicate locator")
                 locs[3 * i] = work.toInt(); locs[3 * i + 1] = edition; locs[3 * i + 2] = tMs.toInt()
             }
-            return PackIndex(fmt, interval, hashes, locs, works, names, aliases, scenes)
+            return PackIndex(fmt, interval, hashes, locs, works, names, aliases, scenes, seriesNames)
         }
     }
 }

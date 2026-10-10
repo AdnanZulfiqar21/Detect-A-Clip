@@ -167,10 +167,10 @@ object GoldenRunner {
             val p = line.split(" ")
             val parsed = try { PackIndex.parse(hex(p[3])) } catch (e: IllegalArgumentException) { null } catch (e: java.nio.charset.CharacterCodingException) { null }
             if ((parsed != null) != (p[2] == "ACCEPT")) mismatches += "${p[1]}: expected ${p[2]}"
-            if (p[1] == "valid_v4_aliases_series_shared_scene") v4 = parsed
+            if (p[1] == "valid_v5_series_names_aliases_shared_scene") v4 = parsed
             n++
         }
-        val pack = v4 ?: error("v4 sample pack missing")
+        val pack = v4 ?: error("v5 sample pack missing")
         for (line in raw) {
             if (!line.startsWith("DISPLAY ")) continue
             val c = line.split(" ")
@@ -305,5 +305,5 @@ object GoldenRunner {
         return Report("pipeline", queries, mismatches, (System.nanoTime() - t0) / 1_000_000)
     }
 
-    val expectedCounts = mapOf("recognition" to 400, "dac_dhash" to 42, "exact" to 9, "e2e" to 6, "format" to 60, "manifest" to 68, "pipeline" to 12)
+    val expectedCounts = mapOf("recognition" to 400, "dac_dhash" to 42, "exact" to 9, "e2e" to 6, "format" to 75, "manifest" to 68, "pipeline" to 12)
 }

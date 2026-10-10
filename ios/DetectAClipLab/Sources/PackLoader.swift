@@ -195,7 +195,7 @@ public final class PackLoader {
 
         // 3. compatibility (this engine: DACDHASH only)
         let fmt = m["index_format_version"]?.string
-        guard fmt == PackIndex.formatV3 || fmt == PackIndex.formatV4 else { throw R("incompatible index format version") }
+        guard fmt == PackIndex.formatV3 || fmt == PackIndex.formatV4 || fmt == PackIndex.formatV5 else { throw R("incompatible index format version") }
         guard m["descriptor_family"]?.string == "DACDHASH" else { throw R("this engine only accepts DACDHASH packs") }
         guard m["descriptor_bytes"]?.int == 8 else { throw R("descriptor family/bytes mismatch") }
         guard m["preprocessing_version"]?.string == PackIndex.exactPreprocessing else { throw R("incompatible preprocessing") }

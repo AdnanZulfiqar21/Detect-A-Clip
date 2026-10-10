@@ -1,5 +1,5 @@
 // Swift port of android PackIndex.kt: the index payload format contract of docs/PACK_FORMAT.md
-// and l0/dac_l0/index/format.py (writer idx-flat-4, reader idx-flat-3 and idx-flat-4), plus
+// and l0/dac_l0/index/format.py (writer idx-flat-5, reader idx-flat-3, -4 and -5), plus
 // Hamming flat retrieval and display-name resolution. Every verdict must match Python on
 // golden_format_cases.txt (FormatContractTests). DACDHASH payloads only.
 // Status: compiled and tested by the swift-core CI job (macOS, Swift 6.3.3; first pass at 3f77273) (docs/TEST_EVIDENCE.md).
@@ -42,6 +42,7 @@ public struct PackIndex {
 
     public static let formatV3 = "idx-flat-3"
     public static let formatV4 = "idx-flat-4"
+    public static let formatV5 = "idx-flat-5"
     public static let exactPreprocessing = "dac-crop-v1+dac-qual-v1+dac-dhash-v1"
 
     public let formatVersion: String
@@ -52,6 +53,8 @@ public struct PackIndex {
     public let names: [[String: String]]
     public let aliases: [[String]]
     public let sharedScenes: [SharedScene]
+    /// idx-flat-5: series_id -> {locale: name}; every referenced series has an entry (maybe empty).
+    public let seriesNames: [String: [String: String]]
 
     public var vectorCount: Int { hashes.count }
 
@@ -89,15 +92,18 @@ public struct PackIndex {
         PackIndex.resolveDisplayName(names[workIndex], preferences: preferences, fallback: works[workIndex].workId)
     }
 
-    /// Same as Python result_display_name: an episode result shows that episode's name; a
-    /// series-level result or an unknown ID shows the ID itself; no candidate -> nil.
+    /// Same as Python result_display_name: an episode result shows that episode's name, a plain
+    /// work its name, a series-level result the series' own name from the series table; an unknown
+    /// ID (or a series without names) shows the ID itself; no candidate -> nil.
     public func resultDisplayName(workId: String?, episodeId: String?, preferences: [String]) -> String? {
         guard let id = workId else { return nil }
         let idx = works.firstIndex { w -> Bool in
             if let ep = episodeId { return w.seriesId == id && w.episodeId == ep }
             return w.workId == id && w.seriesId == nil
         }
-        return idx.map { displayName(workIndex: $0, preferences: preferences) } ?? id
+        if let i = idx { return displayName(workIndex: i, preferences: preferences) }
+        if episodeId == nil, let names = seriesNames[id] { return PackIndex.resolveDisplayName(names, preferences: preferences, fallback: id) }
+        return id
     }
 
     public static func parse(_ d: [UInt8], maxPayloadBytes: Int = 250_000_000) throws -> PackIndex {
@@ -126,9 +132,11 @@ public struct PackIndex {
         guard let meta = metaValue.object else { throw fail("metadata not an object") }
 
         let fmt = meta["index_format_version"]?.string
-        guard fmt == formatV3 || fmt == formatV4 else { throw fail("incompatible index format version") }
-        let v4 = fmt == formatV4
-        guard meta.keySet == (v4 ? metaKeysV3.union(["shared_scenes"]) : metaKeysV3) else { throw fail("metadata keys mismatch") }
+        guard fmt == formatV3 || fmt == formatV4 || fmt == formatV5 else { throw fail("incompatible index format version") }
+        let v4 = fmt != formatV3          // aliases + shared scenes (idx-flat-4 and later)
+        let v5 = fmt == formatV5          // series table
+        let expectedKeys: Set<String> = fmt == formatV3 ? metaKeysV3 : (fmt == formatV4 ? metaKeysV3.union(["shared_scenes"]) : metaKeysV3.union(["shared_scenes", "series"]))
+        guard meta.keySet == expectedKeys else { throw fail("metadata keys mismatch") }
         for k in ["generator_version", "preprocessing_version", "family"] { _ = try text(meta[k], k) }
         guard meta["family"]?.string == "DACDHASH" else { throw fail("this engine only accepts DACDHASH packs") }
         guard meta["preprocessing_version"]?.string == exactPreprocessing else { throw fail("preprocessing version does not match the descriptor family") }
@@ -182,6 +190,28 @@ public struct PackIndex {
             works.append(.init(index: i, workId: wid, seriesId: sid, episodeId: eid, editions: edIds))
             names.append(nameMap); aliases.append(al); durations.append(dd)
         }
+        var referenced: [String] = []
+        for w in works { if let s = w.seriesId, !referenced.contains(s) { referenced.append(s) } }
+        guard !referenced.contains(where: { seenIds.contains($0) }) else { throw fail("series_id equals a work_id") }
+        var seriesNames: [String: [String: String]] = [:]
+        for s in referenced { seriesNames[s] = [:] }
+        if v5 {
+            guard let raw = meta["series"]?.array, raw.count == referenced.count else { throw fail("series table must list exactly the referenced series") }
+            var seenSeries = Set<String>()
+            for e in raw {
+                guard let em = e.object, em.keySet == ["series_id", "names"] else { throw fail("bad series entry") }
+                guard let sid = em["series_id"]?.string, Ascii.isId(sid), referenced.contains(sid), seenSeries.insert(sid).inserted else {
+                    throw fail("series table must list exactly the referenced series")
+                }
+                guard let nm = em["names"]?.object, nm.count <= 16 else { throw fail("bad names table") }
+                var nameMap: [String: String] = [:]
+                for k in nm.keys {
+                    guard Ascii.isLocale(k) else { throw fail("bad locale tag") }
+                    nameMap[k] = try text(nm[k], "display name")
+                }
+                seriesNames[sid] = nameMap
+            }
+        }
 
         var scenes: [SharedScene] = []
         if v4 {
@@ -221,7 +251,7 @@ public struct PackIndex {
             hashes.append(h); locs.append((work, ed, Int(t)))
         }
         return PackIndex(formatVersion: fmt!, samplingIntervalS: interval, hashes: hashes, locs: locs, works: works,
-                         names: names, aliases: aliases, sharedScenes: scenes)
+                         names: names, aliases: aliases, sharedScenes: scenes, seriesNames: seriesNames)
     }
 
     public func search(_ q: UInt64, topK: Int, maxDistance: Double) -> [Recognition.Candidate] {
