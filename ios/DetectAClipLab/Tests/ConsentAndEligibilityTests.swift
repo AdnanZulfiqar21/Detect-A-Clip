@@ -1,4 +1,4 @@
-// NOT RUN (no Mac). Mirrors android ConsentAndEligibilityTest.kt.
+// Runs in the swift-core CI job. Mirrors android ConsentAndEligibilityTest.kt.
 import XCTest
 @testable import DetectAClipCore
 

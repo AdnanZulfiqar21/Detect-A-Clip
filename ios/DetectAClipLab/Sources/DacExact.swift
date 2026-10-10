@@ -1,5 +1,5 @@
 // Swift port of DAC-CROP-v1 / DAC-QUAL-v1 / mirrored DAC-DHASH-v1 (l0/dac_l0/index/exact.py,
-// android DacDhash.kt). Status: IMPLEMENTED_NOT_VERIFIED — ExactPathGoldenTests on a Mac (B-02).
+// android DacDhash.kt). Status: compiled and tested by the swift-core CI job (macOS, Swift 6.3.3; first pass at 3f77273); ExactPathGoldenTests.
 
 extension DacDhash {
     public static func luma(_ rgb: [UInt8], width: Int, height: Int, stride: Int = 3) -> [Int] {

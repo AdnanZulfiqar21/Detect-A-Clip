@@ -1,4 +1,4 @@
-// NOT RUN (no Mac). Mirrors l0/tests/test_coordinator.py.
+// Runs in the swift-core CI job. Mirrors l0/tests/test_coordinator.py.
 import XCTest
 @testable import DetectAClipCore
 

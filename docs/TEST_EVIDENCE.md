@@ -9,16 +9,31 @@ Windows 11 Pro x64, Python 3.13.15, Temurin JDK 17.0.20.1, kotlinc 2.4.21.
 
 | Suite | Command | Last result | Code |
 |---|---|---|---|
-| L0 Python (172 tests, incl. freshness of every committed golden file) | `cd l0 && python -m pytest -o addopts=""` | **172 passed** 2026-10-10 (171 also from a clean clone at `05f437b`) | working tree after `05f437b` |
-| Pure-Kotlin JVM (56 tests: coordinator, lifecycle DIAGNOSTIC + RECOGNITION with injected frames, consent, eligibility, recognition golden ×400, DAC-DHASH-v1 ×42, exact path ×9, end-to-end ×6, format contract ×49, manifest contract ×68, full pipeline ×12, result display ×11, FrameView strides/ownership) | `bash android/run-jvm-tests.sh` | **OK (56 tests)** 2026-10-10 | working tree after `05f437b` |
-| Android app build (AGP 9.4.1, Gradle 9.8.1, compileSdk 37, minSdk 34) | `bash android/gradle-local.sh :app:assembleDebug` | **BUILD SUCCESSFUL** 2026-10-10; both `dac.sourceMode=user_choice` (default) and `app_only` | `app-debug.apk`, capture disabled |
-| Android merged manifest / APK permissions | `aapt2 dump permissions app/build/outputs/apk/debug/app-debug.apk` | **only** FOREGROUND_SERVICE, FOREGROUND_SERVICE_MEDIA_PROJECTION, POST_NOTIFICATIONS; no INTERNET / network / audio; allowBackup=false | CTRL-G00 A1 (build level) |
-| Android lint | `bash android/gradle-local.sh :app:lintDebug` | **No issues found** 2026-10-10 | `459458c` |
-| Android unit tests, Gradle-compiled, **run by direct JUnit** (not a Gradle test task) | `bash android/gradle-local.sh :app:compileDebugUnitTestKotlin` then `bash android/junit-on-gradle-classes.sh` | **OK (55 tests)** 2026-10-10 | Gradle's own `testDebugUnitTest` cannot fork its test JVM on this host (loopback blocked); it runs in CI instead |
-| CI `ci.yml`: python, kotlin-jvm, android (`assembleDebug lintDebug testDebugUnitTest`) on ubuntu-latest | GitHub Actions on PR #1 | first run pending at `05f437b`; outcome recorded below when reported | source-level only |
-| CI `swift-core.yml`: `swift build` + `swift test` on macos-latest (Swift core package only) | GitHub Actions on PR #1 | first run pending at `05f437b` | not an iOS app build, archive or device test |
+| L0 Python (172 tests, incl. freshness of every committed golden file) | `cd l0 && python -m pytest -o addopts=""` | **172 passed** 2026-10-10 locally (171 also from a clean clone at `05f437b`); CI see below | `70f672c`+ |
+| Pure-Kotlin JVM (64 tests: coordinator, lifecycle DIAGNOSTIC + RECOGNITION with injected frames, capture boundary, consent, eligibility, recognition golden ×400, DAC-DHASH-v1 ×42, exact path ×9, end-to-end ×6, format contract ×49, manifest contract ×68, full pipeline ×12, result display ×11, FrameView strides/ownership) | `bash android/run-jvm-tests.sh` | **OK (64 tests)** 2026-10-10 | `8ea39ae` |
+| Android app build (AGP 9.4.1, Gradle 9.8.1, compileSdk 37, minSdk 34) | `bash android/gradle-local.sh :app:assembleDebug` | **BUILD SUCCESSFUL** 2026-10-10 (`8ea39ae`); both `dac.sourceMode=user_choice` (default) and `app_only` built earlier | `app-debug.apk`, capture disabled (`BuildConfig.CAPTURE_ENABLED = false`) |
+| Android APK permissions | `aapt2 dump permissions app/build/outputs/apk/debug/app-debug.apk` | **only** FOREGROUND_SERVICE, FOREGROUND_SERVICE_MEDIA_PROJECTION, POST_NOTIFICATIONS (re-checked at `8ea39ae`); no INTERNET / network / audio; allowBackup=false | CTRL-G00 A1 (build level) |
+| Android lint | `bash android/gradle-local.sh :app:lintDebug` | **No issues found** 2026-10-10 | `8ea39ae` |
+| Android unit tests, Gradle-compiled, **run by direct JUnit** (not a Gradle test task) | `bash android/gradle-local.sh :app:compileDebugUnitTestKotlin` then `bash android/junit-on-gradle-classes.sh` | **OK (64 tests)** 2026-10-10 | `8ea39ae`; Gradle's own `testDebugUnitTest` cannot fork its test JVM on this host and runs in CI instead |
+
+### CI (GitHub Actions on PR #1, ubuntu-latest / macos-latest runners)
+
+| Commit | Workflow / job | Result |
+|---|---|---|
+| `05f437b` | ci: Python, pure Kotlin, Android | **success** (pure Kotlin OK 55; Android BUILD SUCCESSFUL, 51 tasks) |
+| `05f437b`, `70f672c` | swift-core | **failure**: Swift 6.3.3 could not type-check `DacDhash.swift:18` in reasonable time |
+| `63d1a45` | swift-core | `swift build` **succeeded** (Swift core library compiled on macOS); `swift test` **failed** to compile one test closure (`PipelineGoldenTests.swift:75`) |
+| `3f77273` | swift-core | **success**: `swift build` + `swift test`, 38 tests, 0 failures, 0 skipped (macOS 26.6.2, Xcode 26.6, Swift 6.3.3); run 38069331306 |
+| `3f77273` | ci | **success**: Python 172 passed; pure Kotlin OK (56); Android assemble + lint + Gradle `testDebugUnitTest` 56 tests, 0 failures; run 38069331278 |
+| `8ea39ae` | swift-core | **success**: 43 tests, 0 failures, 0 skipped, incl. `CaptureBoundaryTests` (5); run 38072195095 |
+| `8ea39ae` | ci | **success**: Python 172 passed; pure Kotlin OK (64); Android assemble + lint + Gradle `testDebugUnitTest` 64 tests, 0 failures, 0 errors, 0 skipped; run 38072195084 |
+
+The CI rows are source-level evidence only. `swift-core` compiles the platform-independent
+Swift package; it is not an iOS app build, archive, signing or device test, and the
+ScreenCaptureKit adapter (iOS-only) is not compiled by it.
+
 | Android instrumented / device tests | — | **NOT RUN** (no device, B-01) | — |
-| iOS app build / device tests | — | **NOT RUN** (no Xcode project, provisioning or iPhone, B-02) | — |
+| iOS app build / ScreenCaptureKit adapter / device tests | — | **NOT RUN** (no Xcode project, provisioning or iPhone, B-02) | — |
 
 ## Roadmap test IDs
 
@@ -42,16 +57,17 @@ Windows 11 Pro x64, Python 3.13.15, Temurin JDK 17.0.20.1, kotlinc 2.4.21.
 | AI-03 | Edited / montage | INCONCLUSIVE (LAB) | FINAL reports | EDITED correct named 45/60 (HASH64) to 35/60 (THUMB512); no wrong title; MONTAGE never VERIFIED |
 | AI-05 | Shared intros, recaps, stock footage | PASS (LAB, exploratory) | FINAL reports | SERIES_INTRO series level 4/4; RECAP 4/4 correct; STOCK_SHARED abstained 4/4; no episode named without unique evidence |
 | AI-01/02/03/05 (v4) | Sealed FINAL4, fixtures-v4, CAL4 calibration | PASS / INCONCLUSIVE (LAB) | `lab_final4_HASH64_20261009T230913Z`, `lab_final4_DACDHASH_20261009T231309Z` | wrong-title VERIFIED 0 and POSSIBLE 0 for both; CLEAN 119–120/120; EDITED 78 (HASH64) / 85 (DACDHASH) /120; ABSENT abstained 130/130; 20 works per family, still far below F05 counts |
-| (port) | DAC-CROP-v1 / DAC-QUAL-v1 / mirrored hash Python = Kotlin | PASS (JVM) | `ExactPathGoldenTest` | Swift: see swift-core CI row |
+| (port) | DAC-CROP-v1 / DAC-QUAL-v1 / mirrored hash Python = Kotlin = Swift | PASS (JVM, macOS CI) | `ExactPathGoldenTest`, `ExactPathGoldenTests` | synthetic frames |
 | AI-06 | Independent evaluation | BLOCKED | — | no independent evaluator (B-06) |
-| (port) | Kotlin verification/decision = Python reference | PASS (JVM) | `RecognitionGoldenTest`, mutation check caught an injected off-by-one | Swift: see swift-core CI row |
+| (port) | Kotlin and Swift verification/decision = Python reference | PASS (JVM, macOS CI) | `RecognitionGoldenTest`, `RecognitionGoldenTests` (400 cases); mutation check caught an injected off-by-one | — |
 | (port) | DAC-DHASH-v1 bit-exact Python = Kotlin | PASS (JVM) | `DacDhashGoldenTest` | candidate descriptor only |
 | (port) | End-to-end: Python pack → Kotlin parse/hash/retrieve/verify/decide | PASS (JVM) | `EndToEndGoldenTest` (single, brightness, absent, montage, shared intro, unique episode) | synthetic block frames; no OpenCV preprocessing, no quality checks, no device |
 | AI-07 | Distinct non-match states | PASS (LAB) | UNUSABLE 9/9 expected in every family; OUTSIDE_CATALOGUE unconstructible | — |
-| (contract) | Index format v3/v4 verdicts Python = Kotlin | PASS (JVM) | `FormatContractTest` on `golden_format_cases.txt` (49) | Swift: `FormatContractTests`, see swift-core CI row |
-| (contract) | Manifest V2 verdicts Python = Kotlin, state unchanged on rejection | PASS (JVM) | `ManifestContractTest` on `golden_manifest_cases.txt` (68: validity windows, offsets, calendar edges, rollback, signature, compatibility) | Swift: `ManifestContractTests`, see swift-core CI row |
+| (contract) | Index format v3/v4 verdicts Python = Kotlin | PASS (JVM) | `FormatContractTest` on `golden_format_cases.txt` (49) | Swift `FormatContractTests` pass in CI (`3f77273`, `8ea39ae`) |
+| (contract) | Manifest V2 verdicts Python = Kotlin, state unchanged on rejection | PASS (JVM) | `ManifestContractTest` on `golden_manifest_cases.txt` (68: validity windows, offsets, calendar edges, rollback, signature, compatibility) | Swift `ManifestContractTests` pass in CI with CryptoKit (not skipped) |
 | (pipeline) | Delivered frames → selector → DAC-CROP/QUAL/DHASH (+mirror) → retrieval → verification → decision, Python = Kotlin | PASS (JVM) | `PipelineGoldenTest` on `golden_pipeline.txt` (12 queries incl. letterbox, pillarbox, PiP, mirror, black feed, static, montage, shared intro, jitter), padded RGBA strides | synthetic frames; no OS capture |
 | (pipeline) | Recognition-mode lifecycle with injected frames | PASS (JVM) | `RecognitionLifecycleTest` (commit with work/edition/episode, cancel mid-verify, late frames, stale worker after lock, deadline overrun, entitlement revoked at commit, DIAGNOSTIC unchanged) | no screen capture; device timing B-01 |
+| (boundary) | Consent denial, unsolicited grants, frame geometry | PASS (JVM, macOS CI) | Kotlin `CaptureBoundaryTest` (8), Swift `CaptureBoundaryTests` (5); APK permission dump | OS refusal of a consent-less mediaProjection FGS, real `ImageReader`/`CVPixelBuffer` layouts and the iOS picker are device checks (B-01, B-02) |
 | IDX-01b | Store recovery after abrupt termination | PASS (desktop) | `test_store.py::test_abrupt_termination_at_every_io_step_recovers` (child killed with `os._exit` before each I/O step) | desktop filesystem only; device storage not tested |
 | DATA-L00…L03, CAP-A*, CAP-I*, UX-*, OPS-*, REL-* | Device, network, store | BLOCKED | — | B-01, B-02, B-07, B-08 |
 

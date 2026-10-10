@@ -1,4 +1,4 @@
-// Port of l0/dac_l0/coordinator.py (roadmap F03). Status: compiled/tested only where CI runs `swift test`.
+// Port of l0/dac_l0/coordinator.py (roadmap F03). Status: compiled and tested by the swift-core CI job (macOS, Swift 6.3.3; first pass at 3f77273).
 // Pure and clock-injected; call from one serial queue.
 import Foundation
 

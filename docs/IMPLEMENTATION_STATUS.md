@@ -11,14 +11,14 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | Platform | Works now | Not verified / missing |
 |---|---|---|
 | Desktop L0 | Synthetic fixtures (v3.1, v4) with challenge cases; descriptors incl. the integer-exact DACDHASH path; index format contract `idx-flat-4` (reads v3) with names, aliases and shared scenes; temporal verification; series/episode-aware decision; result display names; calibration; manifest V1/V2 with fail-closed validity rules; crash-safe pack store; lab leases; LAB runner. 172 tests | Real footage, real devices, release statistics |
-| Android | LAB app builds to a debug APK (AGP 9.4.1, compileSdk 37); lint clean; no INTERNET in the merged manifest; capture off by default; CAP-A03 `app_only` config compiled. Pure-Kotlin engine: format contract, manifest V2 loader, `RecognitionSession` + `FrameView`, lifecycle DIAGNOSTIC and RECOGNITION modes. 56 unit tests (kotlinc and Gradle-compiled, direct JUnit) | Any device run (B-01); RECOGNITION mode is not wired to real capture (ED-25) |
-| iOS | Swift core package mirrors the Kotlin engine (format v4, manifest V2 via CryptoKit, session, lifecycle with background-task guard, consent/eligibility) with XCTests on the shared golden files; ScreenCaptureKit adapter skeleton | Swift core compiled only by the macOS CI job; iOS app, signing and devices (B-02) |
+| Android | LAB app builds to a debug APK (AGP 9.4.1, compileSdk 37); lint clean; no INTERNET in the merged manifest; capture off by default; a declined picker never starts the capture service; CAP-A03 `app_only` config compiled. Pure-Kotlin engine: format contract, manifest V2 loader, `RecognitionSession` + `FrameView`, lifecycle DIAGNOSTIC and RECOGNITION modes. 64 unit tests (kotlinc, Gradle-compiled direct JUnit, and Gradle `testDebugUnitTest` in CI) | Any device run (B-01); RECOGNITION mode is not wired to real capture (ED-25) |
+| iOS | Swift core package (CI: `swift build` + `swift test`) mirrors the Kotlin engine (format v4, manifest V2 via CryptoKit, session, lifecycle with background-task guard, consent/eligibility) with XCTests on the shared golden files; ScreenCaptureKit adapter skeleton | Swift core compiled and tested by the macOS CI job (first pass `3f77273`); iOS app, signing, ScreenCaptureKit adapter and devices (B-02) |
 
 ## Unfinished implementation vs external verification
 
 | Kind | Items |
 |---|---|
-| Executable here, done this round | Pack validity rules, edition index fix, format contract in three languages, crash-recovery proof, manifest V2, recognition path with injected frames, result display parity, CI workflows |
+| Executable here, done this round | Pack validity rules, edition index fix, format contract in three languages, crash-recovery proof, manifest V2, recognition path with injected frames, result display parity, CI workflows (all green), Swift core compile/test, capture-boundary fixes (ED-28) |
 | Implementation still open (no external input needed, but needs a method decision) | DACDHASH partial montage segmentation; POSSIBLE-under-competition setting; UI_LIKE has no exact-path counterpart; series display names (format has no series-name table, results show the series ID); wiring RECOGNITION mode to real capture (waits for gate evidence by design) |
 | External verification only | Device runs (B-01, B-02, B-07); rights and licensed packs (B-05); independent evaluation (B-06); legal review (P05-T01); store review (B-08); owner decisions (B-04) |
 
@@ -62,7 +62,7 @@ Tracks: **DESKTOP-L0** (Python harness) · **ANDROID** · **IOS**.
 | P05-T06 | IMPLEMENTED_NOT_VERIFIED | decline/changed-terms/late-callback logic tested on JVM |
 | P05-T07 | BLOCKED | accessibility review needs device; study needs D04 |
 | P06-T01 | IN_PROGRESS | threat model draft; actual API path evidence BLOCKED |
-| P06-T02 | PASS (harness) | lease/generation/race tests (Python + Kotlin) |
+| P06-T02 | PASS (harness) | lease/generation/race tests (Python + Kotlin + Swift); capture-boundary regressions (consent denial, unsolicited grants, frame geometry) |
 | P06-T03 | IMPLEMENTED_NOT_VERIFIED | no logs/SDKs/backups in source; DATA-L02 device inspection BLOCKED |
 | P06-T04 | BLOCKED | device soak |
 | P06-T05 | IN_PROGRESS | SBOM; bounded parsers; release signing not designed |

@@ -1,4 +1,4 @@
-// Ports of android ConsentRecords.kt and EligibilityGate.kt. Status: IMPLEMENTED_NOT_VERIFIED.
+// Ports of android ConsentRecords.kt and EligibilityGate.kt. Status: compiled and tested by the swift-core CI job (macOS, Swift 6.3.3; first pass at 3f77273).
 // CryptoKit is used only for the rendered-text hash; no network, no OS permission tokens.
 import Foundation
 #if canImport(CryptoKit)

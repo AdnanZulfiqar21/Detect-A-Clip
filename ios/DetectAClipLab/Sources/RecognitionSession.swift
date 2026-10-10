@@ -1,7 +1,7 @@
 // Swift port of android RecognitionSession.kt (FrameView + RecognitionSession), checked against
 // golden_pipeline.txt by PipelineGoldenTests. Memory only: luma copies and per-frame
 // candidates live in the session and are dropped with it.
-// Status: compiled and tested only where CI runs `swift test` (see docs/TEST_EVIDENCE.md).
+// Status: compiled and tested by the swift-core CI job (macOS, Swift 6.3.3; first pass at 3f77273) (docs/TEST_EVIDENCE.md).
 import Foundation
 
 /// A view of one captured plane (CVPixelBuffer BGRA/RGBA rows, or any interleaved layout).

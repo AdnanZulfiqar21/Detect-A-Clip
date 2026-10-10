@@ -1,4 +1,4 @@
-// NOT RUN (no Mac). Reads the same golden file as android RecognitionGoldenTest.kt and must
+// Runs in the swift-core CI job. Reads the same golden file as android RecognitionGoldenTest.kt and must
 // reproduce the Python reference exactly. Path is resolved relative to this source file.
 import XCTest
 @testable import DetectAClipCore

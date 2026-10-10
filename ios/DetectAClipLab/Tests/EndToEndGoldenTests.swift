@@ -1,4 +1,4 @@
-// NOT RUN (no Mac). Same golden file as android EndToEndGoldenTest.kt.
+// Runs in the swift-core CI job. Same golden file as android EndToEndGoldenTest.kt.
 import XCTest
 @testable import DetectAClipCore
 

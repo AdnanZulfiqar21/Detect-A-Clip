@@ -1,5 +1,5 @@
 // DAC-DHASH-v1 Swift port (see l0/dac_l0/index/exact.py and android DacDhash.kt).
-// Status: IMPLEMENTED_NOT_VERIFIED — DacDhashGoldenTests must pass on a Mac (B-02).
+// Status: compiled and tested by the swift-core CI job (macOS, Swift 6.3.3; first pass at 3f77273); DacDhashGoldenTests.
 
 public enum DacDhash {
     public static let spec = "DAC-DHASH-v1"

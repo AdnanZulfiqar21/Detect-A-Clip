@@ -1,4 +1,4 @@
-// Port of android FrameSelector.kt / l0 sampler.py (F05 intake). Status: IMPLEMENTED_NOT_VERIFIED.
+// Port of android FrameSelector.kt / l0 sampler.py (F05 intake). Status: compiled and tested by the swift-core CI job (macOS, Swift 6.3.3; first pass at 3f77273).
 // OS delivery rate is not assumed controllable: refused frames must be released at once.
 
 public final class FrameSelector {

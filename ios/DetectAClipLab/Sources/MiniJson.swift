@@ -2,7 +2,7 @@
 // in l0/dac_l0/index/format.py). Rejects duplicate keys and NaN/Infinity; integers without a
 // fraction or exponent become .int, other numbers .double. Foundation's JSONSerialization is not
 // used because it neither rejects duplicate keys nor distinguishes 1 from 1.0 portably.
-// Status: compiled and tested only where CI runs `swift test` (see docs/TEST_EVIDENCE.md).
+// Status: compiled and tested by the swift-core CI job (macOS, Swift 6.3.3; first pass at 3f77273) (docs/TEST_EVIDENCE.md).
 
 public enum JSONValue: Equatable {
     case null

@@ -2,7 +2,7 @@
 // and l0/dac_l0/index/format.py (writer idx-flat-4, reader idx-flat-3 and idx-flat-4), plus
 // Hamming flat retrieval and display-name resolution. Every verdict must match Python on
 // golden_format_cases.txt (FormatContractTests). DACDHASH payloads only.
-// Status: compiled and tested only where CI runs `swift test` (see docs/TEST_EVIDENCE.md).
+// Status: compiled and tested by the swift-core CI job (macOS, Swift 6.3.3; first pass at 3f77273) (docs/TEST_EVIDENCE.md).
 import Foundation
 
 public enum PackError: Error, Equatable { case invalid(String) }

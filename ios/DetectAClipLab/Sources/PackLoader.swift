@@ -2,7 +2,7 @@
 // (detached Ed25519 signature over the exact manifest bytes). Checked case by case against
 // golden_manifest_cases.txt (ManifestContractTests). Device state changes only after every
 // check passed. CryptoKit is required; without it (non-Apple toolchains) loading fails closed.
-// Status: compiled and tested only where CI runs `swift test` (see docs/TEST_EVIDENCE.md).
+// Status: compiled and tested by the swift-core CI job (macOS, Swift 6.3.3; first pass at 3f77273) (docs/TEST_EVIDENCE.md).
 import Foundation
 #if canImport(CryptoKit)
 import CryptoKit

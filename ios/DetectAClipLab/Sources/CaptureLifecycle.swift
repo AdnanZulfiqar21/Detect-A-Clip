@@ -1,6 +1,6 @@
 // Port of android CaptureLifecycle.kt. Platform-independent; the ScreenCaptureKit adapter
 // (ScreenCaptureAdapter.swift) calls it on one serial queue.
-// Status: compiled and tested only where CI runs `swift test`; device behaviour unverified (B-02).
+// Status: compiled and tested by the swift-core CI job (macOS, Swift 6.3.3; first pass at 3f77273); device behaviour unverified (B-02).
 //
 // Modes (same as Kotlin):
 //  - DIAGNOSTIC (no recognizer): frames are counted only; the post-capture result is
