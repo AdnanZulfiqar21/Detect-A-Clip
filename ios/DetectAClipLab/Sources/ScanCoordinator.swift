@@ -181,6 +181,9 @@ public final class ScanCoordinator {
         return true
     }
 
+    /// User tapped Discard (Kotlin/Python discard).
+    public func discard() { result = nil }
+
     public func returnToApp(_ now: Int64, entitlementOk: Bool = true, clockTrustworthy: Bool = true) -> Result? {
         guard let r = result else { return nil }
         if !r.valid(at: now, clockTrustworthy: clockTrustworthy) || !entitlementOk { result = nil; return nil }
