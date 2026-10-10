@@ -54,7 +54,7 @@ jobs:
           sed -i 's/^hw.ramSize *=.*/hw.ramSize = 4G/; s/^disk.dataPartition.size *=.*/disk.dataPartition.size = 6G/' "$CFG"
           grep -q "^disk.dataPartition.size" "$CFG" || echo "disk.dataPartition.size = 6G" >> "$CFG"
           grep -E "hw.ramSize|disk.dataPartition|image.sysdir" "$CFG"
-          nohup "$ANDROID_HOME/emulator/emulator" -avd ci37 -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -gpu swangle_indirect -feature -ReadColorBufferDma -accel on > emulator.log 2>&1 &
+          nohup "$ANDROID_HOME/emulator/emulator" -avd ci37 -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -gpu guest -accel on > emulator.log 2>&1 &
           ADB="$ANDROID_HOME/platform-tools/adb"
           "$ADB" wait-for-device
           for i in $(seq 1 120); do [ "$("$ADB" shell getprop sys.boot_completed | tr -d '\r')" = "1" ] && break; sleep 5; done
