@@ -50,9 +50,11 @@ jobs:
         run: |
           mkdir -p "$ANDROID_AVD_HOME"
           echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n ci37 -k "system-images;android-37.0;google_apis;x86_64" -d pixel_7 --force
-          sed -i 's/^hw.ramSize *=.*/hw.ramSize = 4G/' "$ANDROID_AVD_HOME/ci37.avd/config.ini"
-          grep -E "hw.ramSize|image.sysdir" "$ANDROID_AVD_HOME/ci37.avd/config.ini"
-          nohup "$ANDROID_HOME/emulator/emulator" -avd ci37 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect -accel on > emulator.log 2>&1 &
+          CFG="$ANDROID_AVD_HOME/ci37.avd/config.ini"
+          sed -i 's/^hw.ramSize *=.*/hw.ramSize = 4G/; s/^disk.dataPartition.size *=.*/disk.dataPartition.size = 6G/' "$CFG"
+          grep -q "^disk.dataPartition.size" "$CFG" || echo "disk.dataPartition.size = 6G" >> "$CFG"
+          grep -E "hw.ramSize|disk.dataPartition|image.sysdir" "$CFG"
+          nohup "$ANDROID_HOME/emulator/emulator" -avd ci37 -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -gpu swiftshader_indirect -accel on > emulator.log 2>&1 &
           ADB="$ANDROID_HOME/platform-tools/adb"
           "$ADB" wait-for-device
           for i in $(seq 1 120); do [ "$("$ADB" shell getprop sys.boot_completed | tr -d '\r')" = "1" ] && break; sleep 5; done
