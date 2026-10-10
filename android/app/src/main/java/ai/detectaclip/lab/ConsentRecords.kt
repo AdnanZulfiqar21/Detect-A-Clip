@@ -16,7 +16,7 @@ import java.security.MessageDigest
  *  - Purpose choices are separate records; an optional purpose (e.g. notifications) refused
  *    affects only that feature. Nothing here widens access silently.
  *
- * Status: JVM-tested; Android storage adapter not compiled (B-09). Legal text is a DRAFT.
+ * Status: JVM-tested; Android storage adapter compiled with AGP, no device test (B-01). Legal text is a DRAFT.
  */
 data class TermsDocument(
     val termsVersion: String,

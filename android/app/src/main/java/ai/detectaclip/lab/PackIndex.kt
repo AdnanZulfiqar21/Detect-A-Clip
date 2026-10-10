@@ -151,7 +151,7 @@ class PackIndex private constructor(
                 if (eid != null) {
                     if (sid == null) fail("episode_id without series_id")
                     if (eid !is String || !EPISODE.matches(eid)) fail("bad episode_id")
-                    if (!seenEpisodes.add((sid as String) to eid)) fail("duplicate episode")
+                    if (!seenEpisodes.add(sid to eid)) fail("duplicate episode")
                 }
                 val nm = m["names"] as? Map<*, *> ?: fail("bad names table")
                 if (nm.size > 16) fail("bad names table")
@@ -168,7 +168,7 @@ class PackIndex private constructor(
                     if (list.toSet().size != list.size) fail("duplicate alias")
                     list
                 } else emptyList()
-                works += Recognition.WorkEntry(i, wid, sid as String?, eid as String?, edIds)
+                works += Recognition.WorkEntry(i, wid, sid, eid, edIds)
                 names += nameMap; aliases += al; durations += d
             }
 

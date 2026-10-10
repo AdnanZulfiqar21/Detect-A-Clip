@@ -7,7 +7,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.Random
 
-/** JVM port of l0/tests/test_coordinator.py (LIFE-01/02/03, SEC-02). Not yet executed (B-09). */
+/** JVM port of l0/tests/test_coordinator.py (LIFE-01/02/03, SEC-02). Runs on the JVM (run-jvm-tests.sh). */
 class ScanCoordinatorTest {
     private var n = 0
     private fun make(attributable: Boolean = false) =

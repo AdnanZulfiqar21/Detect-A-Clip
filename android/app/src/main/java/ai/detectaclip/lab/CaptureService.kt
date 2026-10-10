@@ -39,8 +39,7 @@ import java.util.concurrent.Future
  *   post-capture work runs. Whether the OS keeps a mediaProjection-type FGS alive after the
  *   projection stopped is a CAP-A04 device question; this code does not assume it.
  *
- * Status: IMPLEMENTED_NOT_VERIFIED. Not compiled (Android SDK licence pending, B-09); no
- * device test (B-01).
+ * Status: compiled with AGP and lint-clean; no device test (B-01).
  */
 class CaptureService : Service() {
 
@@ -51,7 +50,11 @@ class CaptureService : Service() {
     private var screenOffRegistered = false
 
     private val lifecycle: CaptureLifecycle by lazy {
-        CaptureLifecycle(LabState.coordinator, { now() }, ExecutorCompute(worker)) { block -> main.post(block) }
+        // DIAGNOSTIC mode only (CAP-A04): no recognizer factory is passed, so frames are counted,
+        // never decoded. The recognition path (CaptureLifecycle RECOGNITION + RecognitionSession)
+        // is JVM-tested with injected frames; wiring it to real capture stays closed until the
+        // capture and consumer gates have their evidence (B-01, CTRL-G00).
+        CaptureLifecycle(LabState.coordinator, { now() }, ExecutorCompute(worker, DUMMY_COMPUTE_MS), postToMain = { block -> main.post(block) })
     }
 
     private val tick = object : Runnable {
@@ -160,15 +163,16 @@ class CaptureService : Service() {
             .build()
     }
 
-    /** Bounded post-capture work on a worker thread; cancel() interrupts it. */
-    private class ExecutorCompute(private val ex: ExecutorService) : CaptureLifecycle.ComputeRunner {
+    /** Post-capture work on a worker thread; cancel() interrupts it. [dummyMs] > 0 adds the
+     *  CAP-A04 measurement delay before the work and is used in DIAGNOSTIC mode only. */
+    private class ExecutorCompute(private val ex: ExecutorService, private val dummyMs: Long) : CaptureLifecycle.ComputeRunner {
         override fun submit(
-            work: (isCancelled: () -> Boolean) -> ScanCoordinator.Outcome,
-            onDone: (ScanCoordinator.Outcome?) -> Unit,
+            work: (isCancelled: () -> Boolean) -> CaptureLifecycle.WorkOutcome?,
+            onDone: (CaptureLifecycle.WorkOutcome?) -> Unit,
         ): CaptureLifecycle.Cancellable {
             var future: Future<*>? = null
             future = ex.submit {
-                val end = SystemClock.elapsedRealtime() + DUMMY_COMPUTE_MS
+                val end = SystemClock.elapsedRealtime() + dummyMs
                 val cancelled = { Thread.currentThread().isInterrupted || future?.isCancelled == true }
                 while (SystemClock.elapsedRealtime() < end && !cancelled()) { Thread.onSpinWait() }
                 onDone(if (cancelled()) null else work(cancelled))

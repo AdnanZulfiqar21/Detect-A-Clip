@@ -6,7 +6,7 @@ package ai.detectaclip.lab
  * At most [maxOwned] decoded frames (queued + in-flight), ≥ [minSpacingMs] between
  * selected frames (≤2 fps at 500 ms), monotonic timestamps only.
  *
- * Status: IMPLEMENTED_NOT_VERIFIED.
+ * Status: compiled and JVM-tested via PipelineGoldenTest and the lifecycle tests; device timing unverified (B-01).
  */
 class FrameSelector(private val minSpacingMs: Long = 500, private val maxOwned: Int = 3) {
     var delivered = 0; private set

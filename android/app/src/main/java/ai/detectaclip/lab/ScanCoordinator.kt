@@ -17,7 +17,7 @@ import java.security.SecureRandom
  *    normal-close flag never establishes callback cause (CQ-02).
  *  - At most one committed result; memory only (D08 unapproved).
  *
- * Status: IMPLEMENTED_NOT_VERIFIED (not compiled on the authoring host).
+ * Status: compiled and JVM-tested (ScanCoordinatorTest); device orderings unverified (B-01).
  */
 class ScanCoordinator(
     private val budgets: Budgets = Budgets(),
@@ -54,10 +54,13 @@ class ScanCoordinator(
         val flags: List<String>,
         val createdAtMs: Long,
         val expiresAtMs: Long,
+        val candidateEditionId: String? = null,
+        val candidateEpisodeId: String? = null,
     ) {
         init {
             val isMatch = outcome == Outcome.VERIFIED_MATCH || outcome == Outcome.POSSIBLE_MATCH
             require(isMatch == (candidateWorkId != null)) { "match states need a candidate; others must not name one" }
+            require(isMatch || (candidateEditionId == null && candidateEpisodeId == null)) { "non-match states must not name an edition or episode" }
             require(expiresAtMs > createdAtMs)
         }
 
@@ -180,14 +183,15 @@ class ScanCoordinator(
     }
 
     /** Commit path. Returns true iff the result was committed. */
-    fun workerResult(now: Long, workerGeneration: Long, outcome: Outcome, workId: String?, flags: List<String> = emptyList(), entitlementOk: Boolean = true): Boolean {
+    fun workerResult(now: Long, workerGeneration: Long, outcome: Outcome, workId: String?, flags: List<String> = emptyList(),
+                     entitlementOk: Boolean = true, editionId: String? = null, episodeId: String? = null): Boolean {
         if (workerGeneration != generation || state != State.POST_CAPTURE || abortObserved || !leaseActive) {
             staleWorkerResults += 1
             return false
         }
         if (now > postCaptureDeadline) { abort(now, "POST_CAPTURE_DEADLINE_EXPIRED", Outcome.ERROR); return false }
         if (!entitlementOk) { entitlementFailed(now); return false }
-        result = Result(scanId!!, generation, outcome, workId, true, flags, now, now + budgets.resultValidityMs)
+        result = Result(scanId!!, generation, outcome, workId, true, flags, now, now + budgets.resultValidityMs, editionId, episodeId)
         state = State.COMMITTED
         leaseActive = false
         commits += 1

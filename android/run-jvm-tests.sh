@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Compile and run the pure-Kotlin sources and their JUnit tests on a plain JVM, without the
 # Android SDK. Files that import android.* are excluded automatically; they are NOT compiled
-# by this script (Android compile needs the SDK, see docs/BLOCKERS.md B-09).
+# by this script; android/gradle-local.sh compiles the full app with AGP.
 #
 # Expects (git-ignored) tools/: Temurin JDK 17, kotlinc, junit-4.13.2.jar, hamcrest-core-1.3.jar.
 set -euo pipefail

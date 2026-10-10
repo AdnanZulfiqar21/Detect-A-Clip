@@ -21,7 +21,7 @@ import android.widget.TextView
  * and post-capture Cancel) → native picker → coordinator states → result on return.
  * No capture at app open. Results are labelled SYNTHETIC.
  *
- * Status: IMPLEMENTED_NOT_VERIFIED (not compiled, B-09; no device, B-01).
+ * Status: compiled with AGP and lint-clean; no device test (B-01).
  */
 class MainActivity : Activity() {
     private val main = Handler(Looper.getMainLooper())

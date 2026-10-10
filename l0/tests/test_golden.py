@@ -51,3 +51,12 @@ def test_format_contract_cases_are_current(tmp_path):
     write_cases(out)    # also asserts the Python parser agrees with every intended verdict
     committed = COMMITTED.parent / "golden_format_cases.txt"
     assert out.read_bytes().replace(b"\r\n", b"\n") == committed.read_bytes().replace(b"\r\n", b"\n")
+
+
+def test_pipeline_golden_file_is_current(tmp_path):
+    from dac_l0.eval.pipeline_golden import write as write_pipeline
+
+    out = tmp_path / "p.txt"
+    write_pipeline(out)
+    committed = COMMITTED.parent / "golden_pipeline.txt"
+    assert out.read_bytes().replace(b"\r\n", b"\n") == committed.read_bytes().replace(b"\r\n", b"\n")

@@ -8,7 +8,7 @@ import org.junit.Test
 import java.util.Random
 
 /** JVM tests for CaptureLifecycle: races between capture close, user Stop, lock and the
- *  post-capture computation. Device behaviour is not covered (B-01, B-09). */
+ *  post-capture computation. Device behaviour is not covered (B-01). */
 class CaptureLifecycleTest {
     private var now = 0L
 
@@ -27,9 +27,9 @@ class CaptureLifecycleTest {
     private class ManualCompute : CaptureLifecycle.ComputeRunner {
         var submitted = 0
         var cancelled = false
-        private var work: ((() -> Boolean) -> ScanCoordinator.Outcome)? = null
-        private var done: ((ScanCoordinator.Outcome?) -> Unit)? = null
-        override fun submit(work: (isCancelled: () -> Boolean) -> ScanCoordinator.Outcome, onDone: (ScanCoordinator.Outcome?) -> Unit): CaptureLifecycle.Cancellable {
+        private var work: ((() -> Boolean) -> CaptureLifecycle.WorkOutcome?)? = null
+        private var done: ((CaptureLifecycle.WorkOutcome?) -> Unit)? = null
+        override fun submit(work: (isCancelled: () -> Boolean) -> CaptureLifecycle.WorkOutcome?, onDone: (CaptureLifecycle.WorkOutcome?) -> Unit): CaptureLifecycle.Cancellable {
             submitted += 1; cancelled = false; this.work = work; this.done = onDone
             return object : CaptureLifecycle.Cancellable { override fun cancel() { cancelled = true } }
         }
@@ -49,7 +49,7 @@ class CaptureLifecycleTest {
         val c = ScanCoordinator(adapter = ScanCoordinator.AdapterContract(attributable), idSource = { "s" })
         val compute = ManualCompute()
         lateinit var l: CaptureLifecycle
-        l = CaptureLifecycle(c, { now }, compute) { it() }
+        l = CaptureLifecycle(c, { now }, compute, { it() })
         val p = FakeProjection({ l.onProjectionStopped() }, syncStop)
         return Rig(c, l, compute, p)
     }
