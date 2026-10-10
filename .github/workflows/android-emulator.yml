@@ -68,8 +68,19 @@ jobs:
           ADB="$ANDROID_HOME/platform-tools/adb"
           "$ADB" install -r android/app/build/outputs/apk/debug/app-debug.apk
           "$ADB" install -r android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
-          "$ADB" shell am instrument -w -r ai.detectaclip.lab.test/androidx.test.runner.AndroidJUnitRunner | tee instrument.txt
-          grep -q "^OK (" instrument.txt
+          run_suite() { "$ADB" shell am instrument -w -r ai.detectaclip.lab.test/androidx.test.runner.AndroidJUnitRunner | tee instrument.txt; grep -q "^OK (" instrument.txt; }
+          if ! run_suite; then
+            echo "::group::system crash buffer"; "$ADB" logcat -b crash -d | tail -80; echo "::endgroup::"
+            if grep -q "System has crashed" instrument.txt; then
+              echo "Emulator system_server crashed (not a test assertion); waiting for reboot and retrying once."
+              "$ADB" wait-for-device
+              for i in $(seq 1 120); do [ "$("$ADB" shell getprop sys.boot_completed | tr -d '')" = "1" ] && break; sleep 5; done
+              sleep 30; "$ADB" shell input keyevent 82
+              run_suite
+            else
+              exit 1
+            fi
+          fi
       - name: Keep logs
         if: always()
         uses: actions/upload-artifact@v4
