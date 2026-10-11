@@ -86,6 +86,9 @@ jobs:
               exit 1
             fi
           fi
+      - name: Engine log lines (verifier backend, golden reports, timings)
+        if: always()
+        run: '"$ANDROID_HOME/platform-tools/adb" logcat -d -s DAC-ART | tail -40 || true'
       - name: Keep logs
         if: always()
         uses: actions/upload-artifact@v4
