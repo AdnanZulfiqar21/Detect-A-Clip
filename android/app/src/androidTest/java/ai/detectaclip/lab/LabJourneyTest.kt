@@ -162,9 +162,8 @@ class LabJourneyTest {
     /** P05-T06b / D09: the optional notification permission is denied; scanning, the system
      *  prompt and the fail-closed denial path must work exactly as before (no re-prompt). */
     @Test fun journeyWorksWithNotificationsDenied() {
-        // Revoking a runtime permission force-stops the app: stop it first, revoke, then relaunch
-        // and give the slow CI emulator extra time to show the Terms dialog.
-        shell("am force-stop $pkg")
+        // The instrumentation runs inside the app process, so never force-stop the package here
+        // (it would kill this runner). Revoke, then give the slow CI emulator time to relaunch.
         shell("pm revoke $pkg android.permission.POST_NOTIFICATIONS")
         device.waitForIdle(3_000)
         try {
