@@ -1,8 +1,12 @@
 package ai.detectaclip.lab
 
+import java.security.InvalidKeyException
 import java.security.KeyFactory
 import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
 import java.security.Signature
+import java.security.SignatureException
+import java.security.spec.InvalidKeySpecException
 import java.security.spec.X509EncodedKeySpec
 import java.time.OffsetDateTime
 import java.time.format.DateTimeParseException
@@ -12,9 +16,10 @@ import java.time.format.DateTimeParseException
  * bytes). Same rules and verdicts as l0/dac_l0/pack/loader.py; checked case by case against
  * golden_manifest_cases.txt. Device state is only changed after every check passed.
  *
- * Engine scope: DACDHASH payloads only (PackIndex). Ed25519 is used through the platform
- * provider (JDK 15+ on the JVM; on Android served by AndroidOpenSSL on the API 37 emulator and the
- * API 36 CI emulator (EngineOnArtTest); other OS versions remain a device check).
+ * Engine scope: DACDHASH payloads only (PackIndex). Ed25519 verification uses a platform
+ * provider when one can process the key (JDK 15+; AndroidOpenSSL on the Android 17 emulator)
+ * and otherwise the pure-Kotlin [Ed25519] verifier (the Android 16 emulator's providers could
+ * not load the X.509 key spec). Both are checked against the same 68 manifest cases.
  */
 class PackLoader(private val state: DeviceRightsState) {
 
@@ -75,10 +80,36 @@ class PackLoader(private val state: DeviceRightsState) {
 
         fun verifyEd25519(rawPublicKey: ByteArray, message: ByteArray, signature: ByteArray): Boolean {
             if (rawPublicKey.size != 32 || signature.size != 64) return false
-            return try {
-                val key = KeyFactory.getInstance("Ed25519").generatePublic(X509EncodedKeySpec(X509_ED25519_PREFIX + rawPublicKey))
-                Signature.getInstance("Ed25519").run { initVerify(key); update(message); verify(signature) }
-            } catch (e: Exception) { false }
+            return platformVerify(rawPublicKey, message, signature) ?: Ed25519.verify(rawPublicKey, message, signature)
+        }
+
+        /** The platform's verdict, or null when no provider can process an Ed25519 key here.
+         *  A provider that loads the key but rejects the signature is final (no fallback). */
+        private fun platformVerify(rawPublicKey: ByteArray, message: ByteArray, signature: ByteArray): Boolean? {
+            for (alg in listOf("Ed25519", "EdDSA")) {
+                try {
+                    val key = KeyFactory.getInstance(alg).generatePublic(X509EncodedKeySpec(X509_ED25519_PREFIX + rawPublicKey))
+                    return Signature.getInstance(alg).run { initVerify(key); update(message); verify(signature) }
+                } catch (e: NoSuchAlgorithmException) { continue
+                } catch (e: InvalidKeySpecException) { continue
+                } catch (e: InvalidKeyException) { continue
+                } catch (e: SignatureException) { return false }
+            }
+            return null
+        }
+
+        /** Diagnostic: which verifier this runtime uses ("platform:<provider>" or "pure-kotlin"). */
+        fun ed25519Backend(): String {
+            val probe = ByteArray(32).also { it[0] = 1 }   // y = 1: a valid encoding of the identity point
+            for (alg in listOf("Ed25519", "EdDSA")) {
+                try {
+                    val kf = KeyFactory.getInstance(alg)
+                    kf.generatePublic(X509EncodedKeySpec(X509_ED25519_PREFIX + probe))
+                    Signature.getInstance(alg)
+                    return "platform:${kf.provider.name}"
+                } catch (e: Exception) { continue }
+            }
+            return "pure-kotlin"
         }
     }
 

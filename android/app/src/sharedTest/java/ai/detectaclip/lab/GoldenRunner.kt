@@ -202,11 +202,12 @@ object GoldenRunner {
             }
             val before = Triple(st.minimumRightsEpoch, HashMap(st.installedIndexBytes), HashMap(st.minimumPackVersions))
             val now = kv["now"]?.takeIf { it != "UNTRUSTED" }?.let { OffsetDateTime.parse(it) }
+            var reason = "accepted"
             val accepted = try {
                 PackLoader(st).load(hex(kv.getValue("manifest")), hex(kv.getValue("sig")), payloads.getValue(kv.getValue("payload")), now, kv["release"] == "1")
                 true
-            } catch (e: PackLoader.Rejected) { false }
-            if (accepted != (p[2] == "ACCEPT")) mismatches += "${p[1]}: expected ${p[2]}"
+            } catch (e: PackLoader.Rejected) { reason = e.reason; false }
+            if (accepted != (p[2] == "ACCEPT")) mismatches += "${p[1]}: expected ${p[2]} ($reason)"
             if (!accepted && before != Triple(st.minimumRightsEpoch, HashMap(st.installedIndexBytes), HashMap(st.minimumPackVersions)))
                 mismatches += "${p[1]}: state changed on rejection"
             n++
@@ -214,8 +215,27 @@ object GoldenRunner {
         return Report("manifest", n, mismatches, (System.nanoTime() - t0) / 1_000_000)
     }
 
-    /** Which provider (if any) serves Ed25519 on this runtime; null when unavailable. */
+    /** Which provider (if any) serves Signature("Ed25519") on this runtime; null when unavailable. */
     fun ed25519Provider(): String? = try { java.security.Signature.getInstance("Ed25519").provider.name } catch (e: Exception) { null }
+
+    /** The pure-Kotlin verifier must agree with the platform on every signed manifest case. */
+    fun pureEd25519AgreesWithPlatform(raw: List<String>): Report {
+        val t0 = System.nanoTime()
+        val pub = hex(raw.first { it.startsWith("PUBKEY ") }.split(" ")[2])
+        val mismatches = ArrayList<String>(); var n = 0; var accepted = 0
+        for (line in raw.filter { it.startsWith("CASE ") }) {
+            val p = line.split(" ")
+            val kv = p.drop(3).associate { it.substringBefore("=") to it.substringAfter("=") }
+            val manifest = hex(kv.getValue("manifest")); val sig = hex(kv.getValue("sig"))
+            val pure = Ed25519.verify(pub, manifest, sig)
+            val platform = PackLoader.verifyEd25519(pub, manifest, sig)
+            if (pure != platform) mismatches += "${p[1]}: pure=$pure platform=$platform"
+            if (pure) accepted++
+            n++
+        }
+        if (accepted == 0) mismatches += "pure verifier accepted no signature at all"
+        return Report("ed25519", n, mismatches, (System.nanoTime() - t0) / 1_000_000)
+    }
 
     // ---------------------------------------------------------------- golden_pipeline.txt (full device path)
     private fun scaleNearest(src: ByteArray, w: Int, h: Int, nw: Int, nh: Int): ByteArray {

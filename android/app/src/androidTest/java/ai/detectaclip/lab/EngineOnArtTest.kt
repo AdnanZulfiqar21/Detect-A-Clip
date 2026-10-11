@@ -4,16 +4,15 @@ import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
  * The recognition engine on Android's ART runtime (emulator or device): every committed golden
- * file must give the same verdicts as on the JVM and in Python, and Ed25519 must be served by
- * a platform provider (PackLoader relies on it; its availability per OS version was recorded
- * as a device check). Golden files are packaged as test assets from src/test/resources.
+ * file must give the same verdicts as on the JVM and in Python; the Ed25519 backend (platform
+ * provider or the pure-Kotlin fallback, ED-33) is recorded and both verifiers must agree on every
+ * signed case. Golden files are packaged as test assets from src/test/resources.
  * Timings are logged for the record only; they are emulator numbers unless run on a named device.
  */
 @RunWith(AndroidJUnit4::class)
@@ -27,10 +26,12 @@ class EngineOnArtTest {
         assertEquals(r.toString(), emptyList<String>(), r.mismatches)
     }
 
-    @Test fun ed25519IsAvailableThroughAPlatformProvider() {
-        val provider = GoldenRunner.ed25519Provider()
-        Log.i("DAC-ART", "Ed25519 provider: $provider; SDK ${android.os.Build.VERSION.SDK_INT}; ${android.os.Build.FINGERPRINT}")
-        assertNotNull("no Ed25519 Signature provider on this runtime", provider)
+    @Test fun ed25519BackendIsRecordedAndPureVerifierAgrees() {
+        Log.i("DAC-ART", "Ed25519 Signature provider: ${GoldenRunner.ed25519Provider()}; verifier backend: ${PackLoader.ed25519Backend()}; " +
+            "SDK ${android.os.Build.VERSION.SDK_INT}; ${android.os.Build.FINGERPRINT}")
+        val r = GoldenRunner.pureEd25519AgreesWithPlatform(lines("golden_manifest_cases.txt"))
+        Log.i("DAC-ART", r.toString())
+        assertEquals(r.toString(), emptyList<String>(), r.mismatches)
     }
 
     @Test fun recognitionGolden() = check(GoldenRunner.recognition(lines("golden_recognition.txt")))
