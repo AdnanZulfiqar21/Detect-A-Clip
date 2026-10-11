@@ -26,8 +26,11 @@ first, then resume here.
   `adb shell am instrument -w -r ai.detectaclip.lab.test/androidx.test.runner.AndroidJUnitRunner`. With ~2 GB
   free host RAM the emulator's System UI can freeze (tap Wait); keep `-gpu swiftshader_indirect` locally. CI job
   `android-emulator.yml` runs the same suite on API 36 (API 37 crashes surfaceflinger on Linux runners).
-- **Verified:** locally Python 180, pure-Kotlin 73, Android assemble + lint (no issues), direct JUnit 73, EngineOnArtTest 8/8
-  and LabJourneyTest on the API 37 emulator.
+- **Verified:** locally Python 180, pure-Kotlin 76, Android assemble + lint (no issues), direct JUnit 76, EngineOnArtTest 8/8
+  and LabJourneyTest on the API 37 emulator; CI at `622ddad`: ci, android-emulator (16 instrumented tests on API 36) and
+  swift-core green.
+- **Ed25519 on Android (ED-33):** platform provider when it can load the key (Android 17), pure-Kotlin RFC 8032 fallback
+  otherwise (Android 16). Self-implemented verifier: independent review pending (P06-T08).
   CI (see TEST_EVIDENCE): ci.yml (Python, pure Kotlin, Android incl. Gradle `testDebugUnitTest`) and
   swift-core.yml (`swift test` on macOS, Swift core compile for iOS device/simulator, iOS LAB app unsigned
   device build + simulator UI test, installed-header probe). ci.yml skips iOS/docs-only changes.
