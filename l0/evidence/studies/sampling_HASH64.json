@@ -1,0 +1,54 @@
+{
+ "study": "P04-T02c sampling interval",
+ "family": "DEV (seen; exploration only)",
+ "descriptor": "HASH64",
+ "thresholds_digest": "33eae6b6c2fa946747612b2393e8903841b07976a9fa8cf7a38aaf3394578720",
+ "run_at": "2026-10-09T20:07:25.726037+00:00",
+ "rows": [
+  {
+   "sampling_interval_s": 1.0,
+   "vectors": 8200,
+   "payload_bytes": 210335,
+   "bytes_per_reference_hour": 92342,
+   "clean_correct": 119,
+   "edited_correct": 83,
+   "absent_false_any": 0,
+   "wrong_title_verified": 0,
+   "wrong_title_possible": 0,
+   "recognition_p50_ms": 1213,
+   "n_clean": 120,
+   "n_edited": 120,
+   "n_absent": 66
+  },
+  {
+   "sampling_interval_s": 2.0,
+   "vectors": 4100,
+   "payload_bytes": 111935,
+   "bytes_per_reference_hour": 49142,
+   "clean_correct": 119,
+   "edited_correct": 83,
+   "absent_false_any": 0,
+   "wrong_title_verified": 0,
+   "wrong_title_possible": 0,
+   "recognition_p50_ms": 1196,
+   "n_clean": 120,
+   "n_edited": 120,
+   "n_absent": 66
+  },
+  {
+   "sampling_interval_s": 5.0,
+   "vectors": 1616,
+   "payload_bytes": 52319,
+   "bytes_per_reference_hour": 23310,
+   "clean_correct": 116,
+   "edited_correct": 76,
+   "absent_false_any": 0,
+   "wrong_title_verified": 0,
+   "wrong_title_possible": 0,
+   "recognition_p50_ms": 1141,
+   "n_clean": 120,
+   "n_edited": 120,
+   "n_absent": 66
+  }
+ ]
+}

@@ -1,0 +1,80 @@
+# Compiles and tests the platform-independent Swift core (SwiftPM package) on a macOS runner.
+# This is NOT an iOS app build, archive, signing or device test (B-02 stays open for those).
+name: swift-core
+
+on:
+  push:
+    branches: [main, "impl/**"]
+    paths: ["ios/**", "!ios/**/*.md", "android/app/src/test/resources/**", ".github/workflows/swift-core.yml"]
+  pull_request:
+    paths: ["ios/**", "!ios/**/*.md", "android/app/src/test/resources/**", ".github/workflows/swift-core.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: swift-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  swift:
+    name: swift build + swift test (macOS)
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Toolchain
+        run: |
+          sw_vers
+          xcodebuild -version
+          swift --version
+      - name: swift build
+        working-directory: ios/DetectAClipLab
+        run: swift build
+      - name: swift test
+        working-directory: ios/DetectAClipLab
+        run: swift test
+
+  ios-sdk:
+    name: iOS SDK probe + core compile for iOS (no signing, no device)
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Installed-header probe (CAP-I03)
+        run: bash ios/scripts/sdk_probe.sh | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Package schemes
+        working-directory: ios/DetectAClipLab
+        run: xcodebuild -list
+      - name: Compile the Swift core for iOS devices (arm64, unsigned) and the iOS Simulator
+        working-directory: ios/DetectAClipLab
+        run: |
+          set -o pipefail
+          xcodebuild -scheme DetectAClipCore -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build | tail -20
+          xcodebuild -scheme DetectAClipCore -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build | tail -5
+
+  ios-app:
+    name: iOS LAB app (unsigned device build, simulator UI test)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - name: Generate the Xcode project (XcodeGen)
+        run: |
+          brew install xcodegen
+          xcodegen --version
+          cd ios/LabApp && xcodegen generate
+      - name: Build for iOS devices (arm64, unsigned; not an archive)
+        working-directory: ios/LabApp
+        run: |
+          set -o pipefail
+          xcodebuild -project DetectAClipLabApp.xcodeproj -scheme DetectAClipLabApp -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build | tail -25
+      - name: UI test on an iOS Simulator
+        working-directory: ios/LabApp
+        run: |
+          set -o pipefail
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; print(next(x['udid'] for k,v in sorted(d.items(), reverse=True) if 'iOS' in k for x in v if x['name'].startswith('iPhone')))")
+          xcrun simctl list devices available | grep "$UDID"
+          xcodebuild -project DetectAClipLabApp.xcodeproj -scheme DetectAClipLabApp -destination "id=$UDID" test | tail -40
+

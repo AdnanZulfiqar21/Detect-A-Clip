@@ -1,0 +1,1292 @@
+{
+ "purpose": "LAB",
+ "claim_boundary": "Synthetic L0 exploratory evidence only. Not device, rights, coverage or release evidence.",
+ "run_at": "2026-10-09T13:58:48.529341+00:00",
+ "host": "Windows 11 AMD64 python 3.13.15",
+ "l0_version": "0.1.0",
+ "git_commit": "9ba8c6d",
+ "thresholds": {
+  "calibration_version": "dev-uncalibrated-1",
+  "calibration_status": "UNCALIBRATED",
+  "min_qualified_frames": 4,
+  "verified_min_support": 6,
+  "verified_min_support_fraction": 0.5,
+  "verified_min_margin": 3,
+  "possible_min_support": 3,
+  "hash_max_distance": 10.0,
+  "thumb32_max_distance": 120.0,
+  "thumb144_max_distance": 300.0,
+  "top_k": 12,
+  "mirror_invariant": true
+ },
+ "split_manifest_hash": "375a8554bdcacccd12c16a33c3606a024a3bb948833869e1080e99f8b6ab61fe",
+ "splits": {
+  "dev_works": [
+   "SW000",
+   "SW003",
+   "SW006",
+   "SW007",
+   "SW009",
+   "SW010",
+   "SW012",
+   "SW014",
+   "SW015",
+   "SW019"
+  ],
+  "calibration_works": [
+   "SW002",
+   "SW005",
+   "SW011",
+   "SW016",
+   "SW018"
+  ],
+  "final_works": [
+   "SW001",
+   "SW004",
+   "SW008",
+   "SW013",
+   "SW017"
+  ],
+  "absent_works": [
+   "SW900",
+   "SW901",
+   "SW902",
+   "SW903",
+   "SW904",
+   "SW905",
+   "SW906",
+   "SW907",
+   "SW908",
+   "SW909"
+  ],
+  "seed": 42
+ },
+ "query_counts": {
+  "CLEAN": 180,
+  "EDITED": 180,
+  "ABSENT": 66,
+  "UNUSABLE": 9
+ },
+ "protocol": "L0 EXPLORATORY PROTOCOL (preregistered before outcomes; purpose LAB)\n- Denominators: CLEAN = untransformed 8 s clips of indexed editions; EDITED = the same clip\n  family with one query transform; ABSENT = clips of never-indexed works and natural scenes;\n  UNUSABLE = blank/static/synthetic UI feeds. Never merged.\n- Success (CLEAN/EDITED top-1): result names the true work in VERIFIED_MATCH or POSSIBLE_MATCH.\n  Verified-only accuracy is reported separately. Abstentions count as failures.\n- False verified (ABSENT): VERIFIED_MATCH on an absent-work clip. POSSIBLE_MATCH on absent\n  is reported separately as a weak false alarm.\n- Intervals: Wilson 95 % for independent examples; per-work cluster percentile bootstrap\n  reported separately. Several clips per work \u21d2 examples are clustered; the Wilson figure is\n  an independence approximation, not a clustered bound.\n- Zero/small events: no rare-event upper bound is claimed below n=1,000 absent queries.\n- These runs are synthetic L0 dry runs and cannot satisfy the F05 release counts\n  (\u22651,000/\u22651,000/\u22651,000 over \u2265200/\u2265200/\u2265300 works) or any D05 release threshold.\n",
+ "families": [
+  {
+   "family": "HASH64",
+   "build_seconds": 26.09173710003961,
+   "vector_count": 1780,
+   "payload_bytes": 46168,
+   "bytes_per_reference_hour": 46686.74157303371,
+   "indexed_hours": 0.9888888888888889,
+   "duplicate_ratio": 0.6219101123595505,
+   "metrics": [
+    {
+     "name": "CLEAN_top1",
+     "k": 180,
+     "n": 180,
+     "rate": 1.0,
+     "wilson95": [
+      0.9791045020783868,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 20,
+     "denominator": "CLEAN clips; success = true work named in VERIFIED or POSSIBLE",
+     "notes": [
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.017)",
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_verified_correct",
+     "k": 179,
+     "n": 180,
+     "rate": 0.9944444444444445,
+     "wilson95": [
+      0.9692069292336208,
+      0.9990186339327839
+     ],
+     "cluster_boot95": [
+      0.9833333333333333,
+      1.0
+     ],
+     "n_clusters": 20,
+     "denominator": "CLEAN clips; success = true work in VERIFIED_MATCH",
+     "notes": [
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_wrong_work_named",
+     "k": 0,
+     "n": 180,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.02089549792161305
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 20,
+     "denominator": "CLEAN clips; event = a different work named (any match state)",
+     "notes": [
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.017)",
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_top1",
+     "k": 165,
+     "n": 180,
+     "rate": 0.9166666666666666,
+     "wilson95": [
+      0.867070280480355,
+      0.9488501379183008
+     ],
+     "cluster_boot95": [
+      0.8888888888888888,
+      0.95
+     ],
+     "n_clusters": 20,
+     "denominator": "EDITED clips; success = true work named in VERIFIED or POSSIBLE",
+     "notes": [
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_verified_correct",
+     "k": 146,
+     "n": 180,
+     "rate": 0.8111111111111111,
+     "wilson95": [
+      0.7476571742735814,
+      0.861563404797415
+     ],
+     "cluster_boot95": [
+      0.7611111111111111,
+      0.8612499999999993
+     ],
+     "n_clusters": 20,
+     "denominator": "EDITED clips; success = true work in VERIFIED_MATCH",
+     "notes": [
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_wrong_work_named",
+     "k": 0,
+     "n": 180,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.02089549792161305
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 20,
+     "denominator": "EDITED clips; event = a different work named",
+     "notes": [
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.017)",
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_top1[heldout]",
+     "k": 90,
+     "n": 90,
+     "rate": 1.0,
+     "wilson95": [
+      0.9590643744356734,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 10,
+     "denominator": "CLEAN clips; success = true work named in VERIFIED or POSSIBLE \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.033)",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_verified_correct[heldout]",
+     "k": 89,
+     "n": 90,
+     "rate": 0.9888888888888889,
+     "wilson95": [
+      0.9397159168824657,
+      0.9980359158990818
+     ],
+     "cluster_boot95": [
+      0.9666666666666667,
+      1.0
+     ],
+     "n_clusters": 10,
+     "denominator": "CLEAN clips; success = true work in VERIFIED_MATCH \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_wrong_work_named[heldout]",
+     "k": 0,
+     "n": 90,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.04093562556432678
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 10,
+     "denominator": "CLEAN clips; event = a different work named (any match state) \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.033)",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_top1[heldout]",
+     "k": 84,
+     "n": 90,
+     "rate": 0.9333333333333333,
+     "wilson95": [
+      0.8620990522567448,
+      0.9690900722541721
+     ],
+     "cluster_boot95": [
+      0.9,
+      0.9666666666666667
+     ],
+     "n_clusters": 10,
+     "denominator": "EDITED clips; success = true work named in VERIFIED or POSSIBLE \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_verified_correct[heldout]",
+     "k": 74,
+     "n": 90,
+     "rate": 0.8222222222222222,
+     "wilson95": [
+      0.7305610795529596,
+      0.8875026284166965
+     ],
+     "cluster_boot95": [
+      0.7555555555555555,
+      0.8888888888888888
+     ],
+     "n_clusters": 10,
+     "denominator": "EDITED clips; success = true work in VERIFIED_MATCH \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_wrong_work_named[heldout]",
+     "k": 0,
+     "n": 90,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.04093562556432678
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 10,
+     "denominator": "EDITED clips; event = a different work named \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.033)",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_edition_correct_when_asserted",
+     "k": 24,
+     "n": 24,
+     "rate": 1.0,
+     "wilson95": [
+      0.8620237953250198,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 15,
+     "denominator": "CLEAN VERIFIED results that asserted an edition",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.125)",
+      "15 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_edition_correct_when_asserted",
+     "k": 17,
+     "n": 17,
+     "rate": 1.0,
+     "wilson95": [
+      0.8156818649911483,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 12,
+     "denominator": "EDITED VERIFIED results that asserted an edition",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.176)",
+      "12 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "ABSENT_false_verified",
+     "k": 0,
+     "n": 66,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.05500255701354129
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 16,
+     "denominator": "ABSENT clips; event = VERIFIED_MATCH emitted",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.045)",
+      "16 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "ABSENT_false_possible",
+     "k": 4,
+     "n": 66,
+     "rate": 0.06060606060606061,
+     "wilson95": [
+      0.023818614832318334,
+      0.14572908678564217
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.14084507042253522
+     ],
+     "n_clusters": 16,
+     "denominator": "ABSENT clips; event = POSSIBLE_MATCH emitted",
+     "notes": [
+      "n<100: exploratory only",
+      "16 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "UNUSABLE_expected_state",
+     "k": 9,
+     "n": 9,
+     "rate": 1.0,
+     "wilson95": [
+      0.7008549515804559,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 9,
+     "denominator": "UNUSABLE feeds; success = expected non-match state",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.333)",
+      "9 clusters: cluster bootstrap is a planning aid only"
+     ]
+    }
+   ],
+   "latency_ms_p50": 386.6617000894621,
+   "latency_ms_p90": 787.7004000125455,
+   "state_counts": {
+    "CLEAN": {
+     "VERIFIED_MATCH": 179,
+     "POSSIBLE_MATCH": 1
+    },
+    "EDITED": {
+     "VERIFIED_MATCH": 146,
+     "POSSIBLE_MATCH": 19,
+     "NO_CONFIDENT_MATCH": 14,
+     "INSUFFICIENT_SIGNAL": 1
+    },
+    "ABSENT": {
+     "NO_CONFIDENT_MATCH": 62,
+     "POSSIBLE_MATCH": 4
+    },
+    "UNUSABLE": {
+     "UNSUPPORTED_CAPTURE": 1,
+     "INSUFFICIENT_SIGNAL": 8
+    }
+   },
+   "failures": [
+    "EDITED SW002-E1_EXTENDED@3.1:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW003-E2_BROADCAST@17.3:ROTATED_3DEG \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW005-E2_BROADCAST@10.4:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW006-E0_THEATRICAL@48.0:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW008-E1_EXTENDED@53.8:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=['EDITION_AMBIGUOUS']",
+    "EDITED SW009-E2_BROADCAST@16.4:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=['EDITION_AMBIGUOUS']",
+    "EDITED SW010-E0_THEATRICAL@24.3:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW011-E1_EXTENDED@41.9:CROPPED \u2192 INSUFFICIENT_SIGNAL None flags=['QUALIFIED_FRAMES=0']",
+    "EDITED SW012-E0_THEATRICAL@26.0:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=['EDITION_AMBIGUOUS']",
+    "EDITED SW012-E1_EXTENDED@19.4:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=['EDITION_AMBIGUOUS']",
+    "EDITED SW014-E0_THEATRICAL@30.3:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW014-E2_BROADCAST@29.5:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=['EDITION_AMBIGUOUS']",
+    "EDITED SW015-E0_THEATRICAL@11.9:COLOR_SHIFT \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW017-E1_EXTENDED@14.3:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW018-E2_BROADCAST@16.0:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=['EDITION_AMBIGUOUS']",
+    "ABSENT SW901-E0_THEATRICAL@20.7:SPEED_110 \u2192 POSSIBLE_MATCH SW010",
+    "ABSENT SW901-E0_THEATRICAL@27.9:NONE \u2192 POSSIBLE_MATCH SW005",
+    "ABSENT SW909-E0_THEATRICAL@25.7:NONE \u2192 POSSIBLE_MATCH SW009",
+    "ABSENT SW909-E0_THEATRICAL@24.8:NONE \u2192 POSSIBLE_MATCH SW009"
+   ]
+  },
+  {
+   "family": "THUMB32",
+   "build_seconds": 2.2268353999825194,
+   "vector_count": 1780,
+   "payload_bytes": 88889,
+   "bytes_per_reference_hour": 89887.75280898876,
+   "indexed_hours": 0.9888888888888889,
+   "duplicate_ratio": 0.5797752808988764,
+   "metrics": [
+    {
+     "name": "CLEAN_top1",
+     "k": 180,
+     "n": 180,
+     "rate": 1.0,
+     "wilson95": [
+      0.9791045020783868,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 20,
+     "denominator": "CLEAN clips; success = true work named in VERIFIED or POSSIBLE",
+     "notes": [
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.017)",
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_verified_correct",
+     "k": 179,
+     "n": 180,
+     "rate": 0.9944444444444445,
+     "wilson95": [
+      0.9692069292336208,
+      0.9990186339327839
+     ],
+     "cluster_boot95": [
+      0.9833333333333333,
+      1.0
+     ],
+     "n_clusters": 20,
+     "denominator": "CLEAN clips; success = true work in VERIFIED_MATCH",
+     "notes": [
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_wrong_work_named",
+     "k": 0,
+     "n": 180,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.02089549792161305
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 20,
+     "denominator": "CLEAN clips; event = a different work named (any match state)",
+     "notes": [
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.017)",
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_top1",
+     "k": 151,
+     "n": 180,
+     "rate": 0.8388888888888889,
+     "wilson95": [
+      0.7781955023287339,
+      0.8854197713021728
+     ],
+     "cluster_boot95": [
+      0.7888888888888889,
+      0.8888888888888888
+     ],
+     "n_clusters": 20,
+     "denominator": "EDITED clips; success = true work named in VERIFIED or POSSIBLE",
+     "notes": [
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_verified_correct",
+     "k": 139,
+     "n": 180,
+     "rate": 0.7722222222222223,
+     "wilson95": [
+      0.7056425365294068,
+      0.8274254701577151
+     ],
+     "cluster_boot95": [
+      0.7222222222222222,
+      0.8222222222222222
+     ],
+     "n_clusters": 20,
+     "denominator": "EDITED clips; success = true work in VERIFIED_MATCH",
+     "notes": [
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_wrong_work_named",
+     "k": 0,
+     "n": 180,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.02089549792161305
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 20,
+     "denominator": "EDITED clips; event = a different work named",
+     "notes": [
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.017)",
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_top1[heldout]",
+     "k": 90,
+     "n": 90,
+     "rate": 1.0,
+     "wilson95": [
+      0.9590643744356734,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 10,
+     "denominator": "CLEAN clips; success = true work named in VERIFIED or POSSIBLE \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.033)",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_verified_correct[heldout]",
+     "k": 89,
+     "n": 90,
+     "rate": 0.9888888888888889,
+     "wilson95": [
+      0.9397159168824657,
+      0.9980359158990818
+     ],
+     "cluster_boot95": [
+      0.9666666666666667,
+      1.0
+     ],
+     "n_clusters": 10,
+     "denominator": "CLEAN clips; success = true work in VERIFIED_MATCH \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_wrong_work_named[heldout]",
+     "k": 0,
+     "n": 90,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.04093562556432678
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 10,
+     "denominator": "CLEAN clips; event = a different work named (any match state) \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.033)",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_top1[heldout]",
+     "k": 80,
+     "n": 90,
+     "rate": 0.8888888888888888,
+     "wilson95": [
+      0.8074221497873896,
+      0.9385168081070229
+     ],
+     "cluster_boot95": [
+      0.8222222222222222,
+      0.9444444444444444
+     ],
+     "n_clusters": 10,
+     "denominator": "EDITED clips; success = true work named in VERIFIED or POSSIBLE \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_verified_correct[heldout]",
+     "k": 74,
+     "n": 90,
+     "rate": 0.8222222222222222,
+     "wilson95": [
+      0.7305610795529596,
+      0.8875026284166965
+     ],
+     "cluster_boot95": [
+      0.7555555555555555,
+      0.8888888888888888
+     ],
+     "n_clusters": 10,
+     "denominator": "EDITED clips; success = true work in VERIFIED_MATCH \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_wrong_work_named[heldout]",
+     "k": 0,
+     "n": 90,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.04093562556432678
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 10,
+     "denominator": "EDITED clips; event = a different work named \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.033)",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_edition_correct_when_asserted",
+     "k": 23,
+     "n": 23,
+     "rate": 1.0,
+     "wilson95": [
+      0.8568833815495731,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 15,
+     "denominator": "CLEAN VERIFIED results that asserted an edition",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.130)",
+      "15 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_edition_correct_when_asserted",
+     "k": 13,
+     "n": 13,
+     "rate": 1.0,
+     "wilson95": [
+      0.7719046276458016,
+      0.9999999999999999
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 10,
+     "denominator": "EDITED VERIFIED results that asserted an edition",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.231)",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "ABSENT_false_verified",
+     "k": 0,
+     "n": 66,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.05500255701354129
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 16,
+     "denominator": "ABSENT clips; event = VERIFIED_MATCH emitted",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.045)",
+      "16 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "ABSENT_false_possible",
+     "k": 0,
+     "n": 66,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.05500255701354129
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 16,
+     "denominator": "ABSENT clips; event = POSSIBLE_MATCH emitted",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.045)",
+      "16 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "UNUSABLE_expected_state",
+     "k": 9,
+     "n": 9,
+     "rate": 1.0,
+     "wilson95": [
+      0.7008549515804559,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 9,
+     "denominator": "UNUSABLE feeds; success = expected non-match state",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.333)",
+      "9 clusters: cluster bootstrap is a planning aid only"
+     ]
+    }
+   ],
+   "latency_ms_p50": 304.87749993335456,
+   "latency_ms_p90": 533.1958199618388,
+   "state_counts": {
+    "CLEAN": {
+     "VERIFIED_MATCH": 179,
+     "POSSIBLE_MATCH": 1
+    },
+    "EDITED": {
+     "VERIFIED_MATCH": 139,
+     "NO_CONFIDENT_MATCH": 28,
+     "POSSIBLE_MATCH": 12,
+     "INSUFFICIENT_SIGNAL": 1
+    },
+    "ABSENT": {
+     "NO_CONFIDENT_MATCH": 66
+    },
+    "UNUSABLE": {
+     "UNSUPPORTED_CAPTURE": 1,
+     "INSUFFICIENT_SIGNAL": 8
+    }
+   },
+   "failures": [
+    "EDITED SW000-E1_EXTENDED@50.5:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW000-E2_BROADCAST@21.7:ROTATED_3DEG \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW000-E2_BROADCAST@13.9:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW001-E1_EXTENDED@36.7:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW003-E0_THEATRICAL@45.6:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW003-E2_BROADCAST@17.3:ROTATED_3DEG \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW004-E2_BROADCAST@19.0:ROTATED_3DEG \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW005-E2_BROADCAST@25.9:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW007-E0_THEATRICAL@39.3:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW007-E0_THEATRICAL@4.0:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW008-E2_BROADCAST@3.1:ROTATED_3DEG \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW009-E1_EXTENDED@12.4:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW009-E1_EXTENDED@21.5:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW009-E2_BROADCAST@41.5:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW010-E0_THEATRICAL@24.3:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=['EDITION_AMBIGUOUS']",
+    "EDITED SW011-E1_EXTENDED@41.9:CROPPED \u2192 INSUFFICIENT_SIGNAL None flags=['QUALIFIED_FRAMES=0']",
+    "EDITED SW012-E0_THEATRICAL@26.0:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=['EDITION_AMBIGUOUS']",
+    "EDITED SW014-E0_THEATRICAL@4.4:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW014-E2_BROADCAST@41.0:ROTATED_3DEG \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW015-E0_THEATRICAL@11.9:COLOR_SHIFT \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW015-E2_BROADCAST@7.1:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW017-E0_THEATRICAL@37.9:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW017-E1_EXTENDED@11.4:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW018-E0_THEATRICAL@34.7:COLOR_SHIFT \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW018-E1_EXTENDED@23.2:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW018-E1_EXTENDED@32.2:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW019-E0_THEATRICAL@6.3:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW019-E2_BROADCAST@13.5:ROTATED_3DEG \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW019-E2_BROADCAST@36.6:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]"
+   ]
+  },
+  {
+   "family": "THUMB144",
+   "build_seconds": 3.9749885000055656,
+   "vector_count": 1780,
+   "payload_bytes": 288250,
+   "bytes_per_reference_hour": 291488.7640449438,
+   "indexed_hours": 0.9888888888888889,
+   "duplicate_ratio": 0.4061797752808989,
+   "metrics": [
+    {
+     "name": "CLEAN_top1",
+     "k": 180,
+     "n": 180,
+     "rate": 1.0,
+     "wilson95": [
+      0.9791045020783868,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 20,
+     "denominator": "CLEAN clips; success = true work named in VERIFIED or POSSIBLE",
+     "notes": [
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.017)",
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_verified_correct",
+     "k": 179,
+     "n": 180,
+     "rate": 0.9944444444444445,
+     "wilson95": [
+      0.9692069292336208,
+      0.9990186339327839
+     ],
+     "cluster_boot95": [
+      0.9833333333333333,
+      1.0
+     ],
+     "n_clusters": 20,
+     "denominator": "CLEAN clips; success = true work in VERIFIED_MATCH",
+     "notes": [
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_wrong_work_named",
+     "k": 0,
+     "n": 180,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.02089549792161305
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 20,
+     "denominator": "CLEAN clips; event = a different work named (any match state)",
+     "notes": [
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.017)",
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_top1",
+     "k": 146,
+     "n": 180,
+     "rate": 0.8111111111111111,
+     "wilson95": [
+      0.7476571742735814,
+      0.861563404797415
+     ],
+     "cluster_boot95": [
+      0.7555555555555555,
+      0.8666666666666667
+     ],
+     "n_clusters": 20,
+     "denominator": "EDITED clips; success = true work named in VERIFIED or POSSIBLE",
+     "notes": [
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_verified_correct",
+     "k": 137,
+     "n": 180,
+     "rate": 0.7611111111111111,
+     "wilson95": [
+      0.6937760816102222,
+      0.8175340472529352
+     ],
+     "cluster_boot95": [
+      0.7055555555555556,
+      0.8166666666666667
+     ],
+     "n_clusters": 20,
+     "denominator": "EDITED clips; success = true work in VERIFIED_MATCH",
+     "notes": [
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_wrong_work_named",
+     "k": 0,
+     "n": 180,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.02089549792161305
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 20,
+     "denominator": "EDITED clips; event = a different work named",
+     "notes": [
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.017)",
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_top1[heldout]",
+     "k": 90,
+     "n": 90,
+     "rate": 1.0,
+     "wilson95": [
+      0.9590643744356734,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 10,
+     "denominator": "CLEAN clips; success = true work named in VERIFIED or POSSIBLE \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.033)",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_verified_correct[heldout]",
+     "k": 89,
+     "n": 90,
+     "rate": 0.9888888888888889,
+     "wilson95": [
+      0.9397159168824657,
+      0.9980359158990818
+     ],
+     "cluster_boot95": [
+      0.9666666666666667,
+      1.0
+     ],
+     "n_clusters": 10,
+     "denominator": "CLEAN clips; success = true work in VERIFIED_MATCH \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_wrong_work_named[heldout]",
+     "k": 0,
+     "n": 90,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.04093562556432678
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 10,
+     "denominator": "CLEAN clips; event = a different work named (any match state) \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.033)",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_top1[heldout]",
+     "k": 78,
+     "n": 90,
+     "rate": 0.8666666666666667,
+     "wilson95": [
+      0.7812606949930235,
+      0.9220531795931369
+     ],
+     "cluster_boot95": [
+      0.7777777777777778,
+      0.9333333333333333
+     ],
+     "n_clusters": 10,
+     "denominator": "EDITED clips; success = true work named in VERIFIED or POSSIBLE \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_verified_correct[heldout]",
+     "k": 72,
+     "n": 90,
+     "rate": 0.8,
+     "wilson95": [
+      0.7058626364885746,
+      0.8695759881728294
+     ],
+     "cluster_boot95": [
+      0.7111111111111111,
+      0.8777777777777778
+     ],
+     "n_clusters": 10,
+     "denominator": "EDITED clips; success = true work in VERIFIED_MATCH \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_wrong_work_named[heldout]",
+     "k": 0,
+     "n": 90,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.04093562556432678
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 10,
+     "denominator": "EDITED clips; event = a different work named \u2014 restricted to CALIBRATION+FINAL works (not used to choose radii)",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.033)",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN_edition_correct_when_asserted",
+     "k": 23,
+     "n": 23,
+     "rate": 1.0,
+     "wilson95": [
+      0.8568833815495731,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 15,
+     "denominator": "CLEAN VERIFIED results that asserted an edition",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.130)",
+      "15 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED_edition_correct_when_asserted",
+     "k": 14,
+     "n": 14,
+     "rate": 1.0,
+     "wilson95": [
+      0.7846891972623643,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 10,
+     "denominator": "EDITED VERIFIED results that asserted an edition",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.214)",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "ABSENT_false_verified",
+     "k": 0,
+     "n": 66,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.05500255701354129
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 16,
+     "denominator": "ABSENT clips; event = VERIFIED_MATCH emitted",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.045)",
+      "16 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "ABSENT_false_possible",
+     "k": 0,
+     "n": 66,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.05500255701354129
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 16,
+     "denominator": "ABSENT clips; event = POSSIBLE_MATCH emitted",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.045)",
+      "16 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "UNUSABLE_expected_state",
+     "k": 9,
+     "n": 9,
+     "rate": 1.0,
+     "wilson95": [
+      0.7008549515804559,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 9,
+     "denominator": "UNUSABLE feeds; success = expected non-match state",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.333)",
+      "9 clusters: cluster bootstrap is a planning aid only"
+     ]
+    }
+   ],
+   "latency_ms_p50": 358.4866999881342,
+   "latency_ms_p90": 563.3886199910195,
+   "state_counts": {
+    "CLEAN": {
+     "VERIFIED_MATCH": 179,
+     "POSSIBLE_MATCH": 1
+    },
+    "EDITED": {
+     "VERIFIED_MATCH": 137,
+     "NO_CONFIDENT_MATCH": 33,
+     "POSSIBLE_MATCH": 9,
+     "INSUFFICIENT_SIGNAL": 1
+    },
+    "ABSENT": {
+     "NO_CONFIDENT_MATCH": 66
+    },
+    "UNUSABLE": {
+     "UNSUPPORTED_CAPTURE": 1,
+     "INSUFFICIENT_SIGNAL": 8
+    }
+   },
+   "failures": [
+    "EDITED SW000-E1_EXTENDED@50.5:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW000-E2_BROADCAST@21.7:ROTATED_3DEG \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW000-E2_BROADCAST@13.9:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW001-E1_EXTENDED@36.7:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW003-E0_THEATRICAL@45.6:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW003-E2_BROADCAST@17.3:ROTATED_3DEG \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW004-E2_BROADCAST@19.0:ROTATED_3DEG \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW005-E2_BROADCAST@25.9:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW007-E0_THEATRICAL@39.3:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW007-E0_THEATRICAL@4.0:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW008-E2_BROADCAST@8.1:ROTATED_3DEG \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW008-E2_BROADCAST@3.1:ROTATED_3DEG \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW009-E1_EXTENDED@12.4:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW009-E1_EXTENDED@21.5:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW009-E2_BROADCAST@41.5:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW010-E0_THEATRICAL@24.3:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW011-E1_EXTENDED@41.9:CROPPED \u2192 INSUFFICIENT_SIGNAL None flags=['QUALIFIED_FRAMES=0']",
+    "EDITED SW012-E0_THEATRICAL@26.0:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=['EDITION_AMBIGUOUS']",
+    "EDITED SW012-E1_EXTENDED@19.4:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=['EDITION_AMBIGUOUS']",
+    "EDITED SW014-E0_THEATRICAL@30.3:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW014-E0_THEATRICAL@4.4:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW014-E2_BROADCAST@41.0:ROTATED_3DEG \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW015-E0_THEATRICAL@11.9:COLOR_SHIFT \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW015-E2_BROADCAST@7.1:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW015-E2_BROADCAST@15.4:ROTATED_3DEG \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW017-E0_THEATRICAL@37.9:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW017-E1_EXTENDED@11.4:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW018-E0_THEATRICAL@34.7:COLOR_SHIFT \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW018-E0_THEATRICAL@9.1:CROPPED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW018-E1_EXTENDED@23.2:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW018-E1_EXTENDED@32.2:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW019-E0_THEATRICAL@6.3:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW019-E2_BROADCAST@13.5:ROTATED_3DEG \u2192 NO_CONFIDENT_MATCH None flags=[]",
+    "EDITED SW019-E2_BROADCAST@36.6:CAPTIONED \u2192 NO_CONFIDENT_MATCH None flags=[]"
+   ]
+  }
+ ]
+}

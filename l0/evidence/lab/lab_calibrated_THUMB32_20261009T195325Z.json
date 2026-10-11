@@ -1,0 +1,1993 @@
+{
+ "purpose": "LAB",
+ "label": "calibrated_THUMB32",
+ "claim_boundary": "Synthetic L0 exploratory evidence only. Not device, rights, coverage or release evidence.",
+ "run_at": "2026-10-09T19:53:25.017489+00:00",
+ "host": "Windows 11 AMD64 python 3.13.15",
+ "l0_version": "0.1.0",
+ "git_commit": "09b83a2+dirty",
+ "fixture_manifest_sha256": "c246a60a6cf43b6d5fd62723c500a0ddb1007ba275098feadbbdae4731bfc0c6",
+ "generator": "synth-gen-3",
+ "preprocessing": "prep-640x360-gray-uniformcrop-3",
+ "index_format": "idx-flat-2",
+ "thresholds": {
+  "calibration_version": "l0cal-THUMB32-20261009",
+  "calibration_status": "CALIBRATED_L0_SYNTHETIC",
+  "min_qualified_frames": 4,
+  "verified_min_support": 8,
+  "verified_min_support_fraction": 0.6,
+  "verified_min_span_ms": 4000,
+  "verified_max_mean_dist_frac": 0.8,
+  "verified_min_margin": 4,
+  "possible_min_support": 4,
+  "possible_min_span_ms": 1500,
+  "possible_max_mean_dist_frac": 0.9,
+  "possible_on_competition": false,
+  "episode_margin": 3,
+  "hash_max_distance": 9.0,
+  "thumb32_max_distance": 120.0,
+  "thumb144_max_distance": 300.0,
+  "thumb512_max_distance": 620.0,
+  "top_k": 12,
+  "mirror_invariant": true
+ },
+ "thresholds_digest": "89b29a0e18dcbfccd5fa61817ce590c1532d51f11ecb0255c7490befe88ecd29",
+ "calibration_file": "C:\\Projects\\Detect A Clip\\l0\\evidence\\calibration\\calibration_THUMB32.json",
+ "scoring_rules": "fixtures-v3 scoring rules (preregistered 2026-10-09 before any CALIBRATION/FINAL outcome)\nEvery query yields exactly one outcome category. \"named\" = candidate_work_id of a\nVERIFIED or POSSIBLE result; for episodes candidate_work_id is the series ID and\ncandidate_episode_id the episode (None = series level).\n- CLEAN / EDITED: CORRECT_VERIFIED, CORRECT_POSSIBLE, ABSTAIN, WRONG_VERIFIED, WRONG_POSSIBLE.\n- SERIES_UNIQUE: CORRECT_VERIFIED / CORRECT_POSSIBLE (right series and right episode);\n  SERIES_LEVEL (right series, no episode: granularity loss, not wrong); ABSTAIN;\n  WRONG_EPISODE_VERIFIED / WRONG_EPISODE_POSSIBLE; WRONG_VERIFIED / WRONG_POSSIBLE (outside series).\n- SERIES_INTRO (shared intro): CORRECT = series level or ABSTAIN; any named episode is\n  UNSUPPORTED_SPECIFICITY_VERIFIED / _POSSIBLE; outside series is WRONG_*.\n- SERIES_RECAP (previous episode's footage + 2 s own): CORRECT = series level, own episode,\n  or ABSTAIN; another episode VERIFIED = WRONG_EPISODE_VERIFIED; POSSIBLE = WRONG_EPISODE_POSSIBLE.\n- STOCK_SHARED (same stock scene in two works): CORRECT = ABSTAIN, or POSSIBLE naming either\n  work; VERIFIED naming either work = OVERCONFIDENT_SHARED; outside the pair = WRONG_*.\n- MONTAGE (two works): CORRECT_SEGMENTS = POSSIBLE whose segments name both works and nothing\n  else; PARTIAL = names a subset; ABSTAIN; OVERCONFIDENT_VERIFIED = VERIFIED; WRONG_* = any\n  named work or segment outside the pair.\n- TRAILER (rapid cuts of one work): CORRECT_* names it; ABSTAIN; WRONG_* other work.\n- ABSENT: ABSTAIN; FALSE_VERIFIED; FALSE_POSSIBLE (a wrong title shown as uncertain). Both\n  are errors and are reported separately; FALSE_POSSIBLE is never merged into ABSTAIN.\n- UNUSABLE: EXPECTED_STATE if the state is in the case's acceptable list, else UNEXPECTED_STATE\n  (WRONG_* if a title is named).\n- OVERLAY (overlay over the underlying video): CORRECT_* names the video's work; ABSTAIN;\n  WRONG_* names another work.\nSafety totals: WRONG_TITLE_VERIFIED = every *_VERIFIED error category; WRONG_TITLE_POSSIBLE =\nevery *_POSSIBLE error category (incl. FALSE_POSSIBLE).\n",
+ "results": [
+  {
+   "index": {
+    "descriptor": "THUMB32",
+    "vector_count": 4100,
+    "payload_bytes": 208056,
+    "indexed_hours": 2.2777777777777777,
+    "bytes_per_reference_hour": 91341.65853658537,
+    "duplicate_ratio": 0.5,
+    "title_count": 58
+   },
+   "family": "DEV",
+   "descriptor": "THUMB32",
+   "thresholds_digest": "89b29a0e18dcbfccd5fa61817ce590c1532d51f11ecb0255c7490befe88ecd29",
+   "by_kind": {
+    "CLEAN": {
+     "CORRECT_VERIFIED": 115,
+     "CORRECT_POSSIBLE": 4,
+     "ABSTAIN": 1
+    },
+    "EDITED": {
+     "CORRECT_VERIFIED": 68,
+     "ABSTAIN": 45,
+     "CORRECT_POSSIBLE": 7
+    },
+    "SERIES_UNIQUE": {
+     "CORRECT_VERIFIED": 4
+    },
+    "SERIES_INTRO": {
+     "CORRECT_SERIES_LEVEL": 4
+    },
+    "SERIES_RECAP": {
+     "CORRECT_VERIFIED": 4
+    },
+    "STOCK_SHARED": {
+     "ABSTAIN": 4
+    },
+    "MONTAGE": {
+     "CORRECT_SEGMENTS": 5,
+     "PARTIAL": 1
+    },
+    "TRAILER": {
+     "CORRECT_POSSIBLE": 4
+    },
+    "ABSENT": {
+     "ABSTAIN": 65,
+     "FALSE_POSSIBLE": 1
+    },
+    "UNUSABLE": {
+     "EXPECTED_STATE": 9
+    },
+    "OVERLAY": {
+     "ABSTAIN": 3
+    }
+   },
+   "metrics": [
+    {
+     "name": "ABSENT:correct_named",
+     "k": 0,
+     "n": 66,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.05500255701354129
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 16,
+     "denominator": "ABSENT:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.045)",
+      "16 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "ABSENT:correct_verified",
+     "k": 0,
+     "n": 66,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.05500255701354129
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 16,
+     "denominator": "ABSENT:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.045)",
+      "16 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "ABSENT:wrong_title_possible",
+     "k": 1,
+     "n": 66,
+     "rate": 0.015151515151515152,
+     "wilson95": [
+      0.0026796405439821064,
+      0.08095920262066399
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.04918032786885246
+     ],
+     "n_clusters": 16,
+     "denominator": "ABSENT:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "16 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "ABSENT:wrong_title_verified",
+     "k": 0,
+     "n": 66,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.05500255701354129
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 16,
+     "denominator": "ABSENT:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.045)",
+      "16 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN:correct_named",
+     "k": 119,
+     "n": 120,
+     "rate": 0.9916666666666667,
+     "wilson95": [
+      0.9543037087549505,
+      0.998527444266658
+     ],
+     "cluster_boot95": [
+      0.975,
+      1.0
+     ],
+     "n_clusters": 20,
+     "denominator": "CLEAN:correct_named",
+     "notes": [
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN:correct_verified",
+     "k": 115,
+     "n": 120,
+     "rate": 0.9583333333333334,
+     "wilson95": [
+      0.9061591476629647,
+      0.9820732831198906
+     ],
+     "cluster_boot95": [
+      0.925,
+      0.9833333333333333
+     ],
+     "n_clusters": 20,
+     "denominator": "CLEAN:correct_verified",
+     "notes": [
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN:wrong_title_possible",
+     "k": 0,
+     "n": 120,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.031019166418703486
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 20,
+     "denominator": "CLEAN:wrong_title_possible",
+     "notes": [
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.025)",
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN:wrong_title_verified",
+     "k": 0,
+     "n": 120,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.031019166418703486
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 20,
+     "denominator": "CLEAN:wrong_title_verified",
+     "notes": [
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.025)",
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED:correct_named",
+     "k": 75,
+     "n": 120,
+     "rate": 0.625,
+     "wilson95": [
+      0.5357695062597921,
+      0.706475702135532
+     ],
+     "cluster_boot95": [
+      0.5833333333333334,
+      0.6666666666666666
+     ],
+     "n_clusters": 20,
+     "denominator": "EDITED:correct_named",
+     "notes": [
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED:correct_verified",
+     "k": 68,
+     "n": 120,
+     "rate": 0.5666666666666667,
+     "wilson95": [
+      0.47729920885539046,
+      0.6518982356221157
+     ],
+     "cluster_boot95": [
+      0.5333333333333333,
+      0.6
+     ],
+     "n_clusters": 20,
+     "denominator": "EDITED:correct_verified",
+     "notes": [
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED:wrong_title_possible",
+     "k": 0,
+     "n": 120,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.031019166418703486
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 20,
+     "denominator": "EDITED:wrong_title_possible",
+     "notes": [
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.025)",
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED:wrong_title_verified",
+     "k": 0,
+     "n": 120,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.031019166418703486
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 20,
+     "denominator": "EDITED:wrong_title_verified",
+     "notes": [
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.025)",
+      "20 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "MONTAGE:correct_named",
+     "k": 5,
+     "n": 6,
+     "rate": 0.8333333333333334,
+     "wilson95": [
+      0.43649717781352987,
+      0.9699466302516935
+     ],
+     "cluster_boot95": [
+      0.5,
+      1.0
+     ],
+     "n_clusters": 6,
+     "denominator": "MONTAGE:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "6 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "MONTAGE:correct_verified",
+     "k": 0,
+     "n": 6,
+     "rate": 0.0,
+     "wilson95": [
+      2.7755575615628914e-17,
+      0.3903342879021653
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 6,
+     "denominator": "MONTAGE:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.500)",
+      "6 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "MONTAGE:wrong_title_possible",
+     "k": 0,
+     "n": 6,
+     "rate": 0.0,
+     "wilson95": [
+      2.7755575615628914e-17,
+      0.3903342879021653
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 6,
+     "denominator": "MONTAGE:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.500)",
+      "6 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "MONTAGE:wrong_title_verified",
+     "k": 0,
+     "n": 6,
+     "rate": 0.0,
+     "wilson95": [
+      2.7755575615628914e-17,
+      0.3903342879021653
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 6,
+     "denominator": "MONTAGE:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.500)",
+      "6 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "OVERLAY:correct_named",
+     "k": 0,
+     "n": 3,
+     "rate": 0.0,
+     "wilson95": [
+      5.551115123125783e-17,
+      0.5614970317550454
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 1,
+     "denominator": "OVERLAY:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 1.000)",
+      "1 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "OVERLAY:correct_verified",
+     "k": 0,
+     "n": 3,
+     "rate": 0.0,
+     "wilson95": [
+      5.551115123125783e-17,
+      0.5614970317550454
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 1,
+     "denominator": "OVERLAY:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 1.000)",
+      "1 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "OVERLAY:wrong_title_possible",
+     "k": 0,
+     "n": 3,
+     "rate": 0.0,
+     "wilson95": [
+      5.551115123125783e-17,
+      0.5614970317550454
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 1,
+     "denominator": "OVERLAY:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 1.000)",
+      "1 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "OVERLAY:wrong_title_verified",
+     "k": 0,
+     "n": 3,
+     "rate": 0.0,
+     "wilson95": [
+      5.551115123125783e-17,
+      0.5614970317550454
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 1,
+     "denominator": "OVERLAY:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 1.000)",
+      "1 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_INTRO:correct_named",
+     "k": 4,
+     "n": 4,
+     "rate": 1.0,
+     "wilson95": [
+      0.5101091635454027,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_INTRO:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_INTRO:correct_verified",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_INTRO:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_INTRO:wrong_title_possible",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_INTRO:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_INTRO:wrong_title_verified",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_INTRO:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_RECAP:correct_named",
+     "k": 4,
+     "n": 4,
+     "rate": 1.0,
+     "wilson95": [
+      0.5101091635454027,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_RECAP:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_RECAP:correct_verified",
+     "k": 4,
+     "n": 4,
+     "rate": 1.0,
+     "wilson95": [
+      0.5101091635454027,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_RECAP:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_RECAP:wrong_title_possible",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_RECAP:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_RECAP:wrong_title_verified",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_RECAP:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_UNIQUE:correct_named",
+     "k": 4,
+     "n": 4,
+     "rate": 1.0,
+     "wilson95": [
+      0.5101091635454027,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_UNIQUE:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_UNIQUE:correct_verified",
+     "k": 4,
+     "n": 4,
+     "rate": 1.0,
+     "wilson95": [
+      0.5101091635454027,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_UNIQUE:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_UNIQUE:wrong_title_possible",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_UNIQUE:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_UNIQUE:wrong_title_verified",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_UNIQUE:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "STOCK_SHARED:correct_named",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 2,
+     "denominator": "STOCK_SHARED:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "2 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "STOCK_SHARED:correct_verified",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 2,
+     "denominator": "STOCK_SHARED:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "2 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "STOCK_SHARED:wrong_title_possible",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 2,
+     "denominator": "STOCK_SHARED:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "2 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "STOCK_SHARED:wrong_title_verified",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 2,
+     "denominator": "STOCK_SHARED:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "2 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "TRAILER:correct_named",
+     "k": 4,
+     "n": 4,
+     "rate": 1.0,
+     "wilson95": [
+      0.5101091635454027,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 4,
+     "denominator": "TRAILER:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "TRAILER:correct_verified",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "TRAILER:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "TRAILER:wrong_title_possible",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "TRAILER:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "TRAILER:wrong_title_verified",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "TRAILER:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "UNUSABLE:correct_named",
+     "k": 0,
+     "n": 9,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.2991450484195441
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 3,
+     "denominator": "UNUSABLE:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.333)",
+      "3 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "UNUSABLE:correct_verified",
+     "k": 0,
+     "n": 9,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.2991450484195441
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 3,
+     "denominator": "UNUSABLE:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.333)",
+      "3 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "UNUSABLE:wrong_title_possible",
+     "k": 0,
+     "n": 9,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.2991450484195441
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 3,
+     "denominator": "UNUSABLE:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.333)",
+      "3 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "UNUSABLE:wrong_title_verified",
+     "k": 0,
+     "n": 9,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.2991450484195441
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 3,
+     "denominator": "UNUSABLE:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.333)",
+      "3 clusters: cluster bootstrap is a planning aid only"
+     ]
+    }
+   ],
+   "wrong_title_verified": 0,
+   "wrong_title_possible": 1,
+   "errors": [
+    "ABSENT SW904-E0_THEATRICAL@30.2:CROPPED \u2192 FALSE_POSSIBLE (POSSIBLE_MATCH SW018 None flags=['EDITION_AMBIGUOUS', 'WEAK_SUPPORT'])"
+   ],
+   "latency_ms_p50": 1325.2910500159487,
+   "latency_ms_p90": 2596.874829987064
+  },
+  {
+   "index": {
+    "descriptor": "THUMB32",
+    "vector_count": 4100,
+    "payload_bytes": 208056,
+    "indexed_hours": 2.2777777777777777,
+    "bytes_per_reference_hour": 91341.65853658537,
+    "duplicate_ratio": 0.5,
+    "title_count": 58
+   },
+   "family": "CALIBRATION",
+   "descriptor": "THUMB32",
+   "thresholds_digest": "89b29a0e18dcbfccd5fa61817ce590c1532d51f11ecb0255c7490befe88ecd29",
+   "by_kind": {
+    "CLEAN": {
+     "CORRECT_VERIFIED": 58,
+     "ABSTAIN": 1,
+     "CORRECT_POSSIBLE": 1
+    },
+    "EDITED": {
+     "CORRECT_VERIFIED": 36,
+     "CORRECT_POSSIBLE": 4,
+     "ABSTAIN": 20
+    },
+    "SERIES_UNIQUE": {
+     "CORRECT_VERIFIED": 4
+    },
+    "SERIES_INTRO": {
+     "CORRECT_SERIES_LEVEL": 4
+    },
+    "SERIES_RECAP": {
+     "CORRECT_VERIFIED": 4
+    },
+    "STOCK_SHARED": {
+     "ABSTAIN": 4
+    },
+    "MONTAGE": {
+     "CORRECT_SEGMENTS": 6
+    },
+    "TRAILER": {
+     "CORRECT_VERIFIED": 2,
+     "CORRECT_POSSIBLE": 2
+    },
+    "ABSENT": {
+     "ABSTAIN": 66
+    },
+    "UNUSABLE": {
+     "EXPECTED_STATE": 9
+    },
+    "OVERLAY": {
+     "ABSTAIN": 3
+    }
+   },
+   "metrics": [
+    {
+     "name": "ABSENT:correct_named",
+     "k": 0,
+     "n": 66,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.05500255701354129
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 16,
+     "denominator": "ABSENT:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.045)",
+      "16 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "ABSENT:correct_verified",
+     "k": 0,
+     "n": 66,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.05500255701354129
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 16,
+     "denominator": "ABSENT:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.045)",
+      "16 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "ABSENT:wrong_title_possible",
+     "k": 0,
+     "n": 66,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.05500255701354129
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 16,
+     "denominator": "ABSENT:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.045)",
+      "16 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "ABSENT:wrong_title_verified",
+     "k": 0,
+     "n": 66,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.05500255701354129
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 16,
+     "denominator": "ABSENT:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.045)",
+      "16 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN:correct_named",
+     "k": 59,
+     "n": 60,
+     "rate": 0.9833333333333333,
+     "wilson95": [
+      0.9114487027240993,
+      0.9970518402052136
+     ],
+     "cluster_boot95": [
+      0.95,
+      1.0
+     ],
+     "n_clusters": 10,
+     "denominator": "CLEAN:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN:correct_verified",
+     "k": 58,
+     "n": 60,
+     "rate": 0.9666666666666667,
+     "wilson95": [
+      0.886362257256914,
+      0.9908106807438021
+     ],
+     "cluster_boot95": [
+      0.9166666666666666,
+      1.0
+     ],
+     "n_clusters": 10,
+     "denominator": "CLEAN:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN:wrong_title_possible",
+     "k": 0,
+     "n": 60,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.06017185214208986
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 10,
+     "denominator": "CLEAN:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.050)",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "CLEAN:wrong_title_verified",
+     "k": 0,
+     "n": 60,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.06017185214208986
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 10,
+     "denominator": "CLEAN:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.050)",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED:correct_named",
+     "k": 40,
+     "n": 60,
+     "rate": 0.6666666666666666,
+     "wilson95": [
+      0.5405686645211968,
+      0.7727073847647731
+     ],
+     "cluster_boot95": [
+      0.5833333333333334,
+      0.75
+     ],
+     "n_clusters": 10,
+     "denominator": "EDITED:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED:correct_verified",
+     "k": 36,
+     "n": 60,
+     "rate": 0.6,
+     "wilson95": [
+      0.4736605349204075,
+      0.7143050946511744
+     ],
+     "cluster_boot95": [
+      0.5333333333333333,
+      0.6666666666666666
+     ],
+     "n_clusters": 10,
+     "denominator": "EDITED:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED:wrong_title_possible",
+     "k": 0,
+     "n": 60,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.06017185214208986
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 10,
+     "denominator": "EDITED:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.050)",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "EDITED:wrong_title_verified",
+     "k": 0,
+     "n": 60,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.06017185214208986
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 10,
+     "denominator": "EDITED:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.050)",
+      "10 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "MONTAGE:correct_named",
+     "k": 6,
+     "n": 6,
+     "rate": 1.0,
+     "wilson95": [
+      0.6096657120978346,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 5,
+     "denominator": "MONTAGE:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.500)",
+      "5 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "MONTAGE:correct_verified",
+     "k": 0,
+     "n": 6,
+     "rate": 0.0,
+     "wilson95": [
+      2.7755575615628914e-17,
+      0.3903342879021653
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 5,
+     "denominator": "MONTAGE:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.500)",
+      "5 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "MONTAGE:wrong_title_possible",
+     "k": 0,
+     "n": 6,
+     "rate": 0.0,
+     "wilson95": [
+      2.7755575615628914e-17,
+      0.3903342879021653
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 5,
+     "denominator": "MONTAGE:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.500)",
+      "5 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "MONTAGE:wrong_title_verified",
+     "k": 0,
+     "n": 6,
+     "rate": 0.0,
+     "wilson95": [
+      2.7755575615628914e-17,
+      0.3903342879021653
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 5,
+     "denominator": "MONTAGE:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.500)",
+      "5 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "OVERLAY:correct_named",
+     "k": 0,
+     "n": 3,
+     "rate": 0.0,
+     "wilson95": [
+      5.551115123125783e-17,
+      0.5614970317550454
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 1,
+     "denominator": "OVERLAY:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 1.000)",
+      "1 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "OVERLAY:correct_verified",
+     "k": 0,
+     "n": 3,
+     "rate": 0.0,
+     "wilson95": [
+      5.551115123125783e-17,
+      0.5614970317550454
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 1,
+     "denominator": "OVERLAY:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 1.000)",
+      "1 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "OVERLAY:wrong_title_possible",
+     "k": 0,
+     "n": 3,
+     "rate": 0.0,
+     "wilson95": [
+      5.551115123125783e-17,
+      0.5614970317550454
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 1,
+     "denominator": "OVERLAY:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 1.000)",
+      "1 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "OVERLAY:wrong_title_verified",
+     "k": 0,
+     "n": 3,
+     "rate": 0.0,
+     "wilson95": [
+      5.551115123125783e-17,
+      0.5614970317550454
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 1,
+     "denominator": "OVERLAY:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 1.000)",
+      "1 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_INTRO:correct_named",
+     "k": 4,
+     "n": 4,
+     "rate": 1.0,
+     "wilson95": [
+      0.5101091635454027,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_INTRO:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_INTRO:correct_verified",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_INTRO:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_INTRO:wrong_title_possible",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_INTRO:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_INTRO:wrong_title_verified",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_INTRO:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_RECAP:correct_named",
+     "k": 4,
+     "n": 4,
+     "rate": 1.0,
+     "wilson95": [
+      0.5101091635454027,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_RECAP:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_RECAP:correct_verified",
+     "k": 4,
+     "n": 4,
+     "rate": 1.0,
+     "wilson95": [
+      0.5101091635454027,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_RECAP:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_RECAP:wrong_title_possible",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_RECAP:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_RECAP:wrong_title_verified",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_RECAP:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_UNIQUE:correct_named",
+     "k": 4,
+     "n": 4,
+     "rate": 1.0,
+     "wilson95": [
+      0.5101091635454027,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_UNIQUE:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_UNIQUE:correct_verified",
+     "k": 4,
+     "n": 4,
+     "rate": 1.0,
+     "wilson95": [
+      0.5101091635454027,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_UNIQUE:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_UNIQUE:wrong_title_possible",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_UNIQUE:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "SERIES_UNIQUE:wrong_title_verified",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 4,
+     "denominator": "SERIES_UNIQUE:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "4 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "STOCK_SHARED:correct_named",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 2,
+     "denominator": "STOCK_SHARED:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "2 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "STOCK_SHARED:correct_verified",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 2,
+     "denominator": "STOCK_SHARED:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "2 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "STOCK_SHARED:wrong_title_possible",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 2,
+     "denominator": "STOCK_SHARED:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "2 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "STOCK_SHARED:wrong_title_verified",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 2,
+     "denominator": "STOCK_SHARED:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "2 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "TRAILER:correct_named",
+     "k": 4,
+     "n": 4,
+     "rate": 1.0,
+     "wilson95": [
+      0.5101091635454027,
+      1.0
+     ],
+     "cluster_boot95": [
+      1.0,
+      1.0
+     ],
+     "n_clusters": 3,
+     "denominator": "TRAILER:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "3 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "TRAILER:correct_verified",
+     "k": 2,
+     "n": 4,
+     "rate": 0.5,
+     "wilson95": [
+      0.15003898915214947,
+      0.8499610108478506
+     ],
+     "cluster_boot95": [
+      0.0,
+      1.0
+     ],
+     "n_clusters": 3,
+     "denominator": "TRAILER:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "3 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "TRAILER:wrong_title_possible",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 3,
+     "denominator": "TRAILER:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "3 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "TRAILER:wrong_title_verified",
+     "k": 0,
+     "n": 4,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.4898908364545973
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 3,
+     "denominator": "TRAILER:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.750)",
+      "3 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "UNUSABLE:correct_named",
+     "k": 0,
+     "n": 9,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.2991450484195441
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 3,
+     "denominator": "UNUSABLE:correct_named",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.333)",
+      "3 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "UNUSABLE:correct_verified",
+     "k": 0,
+     "n": 9,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.2991450484195441
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 3,
+     "denominator": "UNUSABLE:correct_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.333)",
+      "3 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "UNUSABLE:wrong_title_possible",
+     "k": 0,
+     "n": 9,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.2991450484195441
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 3,
+     "denominator": "UNUSABLE:wrong_title_possible",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.333)",
+      "3 clusters: cluster bootstrap is a planning aid only"
+     ]
+    },
+    {
+     "name": "UNUSABLE:wrong_title_verified",
+     "k": 0,
+     "n": 9,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.2991450484195441
+     ],
+     "cluster_boot95": [
+      0.0,
+      0.0
+     ],
+     "n_clusters": 3,
+     "denominator": "UNUSABLE:wrong_title_verified",
+     "notes": [
+      "n<100: exploratory only",
+      "zero/all events: rare-event bound INCONCLUSIVE at this n (rule-of-three \u2248 0.333)",
+      "3 clusters: cluster bootstrap is a planning aid only"
+     ]
+    }
+   ],
+   "wrong_title_verified": 0,
+   "wrong_title_possible": 0,
+   "errors": [],
+   "latency_ms_p50": 1334.9311499623582,
+   "latency_ms_p90": 2800.3907200065446
+  }
+ ]
+}

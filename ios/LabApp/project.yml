@@ -1,0 +1,62 @@
+# XcodeGen spec for the iOS LAB app shell (P02-T02a). Generate with `xcodegen generate` on a Mac;
+# the .xcodeproj is not committed. CI builds it unsigned for the iOS Simulator and generic iOS
+# devices and runs the UI test on a simulator. None of that is device, signing or store evidence.
+name: DetectAClipLabApp
+options:
+  bundleIdPrefix: ai.detectaclip
+  deploymentTarget:
+    iOS: "17.0"
+packages:
+  DetectAClipLab:
+    path: ../DetectAClipLab
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    # No developer team: ad-hoc signing for the simulator; device builds use CODE_SIGNING_ALLOWED=NO.
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "-"
+    DEVELOPMENT_TEAM: ""
+    MARKETING_VERSION: 0.1.0-lab
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  DetectAClipLabApp:
+    type: application
+    platform: iOS
+    sources:
+      - Sources
+      - Resources
+    dependencies:
+      - package: DetectAClipLab
+        product: DetectAClipCore
+    info:
+      path: Generated/Info.plist
+      properties:
+        CFBundleDisplayName: Detect A Clip LAB
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        # LAB build: capture stays disabled (DATA-L00 Part A analogue). No camera, microphone,
+        # Photos, network or background-audio keys exist in this plist.
+        DACCaptureEnabled: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ai.detectaclip.lab
+        GENERATE_INFOPLIST_FILE: NO
+        TARGETED_DEVICE_FAMILY: "1"
+  DetectAClipLabAppUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    dependencies:
+      - target: DetectAClipLabApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ai.detectaclip.lab.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: DetectAClipLabApp
+schemes:
+  DetectAClipLabApp:
+    build:
+      targets:
+        DetectAClipLabApp: all
+    test:
+      targets: [DetectAClipLabAppUITests]

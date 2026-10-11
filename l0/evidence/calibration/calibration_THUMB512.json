@@ -1,0 +1,125 @@
+{
+ "calibration_type": "L0_SYNTHETIC_CALIBRATION",
+ "descriptor": "THUMB512",
+ "created_at": "2026-10-09T19:45:00.100135+00:00",
+ "family_used": "CALIBRATION",
+ "fixture_manifest_sha256": "c246a60a6cf43b6d5fd62723c500a0ddb1007ba275098feadbbdae4731bfc0c6",
+ "evidence_digest": "b2efa6714b03a039",
+ "grid": {
+  "verified_min_support": [
+   5,
+   6,
+   7,
+   8
+  ],
+  "verified_min_support_fraction": [
+   0.5,
+   0.6,
+   0.7
+  ],
+  "verified_min_span_ms": [
+   2000,
+   3000,
+   4000
+  ],
+  "verified_max_mean_dist_frac": [
+   0.6,
+   0.8
+  ],
+  "verified_min_margin": [
+   2,
+   3,
+   4
+  ],
+  "possible_min_support": [
+   3,
+   4,
+   5
+  ],
+  "possible_min_span_ms": [
+   1000,
+   1500,
+   2500
+  ],
+  "possible_max_mean_dist_frac": [
+   0.6,
+   0.9
+  ],
+  "possible_on_competition": [
+   false,
+   true
+  ]
+ },
+ "selection_rule": "Threshold calibration on the CALIBRATION family only (P04-T05).\n\nPreregistered selection rule (written before any CALIBRATION outcome was computed):\n 1. Hard constraints on CALIBRATION: zero wrong-title VERIFIED results of any kind\n    (incl. FALSE_VERIFIED, wrong episode, unsupported specificity, overconfident shared\n    footage and montage VERIFIED).\n 2. Among feasible settings, minimise wrong-title POSSIBLE results (a wrong title shown as\n    uncertain is still an error, OF-01).\n 3. Then maximise correct named results on CLEAN + EDITED + SERIES_UNIQUE + TRAILER + OVERLAY.\n 4. Then maximise CORRECT_VERIFIED on the same kinds.\n 5. Ties: the most conservative setting (larger verified_min_support, span, margin;\n    smaller distance fractions) in a fixed grid order.\nIf no setting is feasible the result is reported as INFEASIBLE and nothing is frozen.\n\nOutput: a frozen calibration JSON (thresholds, digest, fixture manifest hash, evidence\ndigest, grid, selection trace). `calibration_status` becomes CALIBRATED_L0_SYNTHETIC, a\nLAB-only status that the pack loader's release mode still rejects.\n",
+ "feasible_settings": 7200,
+ "status": "FROZEN",
+ "thresholds": {
+  "calibration_version": "l0cal-THUMB512-20261009",
+  "calibration_status": "CALIBRATED_L0_SYNTHETIC",
+  "min_qualified_frames": 4,
+  "verified_min_support": 8,
+  "verified_min_support_fraction": 0.5,
+  "verified_min_span_ms": 4000,
+  "verified_max_mean_dist_frac": 0.8,
+  "verified_min_margin": 4,
+  "possible_min_support": 4,
+  "possible_min_span_ms": 1500,
+  "possible_max_mean_dist_frac": 0.6,
+  "possible_on_competition": false,
+  "episode_margin": 3,
+  "hash_max_distance": 9.0,
+  "thumb32_max_distance": 120.0,
+  "thumb144_max_distance": 300.0,
+  "thumb512_max_distance": 620.0,
+  "top_k": 12,
+  "mirror_invariant": true
+ },
+ "thresholds_digest": "07bc4ed1846540cd4b5b740738e3572042749596a8283e5dcc84825357ba0929",
+ "calibration_outcomes": {
+  "by_kind": {
+   "CLEAN": {
+    "CORRECT_VERIFIED": 58,
+    "ABSTAIN": 1,
+    "CORRECT_POSSIBLE": 1
+   },
+   "EDITED": {
+    "CORRECT_VERIFIED": 36,
+    "ABSTAIN": 24
+   },
+   "SERIES_UNIQUE": {
+    "CORRECT_VERIFIED": 4
+   },
+   "SERIES_INTRO": {
+    "CORRECT_SERIES_LEVEL": 4
+   },
+   "SERIES_RECAP": {
+    "CORRECT_VERIFIED": 4
+   },
+   "STOCK_SHARED": {
+    "ABSTAIN": 4
+   },
+   "MONTAGE": {
+    "CORRECT_SEGMENTS": 2,
+    "PARTIAL": 4
+   },
+   "TRAILER": {
+    "CORRECT_VERIFIED": 2,
+    "CORRECT_POSSIBLE": 2
+   },
+   "ABSENT": {
+    "ABSTAIN": 66
+   },
+   "UNUSABLE": {
+    "EXPECTED_STATE": 9
+   },
+   "OVERLAY": {
+    "ABSTAIN": 3
+   }
+  },
+  "wrong_title_verified": 0,
+  "wrong_title_possible": 0,
+  "correct_named_objective": 103,
+  "correct_verified_objective": 100,
+  "errors": []
+ }
+}
