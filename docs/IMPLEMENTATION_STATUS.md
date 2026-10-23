@@ -12,7 +12,7 @@ Tracks: **DESKTOP-L0** (Python harness on this Windows host) · **ANDROID** · *
 |---|---|---|
 | P00 | IN_PROGRESS | T01 done; T02 UNVERIFIED (no SDK installed); T03/T04/T05 BLOCKED (B-03/B-04); T06/T07/T08/T09 in progress on desktop track. |
 | P01 | NOT_STARTED / BLOCKED | Source preparation possible; compile + capture BLOCKED (B-01). |
-| P02 | IN_PROGRESS / BLOCKED | T02 no-frame lab app in `ios/`, compiled by CI on macOS (IMPLEMENTED_NOT_VERIFIED until a green run is recorded). Capture, device tests BLOCKED (B-02). |
+| P02 | IN_PROGRESS / BLOCKED | T02 no-frame lab app in `ios/`, compiled and unit-tested by CI on macOS (IOS-BUILD-01); no device run. Capture, device tests BLOCKED (B-02). |
 | P03 | IN_PROGRESS (L0 items only) | L1 items BLOCKED (B-05). |
 | P04 | IN_PROGRESS (desktop LAB only) | RELEASE purpose BLOCKED (B-06). |
 | P05–P10 | NOT_STARTED | Need native gates and external inputs. |
@@ -33,7 +33,7 @@ Tracks: **DESKTOP-L0** (Python harness on this Windows host) · **ANDROID** · *
 | P00-T09 | ALL | IN_PROGRESS | `l0/tests/test_trace.py` parses roadmap IDs (TRACE-01). |
 | P01-T01…T08 | ANDROID | NOT_STARTED (T01 source prep IN_PROGRESS) | B-01 |
 | P02-T01 | IOS | BLOCKED | B-02 (installed headers need Xcode; CI logs record the runner's Xcode/SDK). |
-| P02-T02 | IOS | IMPLEMENTED_NOT_VERIFIED | `ios/` no-frame SwiftUI app + `DetectAClipCore`; capture source disabled → UNSUPPORTED_CAPTURE. Compile evidence = `iOS build` workflow run. DATA-L00 Part A not done. |
+| P02-T02 | IOS | IMPLEMENTED_NOT_VERIFIED | `ios/` no-frame SwiftUI app + `DetectAClipCore`; capture source disabled → UNSUPPORTED_CAPTURE. Compile + core unit tests PASS in CI (IOS-BUILD-01, `docs/TEST_EVIDENCE.md`); no physical iPhone run. DATA-L00 Part A not done. |
 | P02-T03…T06 | IOS | BLOCKED | B-02 |
 | P03-T01 | DESKTOP-L0 | IN_PROGRESS | `l0/schemas/` |
 | P03-T02 | L1 | BLOCKED | B-05; L0 contributor grant manifest in `l0/assets/RIGHTS_MANIFEST.json`. |

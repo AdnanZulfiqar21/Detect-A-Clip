@@ -131,11 +131,7 @@ final class ScanController: ObservableObject {
                     _ = coordinator.record(ticket, sample: QuerySample(time: time, frame: frame,
                                                                        policy: matcher.policy))
                 }
-                let image = FrameImage.make(frame)
-                await MainActor.run {
-                    self?.preview = image
-                    self?.refresh()
-                }
+                await self?.show(FrameImage.make(frame))
                 try? await Task.sleep(nanoseconds: deliveryInterval)
             }
 
@@ -144,8 +140,13 @@ final class ScanController: ObservableObject {
                 let decision = matcher.decide(samples)
                 coordinator.commit(ticket, decision: decision)
             }
-            await MainActor.run { self?.refresh() }
+            await self?.refresh()
         }
+    }
+
+    private func show(_ image: CGImage?) {
+        preview = image
+        refresh()
     }
 }
 
