@@ -1,0 +1,76 @@
+name: iOS build
+
+# Builds the iPhone lab app on a GitHub-hosted Mac (this repository's own hosts have no Xcode).
+# Produces an UNSIGNED .ipa: it compiles for real iPhones but must be signed (Xcode with an
+# Apple ID, or a sideloading tool) before it can be installed. See ios/README.md.
+
+on:
+  push:
+    branches: [main, "claude/**"]
+    paths: ["ios/**", ".github/workflows/ios-build.yml"]
+  pull_request:
+    paths: ["ios/**", ".github/workflows/ios-build.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Record toolchain
+        run: |
+          sw_vers
+          xcodebuild -version
+          swift --version
+          xcrun --sdk iphoneos --show-sdk-version
+
+      - name: Core unit tests (swift test)
+        run: swift test --package-path DetectAClipCore
+
+      - name: Generate Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Build for iOS Simulator
+        run: |
+          set -o pipefail
+          xcodebuild -project DetectAClip.xcodeproj -scheme DetectAClip \
+            -configuration Debug -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/sim \
+            CODE_SIGNING_ALLOWED=NO build
+
+      - name: Build for iPhone (unsigned, Release)
+        run: |
+          set -o pipefail
+          xcodebuild -project DetectAClip.xcodeproj -scheme DetectAClip \
+            -configuration Release -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/device \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+
+      - name: Package unsigned IPA and simulator app
+        run: |
+          APP=build/device/Build/Products/Release-iphoneos/DetectAClip.app
+          test -x "$APP/DetectAClip"
+          mkdir -p build/out/Payload
+          cp -R "$APP" build/out/Payload/
+          (cd build/out && zip -qry DetectAClip-unsigned.ipa Payload && rm -rf Payload)
+          (cd build/sim/Build/Products/Debug-iphonesimulator && zip -qry ../../../../out/DetectAClip-simulator.app.zip DetectAClip.app)
+          (cd build/out && shasum -a 256 * | tee SHA256SUMS.txt)
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DetectAClip-iOS-${{ github.sha }}
+          path: ios/build/out/
+          if-no-files-found: error
+          retention-days: 30

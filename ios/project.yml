@@ -1,0 +1,35 @@
+# XcodeGen spec for the iPhone lab build. Generate the Xcode project with `xcodegen generate`
+# (the .xcodeproj is not committed). See ios/README.md.
+name: DetectAClip
+options:
+  bundleIdPrefix: io.github.adnanzulfiqar21
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+packages:
+  DetectAClipCore:
+    path: DetectAClipCore
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  DetectAClip:
+    type: application
+    platform: iOS
+    sources:
+      - path: DetectAClip
+        excludes:
+          - "Support/Info.plist"
+    dependencies:
+      - package: DetectAClipCore
+    settings:
+      base:
+        PRODUCT_NAME: DetectAClip
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.adnanzulfiqar21.detectaclip.lab
+        INFOPLIST_FILE: DetectAClip/Support/Info.plist
+        TARGETED_DEVICE_FAMILY: "1"
+        ENABLE_BITCODE: NO
+        CODE_SIGN_STYLE: Automatic
+    scheme: {}

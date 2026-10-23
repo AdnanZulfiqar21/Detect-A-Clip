@@ -25,7 +25,7 @@ No physical device test, rights grant, legal sign-off or store decision exists. 
 | `docs/` | One authoritative record per topic: status, decisions, blockers, review log, test evidence, resume state |
 | `l0/` | Desktop synthetic **L0** track (Python): synthetic asset generator, schemas, index builder, retrieval, evaluation |
 | `android/` | Android native lab build (Kotlin) — prepared source; compile state recorded in status |
-| `ios/` | iPhone native lab build (Swift) — prepared source; cannot be compiled on this Windows host |
+| `ios/` | iPhone native lab build (Swift/SwiftUI) — no-frame lab app, built unsigned by GitHub Actions on macOS; see `ios/README.md` |
 
 ## What L0 is and is not
 
@@ -41,3 +41,8 @@ python -m pytest l0/tests -q
 ```
 
 See `l0/README.md` for the generator, index builder and evaluation commands.
+
+## iPhone build
+
+See [ios/README.md](ios/README.md). The `iOS build` workflow produces an unsigned `.ipa`
+and a simulator build as downloadable artifacts; installing on an iPhone needs signing.

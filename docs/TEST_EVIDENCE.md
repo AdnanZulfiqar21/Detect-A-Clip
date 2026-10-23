@@ -14,3 +14,4 @@ release evidence. Tests without a row are planned, not run.
 | AI-03 (LAB) | Synthetic edited | NOT_RUN | | |
 | AI-07 (LAB) | Result enum distinctness | NOT_RUN | | |
 | LIFE-01 / LIFE-03 (harness) | Coordinator orderings | NOT_RUN | | |
+| IOS-BUILD-01 (compile, CI) | `ios/` core tests + simulator + unsigned arm64 iPhone build | PASS (compile/unit only) | `iOS build` workflow run 39888122632 · 2026-10-23 · commit 231674f · GitHub macos-latest runner, macOS 26.6.2, Xcode 26.6 (17F113), Swift 6.3.3, iphoneos SDK 26.5, deployment target iOS 16.0 | `swift test`: 24 tests, 0 failures (RecognitionTests 10, ScanCoordinatorTests 14). Simulator and Release iphoneos builds `BUILD SUCCEEDED`. Unsigned IPA sha256 0f4e023b…dc010. No device, signing or capture evidence. |

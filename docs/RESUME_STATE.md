@@ -11,3 +11,11 @@ Updated at checkpoints. On continuation: verify live git state first, then resum
 - **Last commands/results:** `gh repo view` → isEmpty=true; toolchain inventory → no JDK/SDK
 - **Open findings:** none
 - **Blockers:** see docs/BLOCKERS.md B-01…B-08
+
+## 2026-10-23 — iPhone lab build (session on Linux cloud host)
+
+- **Branch:** `claude/hopeful-cerf-7qfyiz` (PR to `main`).
+- **Added:** `ios/` (SwiftUI app, `DetectAClipCore` package with unit tests, XcodeGen spec), `.github/workflows/ios-build.yml` (macOS runner: `swift test`, simulator build, unsigned iPhone `.ipa` artifact).
+- **Not run locally:** no Swift/Xcode on this host; first compile is the CI run.
+- **Note:** `l0/` and `android/` listed in README do not exist in the repository yet.
+- **Next:** record the CI result in TEST_EVIDENCE; physical iPhone run needs B-02.
